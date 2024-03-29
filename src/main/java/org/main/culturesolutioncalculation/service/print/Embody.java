@@ -18,8 +18,7 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
-import com.opencsv.CSVReader;
-import org.main.culturesolutioncalculation.domain.Users;
+import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
 import org.main.culturesolutioncalculation.model.NutrientSolution;
 import org.main.culturesolutioncalculation.service.CSVDataReader;
@@ -32,10 +31,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Embody implements Print{
 
@@ -268,7 +264,7 @@ public class Embody implements Print{
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try{
-                cssFile = helper.getCSS(new FileInputStream("pdf.css"));
+                cssFile = helper.getCSS(new FileInputStream("src/main/resources/css/pdf.css"));
             }catch (FileNotFoundException e){
                 e.printStackTrace();
             }

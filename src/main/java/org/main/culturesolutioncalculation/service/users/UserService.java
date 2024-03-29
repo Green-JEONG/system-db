@@ -1,6 +1,7 @@
-package org.main.culturesolutioncalculation.service.database;
+package org.main.culturesolutioncalculation.service.users;
 
-import org.main.culturesolutioncalculation.domain.Users;
+import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
+import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.*;
 

@@ -13,7 +13,7 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
-import org.main.culturesolutioncalculation.domain.Users;
+import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 
 import java.io.*;
@@ -147,7 +147,7 @@ public class Abstract implements Print{
             CSSResolver cssResolver = new StyleAttrCSSResolver();
             CssFile cssFile = null;
             try{
-                cssFile = helper.getCSS(new FileInputStream("pdf.css"));
+                cssFile = helper.getCSS(new FileInputStream("src/main/resources/css/pdf.css"));
             }catch (FileNotFoundException e){
                 e.printStackTrace();
             }

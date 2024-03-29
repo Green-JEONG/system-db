@@ -1,4 +1,4 @@
-package org.main.culturesolutioncalculation.domain;
+package org.main.culturesolutioncalculation.service.users;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
