@@ -3,10 +3,8 @@ package org.main.culturesolutioncalculation.service.calculator;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 import org.main.culturesolutioncalculation.service.users.Users;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,7 +13,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     private DatabaseConnector conn;
 
+    Timestamp request_date;
+
     private Users users;
+    private Long requestHistory_id;
 
     private int users_macro_consideredValues_id;
 
@@ -56,6 +57,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         this.consideredValues = consideredValues;
         this.userFertilization = userFertilization;
         this.calFertilization = userFertilization;
+        request_date = Timestamp.from(Instant.now());
         getMajorCompoundRatio(is4);
     }
 
@@ -139,23 +141,52 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     //원수 고려 여부, 처방 농도, 고려 원수, 기준값 -> db에 저장하는 함수
     public void save(){
+        insertIntoRequestHistory();
         insertIntoUsersMacroConsideredValues(); //원수 고려 값 테이블에 저장
         insertIntoUsersMacroFertilization();
         insertIntoUsersMacroCalculatedMass();
+    }
+
+    public void insertIntoRequestHistory() {
+        String query = "insert into requestHistory (users_id, request_date) " +
+                "values (" + users.getId() + ", " + request_date + ")";
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                System.out.println("insert success in requestHistory");
+                // 생성된 pk get
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        requestHistory_id = generatedKeys.getLong(1); // 생성된 ID
+                        System.out.println("Generated Request ID: " + requestHistory_id);
+                    } else {
+                        System.out.println("No ID was generated.");
+                    }
+                }
+
+            } else System.out.println("insert fail in requestHistory");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
+
+    //TODO - insert 테스트
     private void insertIntoUsersMacroFertilization(){
         String query = "insert into users_macro_fertilization (users_id";
         for (String macro : userFertilization.keySet()) {
             query += ", "+macro;
         }
-        query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca)
+        query += ", requestHistory_id) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
         query += "values (" + users.getId();
 
         for (String macro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(macro);
         }
-        query += ")";
+        query += ", "+requestHistory_id+")";
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
             int result = stmt.executeUpdate(query);
@@ -191,6 +222,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //        }
 //    }
 
+    //TODO - insert 제대로 되는 지 확인
     //100배액(kg) 계산식 저거 맞나 확인받기
     private void insertIntoUsersMacroCalculatedMass() { //계산된 질량 값 DB 저장
         String unit = "'kg'";
@@ -198,10 +230,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         for (String macro : molecularMass.keySet()) {
             double concentration_100fold = molecularMass.get(macro).getMass() / 10;
 
-            String query = "insert into users_macro_calculatedMass (user_id, users_macro_consideredValues_id, macro, mass, unit, solution) " +
-                    "values ("+ users.getId() +", "+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "+concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+")";
+            String query = "insert into users_macro_calculatedMass (user_id, users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id) " +
+                    "values ("+ users.getId() +", "+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "
+                    +concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+", "+requestHistory_id+")";
 
-            System.out.println("query = " + query);
             try(Connection connection = conn.getConnection();
                     Statement stmt = connection.createStatement();){
                 int result = stmt.executeUpdate(query);
@@ -214,20 +246,23 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
     }
 
+    //TODO 테스트
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
-                "H2PO4, K, Ca, Mg, SO4S, unit, user_id) values (";
+                "H2PO4, K, Ca, Mg, SO4S, unit, user_id, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+")";
+            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+", "+requestHistory_id+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
+            values += requestHistory_id+")";
             query += values;
         }
+
         try (Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement()) {
             int result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);

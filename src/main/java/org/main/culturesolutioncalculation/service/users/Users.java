@@ -10,7 +10,6 @@ public class Users {
     private int id;
     private String name;
     private String mediumType;
-    private Timestamp requestDate;
 
     private String cultivationScale;
 
@@ -21,11 +20,10 @@ public class Users {
 
     }
 
-    public Users(int id, String name, String mediumType, Timestamp requestDate, String address, String contact, String cropName, String cultivationScale) {
+    public Users(int id, String name, String mediumType, String address, String contact, String cropName, String cultivationScale) {
         this.id = id;
         this.name = name;
         this.mediumType = mediumType;
-        this.requestDate = requestDate;
         this.address = address;
         this.contact = contact;
         this.cropName = cropName;
@@ -60,10 +58,6 @@ public class Users {
     }
 
 
-    public Timestamp getRequestDate() {
-        return requestDate;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -84,9 +78,6 @@ public class Users {
         this.name = name;
     }
 
-    public void setRequestDate(Timestamp requestDate) {
-        this.requestDate = requestDate;
-    }
 
     public void setAddress(String address) {
         this.address = address;

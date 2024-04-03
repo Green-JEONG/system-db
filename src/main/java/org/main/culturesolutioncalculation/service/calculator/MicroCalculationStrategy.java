@@ -3,10 +3,8 @@ package org.main.culturesolutioncalculation.service.calculator;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 import org.main.culturesolutioncalculation.service.users.Users;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +15,8 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private Users users;
 
     private boolean isConsidered;
+    private Long requestHistory_id;
+    private Timestamp request_date;
     private String unit;
     private int users_micro_consideredValues_id;
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
@@ -54,6 +54,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         this.consideredValues = consideredValues;
         this.userFertilization = userFertilization;
         this.calFertilization = userFertilization;
+        request_date = Timestamp.from(Instant.now());
         getMajorCompoundRatio(userMicroNutrients);
     }
 
@@ -142,26 +143,55 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     //원수 고려 여부, 처방 농도, 고려 원수, 기준값 -> db에 저장하는 함수
     public void save(){
+        insertIntoRequestHistory();
         insertIntoUsersMicroConsideredValues(); //원수 고려 값 테이블에 저장
         insertIntoUsersMicroFertilization();
         insertIntoUsersMicroCalculatedMass();
 
     }
 
+    public void insertIntoRequestHistory() {
+        String query = "insert into requestHistory (users_id, request_date) " +
+                "values ("+users.getId()+", "+request_date+")";
+
+        try(Connection connection = conn.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
+            int result = pstmt.executeUpdate();
+            if(result>0) {
+                System.out.println("insert success in requestHistory");
+                // 생성된 pk get
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        requestHistory_id = generatedKeys.getLong(1); // 생성된 ID
+                        System.out.println("Generated Request ID: " + requestHistory_id);
+                    } else {
+                        System.out.println("No ID was generated.");
+                    }
+                }
+
+            }
+            else System.out.println("insert fail in requestHistory");
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    //TODO - insert test
     //미량원소 100배액식 저거 맞나 확인받기
     private void insertIntoUsersMicroCalculatedMass() {
         String unit = "'kg'";
         for (String micro : molecularMass.keySet()) {
             double concentration_100fold = molecularMass.get(micro).getMass()*100/1000;
 
-            String query = "insert into users_micro_calculatedMass (user_id, users_micro_consideredValues_id, micro, mass, unit, solution) " +
-                    "values ("+ users.getId() +", "+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "+concentration_100fold+", "+unit+", '"+molecularMass.get(micro).getSolution()+"')";
+            String query = "insert into users_micro_calculatedMass (user_id, users_micro_consideredValues_id, micro, mass, unit, solution, requestHistory_id) " +
+                    "values ("+ users.getId() +", "+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "
+                    +concentration_100fold+", "+unit+", "+molecularMass.get(micro).getSolution()+", "+requestHistory_id+")";
 
-            System.out.println("query = " + query);
             try(Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement();){
-                int result = stmt.executeUpdate(query);
-
+                //int result = stmt.executeUpdate(query);
                 //if(result>0) System.out.println("success");
                 //else System.out.println("insert failed");
             }catch (SQLException e){
@@ -175,17 +205,16 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         for (String micro : userFertilization.keySet()) {
             query += ", "+micro;
         }
-        query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca)
+        query += ", requestHistory_id) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
         query += "values (" + users.getId();
 
         for (String micro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(micro);
         }
-        query += ")";
+        query += requestHistory_id + ")";
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
-            int result = stmt.executeUpdate(query);
-
+            //int result = stmt.executeUpdate(query);
             //if(result>0) System.out.println("success insert users_macro_fertilization");
             //else System.out.println("insert failed users_macro_fertilization");
         }catch (SQLException e){
@@ -217,18 +246,20 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //        }
 //    }
 
+    //TODO - insert test
     private void insertIntoUsersMicroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_micro_consideredValues ";
         String values = "(is_considered, Fe, Cu, " +
-                "B, Mn, Zn, Mo, unit, user_id) values (";
+                "B, Mn, Zn, Mo, unit, user_id, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+")";
+            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+", "+requestHistory_id+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
+            values += requestHistory_id+")";
             query += values;
         }
         try (Connection connection = conn.getConnection();

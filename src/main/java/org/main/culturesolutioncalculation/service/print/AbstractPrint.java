@@ -56,6 +56,7 @@ public class AbstractPrint implements Print{
     //데이터베이스에서 꺼내와야함
     public void setMacroMolecularMass() {
 
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime requestDate = LocalDateTime.parse("2024-03-25 16:48:44", formatter);
 
