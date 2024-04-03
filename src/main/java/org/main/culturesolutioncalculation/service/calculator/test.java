@@ -45,8 +45,8 @@ public class test {
 
         CalculatorClient client = new CalculatorClient(strategy);
 
-        Map<String, Map<String, Double>> calculatedValues = strategy.calculateDistributedValues();
+        Map<String, Map<String, Double>> calculateValue = client.calculate();
 
-        strategy.save();
+        client.save();
     }
 }

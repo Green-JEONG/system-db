@@ -4,6 +4,8 @@ public interface Print {
 
     public void setMacroMolecularMass();
     public void setMicroMolecularMass();
+
+    public void setUp();
     public  String getUserInfo();
     public String getAllHtmlStr();
 

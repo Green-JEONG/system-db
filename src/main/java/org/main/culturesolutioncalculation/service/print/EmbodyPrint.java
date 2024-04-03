@@ -33,7 +33,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class Embody implements Print{
+public class EmbodyPrint implements Print{
 
     private DatabaseConnector conn;
     private CSVDataReader csvDataReader;
@@ -60,7 +60,7 @@ public class Embody implements Print{
      */
     private Users users;
 
-    public void setUsers(Users users) {
+    public EmbodyPrint(Users users){
         this.users = users;
     }
 
@@ -251,7 +251,6 @@ public class Embody implements Print{
     @Override
     public void getPDF() {
 
-        setUp();
 
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         try{

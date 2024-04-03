@@ -12,8 +12,8 @@ public class CalculatorClient {
     public void setStrategy(CalculationStrategy strategy){
         this.strategy = strategy;
     }
-    public void calculate(){
-        strategy.calculateDistributedValues();
+    public Map<String, Map<String, Double>> calculate(){
+        return strategy.calculateDistributedValues();
     }
     public void save(){
         strategy.save();

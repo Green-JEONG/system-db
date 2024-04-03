@@ -28,7 +28,7 @@ import com.itextpdf.tool.xml.css.CssFile;
 import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 
-public class Abstract implements Print{
+public class AbstractPrint implements Print{
 
     private DatabaseConnector conn;
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
@@ -48,10 +48,10 @@ public class Abstract implements Print{
     public String getPdfName() {
         return pdfName;
     }
-
-    public void setUsers(Users users) {
+    public AbstractPrint(Users users){
         this.users = users;
     }
+
 
     //데이터베이스에서 꺼내와야함
     public void setMacroMolecularMass() {
@@ -127,14 +127,14 @@ public class Abstract implements Print{
     }
 
     public void setUp(){
+        //원수 고려값 세팅
         setMacroMolecularMass();
         setMicroMolecularMass();
+        //유저 정보에 따른 PDF 세팅
         setPdfName();
     }
 
     public void getPDF(){
-
-        setUp();
 
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         try{
