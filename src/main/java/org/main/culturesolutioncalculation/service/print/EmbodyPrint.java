@@ -27,16 +27,15 @@ import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 public class EmbodyPrint implements Print{
 
     private DatabaseConnector conn;
     private CSVDataReader csvDataReader;
+    private int requestHistory_id;
+    private Timestamp requestDate;
     private String pdfName;
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
@@ -60,22 +59,22 @@ public class EmbodyPrint implements Print{
      */
     private Users users;
 
-    public EmbodyPrint(Users users){
+    public EmbodyPrint(Users users, int requestHistory_id, Timestamp requestDate){
         this.users = users;
+        this.requestHistory_id = requestHistory_id;
+        this.requestDate = requestDate;
     }
 
     @Override
     public void setMacroMolecularMass() {
         String query = "SELECT um.* FROM users_macro_calculatedMass um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
 
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, users.getRequestDate().toString());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -96,15 +95,13 @@ public class EmbodyPrint implements Print{
     @Override
     public void setMicroMolecularMass() {
         String query = "SELECT um.* FROM users_micro_calculatedMass um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
 
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, users.getRequestDate().toString());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -123,14 +120,12 @@ public class EmbodyPrint implements Print{
     }
     public void setMacroFertilization(){
         String query = "select um.* from users_macro_fertilization um " +
-                "join users u on u.id = um.users_id " +
-                "where u.request_date = ? and u.id = ?";
+                "where um.requestHistory_id = ?";
 
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setString(1, users.getRequestDate().toString());
-            pstmt.setInt(2, users.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -146,14 +141,12 @@ public class EmbodyPrint implements Print{
     }
     public void setMicroFertilization(){
         String query = "select um.* from users_micro_fertilization um " +
-                "join users u on u.id = um.users_id " +
-                "where u.request_date = ? and u.id = ?";
+                "where um.requestHistory_id = ?";
 
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setString(1, users.getRequestDate().toString());
-            pstmt.setInt(2, users.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -170,14 +163,12 @@ public class EmbodyPrint implements Print{
     //다량원수 고려값 db에서 불러오기
     public void setMacroConsideredValue(){
         String query = "SELECT um.* FROM users_macro_consideredValues um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, users.getRequestDate().toString());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -195,14 +186,12 @@ public class EmbodyPrint implements Print{
     //미량원수 고려값 db에서 불러오기
     public void setMicroConsideredValue(){
         String query = "SELECT um.* FROM users_micro_consideredValues um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, users.getRequestDate().toString());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -222,13 +211,13 @@ public class EmbodyPrint implements Print{
     public String getUserInfo() {
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+users.getRequestDate()+"</p>" +
+                        "<p>의뢰 일시: "+requestDate+"</p>" +
                         "<p>재배 작물: "+users.getCropName()+"</p>" +
                         "<p>배양액 종류: "+users.getMediumType()+"</p>" +
                         "<br></br><br></br><br></br> ";
     }
     public void setPdfName() {
-        this.pdfName = users.getName()+"_"+users.getRequestDate()+"_"+users.getCropName()+".pdf";
+        this.pdfName = users.getName()+"_"+requestDate+"_"+users.getCropName()+".pdf";
     }
 
     public String getPdfName() {

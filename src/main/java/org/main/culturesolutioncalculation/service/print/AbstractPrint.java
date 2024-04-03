@@ -39,40 +39,36 @@ public class AbstractPrint implements Print{
     사용자 이름, 분석 날짜, 재배 작물, 배양액 종류(네덜란드, 야마자키:이건 프론트에서 받아오기로)
      */
     private Users users;
+    private Timestamp requestDate;
+    private int requestHistory_id;
     private String pdfName;
 
     public void setPdfName() {
-        this.pdfName = users.getName()+"_"+users.getRequestDate()+"_"+users.getCropName()+".pdf";
+        this.pdfName = users.getName()+"_"+requestDate+"_"+users.getCropName()+".pdf";
     }
 
     public String getPdfName() {
         return pdfName;
     }
-    public AbstractPrint(Users users){
+    public AbstractPrint(Users users, Timestamp requestDate, int requestHistory_id){
+
         this.users = users;
+        this.requestDate = requestDate;
+        this.requestHistory_id = requestHistory_id;
     }
 
 
     //데이터베이스에서 꺼내와야함
+    @Override
     public void setMacroMolecularMass() {
-
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime requestDate = LocalDateTime.parse("2024-03-25 16:48:44", formatter);
-
-        // DateTimeFormatter를 사용하여 LocalDateTime을 적절한 문자열로 변환
-        String formattedDate = requestDate.format(formatter);
-
         String query = "SELECT um.* FROM users_macro_calculatedMass um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
 
         try (Connection connection = conn.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)) {
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, formattedDate);
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -88,27 +84,18 @@ public class AbstractPrint implements Print{
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
+    @Override
     public void setMicroMolecularMass() {
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime requestDate = LocalDateTime.parse("2024-03-25 16:48:44", formatter);
-
-        // DateTimeFormatter를 사용하여 LocalDateTime을 적절한 문자열로 변환
-        String formattedDate = requestDate.format(formatter);
-
         String query = "SELECT um.* FROM users_micro_calculatedMass um " +
-                "JOIN users u ON um.user_id = u.id " +
-                "WHERE u.id = ? AND u.request_date = ?";
+                "WHERE um.requestHistory_id = ?";
 
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, users.getId());
-            pstmt.setString(2, formattedDate);
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -124,7 +111,6 @@ public class AbstractPrint implements Print{
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public void setUp(){
@@ -210,7 +196,7 @@ public class AbstractPrint implements Print{
 
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+users.getRequestDate()+"</p>" +
+                        "<p>의뢰 일시: "+requestDate+"</p>" +
                         "<p>재배 작물: "+users.getCropName()+"</p>" +
                         "<p>배양액 종류: "+users.getMediumType()+"</p>" +
                         "<hr>";

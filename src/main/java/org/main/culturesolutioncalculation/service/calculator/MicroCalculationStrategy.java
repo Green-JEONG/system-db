@@ -15,7 +15,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private Users users;
 
     private boolean isConsidered;
-    private Long requestHistory_id;
+    private int requestHistory_id;
     private Timestamp request_date;
     private String unit;
     private int users_micro_consideredValues_id;
@@ -151,8 +151,8 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     }
 
     public void insertIntoRequestHistory() {
-        String query = "insert into requestHistory (users_id, request_date) " +
-                "values ("+users.getId()+", "+request_date+")";
+        String query = "insert into requestHistory (user_id, request_date) " +
+                "values ("+users.getId()+", '"+request_date+"')";
 
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
@@ -162,7 +162,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                 // 积己等 pk get
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        requestHistory_id = generatedKeys.getLong(1); // 积己等 ID
+                        requestHistory_id = generatedKeys.getInt(1); // 积己等 ID
                         System.out.println("Generated Request ID: " + requestHistory_id);
                     } else {
                         System.out.println("No ID was generated.");
@@ -201,7 +201,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     }
     private void insertIntoUsersMicroFertilization(){
-        String query = "insert into users_micro_fertilization (users_id";
+        String query = "insert into users_micro_fertilization (user_id";
         for (String micro : userFertilization.keySet()) {
             query += ", "+micro;
         }
@@ -224,7 +224,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
 //    private void insertIntoUsersMicroFertilization() {
 //        for (String micro : distributedValues.keySet()) {
-//            String query = "insert into users_micro_fertilization (users_id, micro";
+//            String query = "insert into users_micro_fertilization (user_id, micro";
 //            for (String element : distributedValues.get(micro).keySet()) {
 //                query += ", "+element;
 //            }

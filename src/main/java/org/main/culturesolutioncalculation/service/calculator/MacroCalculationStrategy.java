@@ -13,10 +13,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     private DatabaseConnector conn;
 
-    Timestamp request_date;
+    private Timestamp request_date;
 
     private Users users;
-    private Long requestHistory_id;
+    private int requestHistory_id;
 
     private int users_macro_consideredValues_id;
 
@@ -148,8 +148,8 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     }
 
     public void insertIntoRequestHistory() {
-        String query = "insert into requestHistory (users_id, request_date) " +
-                "values (" + users.getId() + ", " + request_date + ")";
+        String query = "insert into requestHistory (user_id, request_date) " +
+                "values (" + users.getId() + ", '" + request_date + "')";
 
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -159,7 +159,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
                 // 积己等 pk get
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        requestHistory_id = generatedKeys.getLong(1); // 积己等 ID
+                        requestHistory_id = generatedKeys.getInt(1); // 积己等 ID
                         System.out.println("Generated Request ID: " + requestHistory_id);
                     } else {
                         System.out.println("No ID was generated.");
@@ -176,7 +176,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     //TODO - insert 抛胶飘
     private void insertIntoUsersMacroFertilization(){
-        String query = "insert into users_macro_fertilization (users_id";
+        String query = "insert into users_macro_fertilization (user_id";
         for (String macro : userFertilization.keySet()) {
             query += ", "+macro;
         }
@@ -200,7 +200,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
 //    private void insertIntoUsersMacroFertilization() { //拌魂等 贸规蔼 DB 历厘
 //        for (String macro : distributedValues.keySet()) {
-//            String query = "insert into users_macro_fertilization (users_id, macro";
+//            String query = "insert into users_macro_fertilization (user_id, macro";
 //            for (String element : distributedValues.get(macro).keySet()) {
 //                query += ", "+element;
 //            }

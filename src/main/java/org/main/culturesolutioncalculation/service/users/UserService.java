@@ -11,8 +11,8 @@ public class UserService {
 
     //유저 정보 저장
     public void save(Users users){
-        String query = "insert into users (name, address, contact, request_date, crop_name, cultivation_scale, medium_type) " +
-                "values ("+users.getName()+", "+users.getAddress()+", "+users.getContact()+", "+users.getRequestDate()+", "
+        String query = "insert into users (name, address, contact, crop_name, cultivation_scale, medium_type) " +
+                "values ("+users.getName()+", "+users.getAddress()+", "+users.getContact()+", "
                 +users.getCropName()+", "+users.getCultivationScale()+", "+users.getMediumType()+")";
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
@@ -38,7 +38,6 @@ public class UserService {
                 String userName = resultSet.getString("name");
                 String mediumType = resultSet.getString("medium_type");
                 String cropName = resultSet.getString("crop_name");
-                Timestamp requestDate = resultSet.getTimestamp("request_date");
                 String address = resultSet.getString("address");
                 String contact = resultSet.getString("contact");
                 String cultivationScale = resultSet.getString("cultivation_scale");
@@ -49,7 +48,6 @@ public class UserService {
                 users.setMediumType(mediumType);
                 users.setContact(contact);
                 users.setCropName(cropName);
-                users.setRequestDate(requestDate);
                 users.setCultivationScale(cultivationScale);
             }
 
