@@ -2,8 +2,7 @@ package org.main.culturesolutioncalculation.service.calculator;
 
 import org.main.culturesolutioncalculation.service.users.Users;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /*
 
@@ -35,16 +34,19 @@ public class test {
             put("SO4S", 0.0);
         }
     };
+    List<String> userMicroNutrients = new LinkedList<>(Arrays.asList("Fe-EDTA", "H3BO3", "MnSO4¡¤H2O", "Na2MoO4¡¤2H2O"));
+    private String unit = "ppm";
 
 
     public void testSetStrategy(){
-        CalculationStrategy strategy = new MacroCalculationStrategy(
-               new Users(),"mM" , is4, isConsidered, consideredValues, fertilization
+        CalculationStrategy strategy = new MicroCalculationStrategy(
+               new Users(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
         );
+
         CalculatorClient client = new CalculatorClient(strategy);
-        strategy.calculateDistributedValues();
+
+        Map<String, Map<String, Double>> calculatedValues = strategy.calculateDistributedValues();
+
         strategy.save();
-
-
     }
 }

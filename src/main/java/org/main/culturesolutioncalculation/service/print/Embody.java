@@ -448,14 +448,20 @@ public class Embody implements Print{
         String unit = "Kg";
         String Html =
                 "<tr>"+
-                "<th class=\"category\">"+solution+"액</th>" +
-                        "<th colspan=\"2\">100배액 기준</th>" +
+                        "<th class=\"category\">"+solution+"액</th>" +
+                        "<th colspan=\"5\"></th>"+
+                        "<th class=\"category\" colspan=\"2\">100배액 기준</th>" +
                         "</tr>";
 
         for (String macro : MacroMolecularMass.keySet()) {
             if(MacroMolecularMass.get(macro).getSolution().equals(solution)){
                 Html += "<tr>"+
                         "<td class=\"name\">"+macro+"</td>" +
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
                         "<td>"+String.format("%.2f",MacroMolecularMass.get(macro).getMass())+"</td>" +
                         "<td class=\"unit\">"+unit+"</td>" +
                         "</tr>";
@@ -465,6 +471,11 @@ public class Embody implements Print{
             if(MicroMolecularMass.get(micro).getSolution().equals(solution)){
                 Html += "<tr>"+
                         "<td class=\"name\">"+micro+"</td>" +
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
+                        "<td> </td>"+
                         "<td>"+String.format("%.2f",MicroMolecularMass.get(micro).getMass())+"</td>" +
                         "<td class=\"unit\">"+unit+"</td>" +
                         "</tr>";

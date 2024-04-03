@@ -46,7 +46,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //        }
 //    };
 
-    public MicroCalculationStrategy(Users users, boolean isConsidered, String unit, List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+    public MicroCalculationStrategy(Users users, String unit, boolean isConsidered,  List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
         this.users = users;
         this.unit = unit;
         this.isConsidered = isConsidered;
