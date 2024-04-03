@@ -7,15 +7,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MicroCalculator{
+public class MicroCalculationStrategy implements CalculationStrategy{
     private DatabaseConnector conn;
     private int users_id;
     private int getUsers_id(){
         return this.users_id;
     }
+
+    private boolean isConsidered;
+    private String unit;
     private int users_micro_consideredValues_id;
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
 
@@ -23,36 +27,35 @@ public class MicroCalculator{
 
     private Map<String, FinalCal> molecularMass =  new LinkedHashMap<>();
 
+    List<String> userMicroNutrients = new LinkedList<>(); //유저가 선택했던 미량원소 비료 리스트
+
     //1. 기준값 - 프론트에서 넘어옴
-    private Map<String, Double> standardValues = new LinkedHashMap<>();
+    //private Map<String, Double> standardValues = new LinkedHashMap<>();
     //2. 원수 고려값 - 프론트에서 넘어옴
     private Map<String, Double> consideredValues = new LinkedHashMap<>();
 
     //넘어와야 할 처방 농도 양식 - 순서 그대로 유지되어야 함. front에서 넘어와야함
-    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
-        {
-            put("Fe", 15.5);
-            put("Cu", 0.75);
-            put("B", 30.0);
-            put("Mn", 10.0);
-            put("Zn", 5.0);
-            put("Mo",0.5);
-        }
-    };
+    private Map<String, Double> userFertilization = new LinkedHashMap<>(); //db에 저장되어야 할 처방 농도 (계산 수행 X)
+    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //계산 수행할 처방 농도
+//    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
+//        {
+//            put("Fe", 15.5);
+//            put("Cu", 0.75);
+//            put("B", 30.0);
+//            put("Mn", 10.0);
+//            put("Zn", 5.0);
+//            put("Mo",0.5);
+//        }
+//    };
 
-    //처방 농도 계산 함수. '기준량 - 원소성분 = 처방농도' 수행. 원수 고려 안하면 0으로 넘어와야 함
-    private void calculateFertilizationValue(Map<String, Double> standardValuesFront, Map<String, Double> consideredValuesFront ){
-        //프론트에서 받은 값 저장해야 하는지는 좀 더 고민해보기. 지워도 될듯함
-        standardValues = standardValuesFront;
-        consideredValues = consideredValuesFront;
-
-        for (String valueName : standardValuesFront.keySet()) {
-            if(consideredValuesFront.get(valueName) < standardValuesFront.get(valueName)){
-                fertilization.put(valueName, standardValuesFront.get(valueName) - consideredValuesFront.get(valueName));
-            }else{ //원수 고려값을 기준값보다 크게 입력한 경우- 에러
-                System.err.println("입력한 원수 ["+ valueName+ "]값이 기준 값을 초과했습니다.");
-            }
-        }
+    public MicroCalculationStrategy(boolean isConsidered, String unit, List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+        this.unit = unit;
+        this.isConsidered = isConsidered;
+        this.userMicroNutrients = userMicroNutrients;
+        this.consideredValues = consideredValues;
+        this.userFertilization = userFertilization;
+        this.calFertilization = userFertilization;
+        getMajorCompoundRatio(userMicroNutrients);
     }
 
     //분자 별 갖고 있는 미량 원소 비율을 가져옴. userMicroNutrients : 사용자가 선택한 미량원소 리스트
@@ -77,7 +80,7 @@ public class MicroCalculator{
                 molecularMass.put(micro, new FinalCal(solution, mass)); //100배액 계산을 위해 화합물과 그 질량, 양액 저장
 
                 Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. 질산칼슘4수염이 갖는 원수의 이름과 질량비를 갖는 map
-                for (String major : fertilization.keySet()) {
+                for (String major : userFertilization.keySet()) {
                     if (resultSet.getDouble(major) != 0) {
                         compoundRatio.put(major, resultSet.getDouble(major));
                         try (Statement innerStmt = connection.createStatement();
@@ -99,46 +102,48 @@ public class MicroCalculator{
         }
     }
 
-    public Map<String, Map<String, Double>> calculateWithRatio(Map<String, Double> userFertilization){
-        double ratioValue = Double.MAX_VALUE;
-        Map<String, Double> results = fertilization; //나중에 userFertilization이 들어오면 바꿀것 (result = userFertilization으로)
+    // 분자량*시비량/원자량/함량갯수 = 100배액
+    /*
+      name = ZnSO4쨌7H2O
+      compoundsRatio = {content_count=1.0, Zn=1.0, mass=65.37}
+     */
+    public Map<String, Map<String, Double>> calculateDistributedValues() {
+        Map<String, Double> results = userFertilization;
 
-        for (String compound : compoundsRatio.keySet()) { //ex; {ZnSO4·7H2O , {Zn=1.0, mass=65.37}}에서 ZnSO4·7H2O이 compound
-            // 분자량*시비량/원자량/함량갯수 = 100배액
-            /*
-              name = ZnSO4쨌7H2O
-              compoundsRatio = {content_count=1.0, Zn=1.0, mass=65.37}
-             */
-            Map<String, Double> result = new LinkedHashMap<>();
-            double atomicWeight = compoundsRatio.get(compound).get("mass"); //원자량
-            double molecularWeight =  molecularMass.get(compound).getMass(); //분자량
-            double contentCount = compoundsRatio.get(compound).get("content_count"); //함량갯수
-            double fertilizationAmount; //시비량
-            double microValue = 0.0; //계산 결과
-
-            for (String micro : results.keySet()) { //처방농도 micro
-                if(compoundsRatio.get(compound).containsKey(micro)){
-                    fertilizationAmount = results.get(micro);
-                    microValue = molecularWeight * fertilizationAmount / atomicWeight / contentCount;
-                    result.put(micro, fertilizationAmount);
-                }
-            }
-            distributedValues.put(compound, result); //해당 화합물의 원수 처방량
-            molecularMass.get(compound).setMass(microValue);//최종 minValue * mass 한 값
+        for (String compound : compoundsRatio.keySet()) {
+            Map<String, Double> calculatedCompounds = calculateCompoundDistribution(compound, calFertilization);
+            distributedValues.put(compound, calculatedCompounds); // 계산된 화합물 분포 저장
         }
 
         return distributedValues;
     }
+    // 계산된 화합물 분포를 반환
+    private Map<String, Double> calculateCompoundDistribution(String compound, Map<String, Double> calFertilization) {
+        Map<String, Double> distributionResult = new LinkedHashMap<>();
+        double atomicWeight = compoundsRatio.get(compound).get("mass"); // 원자량
+        double molecularWeight = molecularMass.get(compound).getMass(); // 분자량
+        double contentCount = compoundsRatio.get(compound).get("content_count"); // 함량 개수
 
-    //프론트에서 hashMap fertilization(처방농도), 선택한 화합식 문자열 배열 받아야함
-    private Map<String, Map<String, Double>> calculate(Map<String, Double> userFertilization, List<String> userMicroNutrients) { //처방 농도
-        getMajorCompoundRatio(userMicroNutrients);
-        return calculateWithRatio(userFertilization);
+        for (String nutrient : calFertilization.keySet()) {
+            if (compoundsRatio.get(compound).containsKey(nutrient)) {
+                double fertilizationAmount = calFertilization.get(nutrient);
+                double calculatedValue = calculateMicroElementValue(molecularWeight, fertilizationAmount, atomicWeight, contentCount);
+                distributionResult.put(nutrient, fertilizationAmount);
+                molecularMass.get(compound).setMass(calculatedValue); // 최종 값 업데이트
+            }
+        }
+
+        return distributionResult;
+    }
+
+    // 미량 원소 값을 계산
+    private double calculateMicroElementValue(double molecularWeight, double fertilizationAmount, double atomicWeight, double contentCount) {
+        return molecularWeight * fertilizationAmount / atomicWeight / contentCount;
     }
 
     //원수 고려 여부, 처방 농도, 고려 원수, 기준값 -> db에 저장하는 함수
-    public void save(boolean isConsidered, String unit, Map<String, Double> userFertilization, Map<String, Double> consideredValue, Map<String, Double>standardValue ){
-        insertIntoUsersMicroConsideredValues(isConsidered, unit); //원수 고려 값 테이블에 저장
+    public void save(){
+        insertIntoUsersMicroConsideredValues(); //원수 고려 값 테이블에 저장
         insertIntoUsersMicroFertilization();
         insertIntoUsersMicroCalculatedMass();
 
@@ -168,14 +173,14 @@ public class MicroCalculator{
     }
     private void insertIntoUsersMicroFertilization(){
         String query = "insert into users_micro_fertilization (users_id";
-        for (String micro : fertilization.keySet()) {
+        for (String micro : userFertilization.keySet()) {
             query += ", "+micro;
         }
         query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca)
         query += "values (" + users_id;
 
-        for (String micro : fertilization.keySet()) {
-            query += ", "+fertilization.get(micro);
+        for (String micro : userFertilization.keySet()) {
+            query += ", "+userFertilization.get(micro);
         }
         query += ")";
         try(Connection connection = conn.getConnection();
@@ -213,7 +218,7 @@ public class MicroCalculator{
 //        }
 //    }
 
-    private void insertIntoUsersMicroConsideredValues(boolean isConsidered, String unit) { //고려 원수 값 DB 저장
+    private void insertIntoUsersMicroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_micro_consideredValues ";
         String user_id = getUsers_id()+"";
         String values = "(is_considered, Fe, Cu, " +
