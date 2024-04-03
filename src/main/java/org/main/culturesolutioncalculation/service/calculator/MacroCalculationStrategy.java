@@ -1,6 +1,7 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
+import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,7 +15,8 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     private DatabaseConnector conn;
 
-    private int users_id;
+    private Users users;
+
     private int users_macro_consideredValues_id;
 
     private boolean is4;
@@ -46,7 +48,8 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //            put("SO4S",1.75);
 //        }
 //    };
-    public MacroCalculationStrategy(String unit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+    public MacroCalculationStrategy(Users users, String unit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+        this.users = users;
         this.unit = unit;
         this.is4 = is4;
         this.isConsidered = isConsidered;
@@ -54,10 +57,6 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         this.userFertilization = userFertilization;
         this.calFertilization = userFertilization;
         getMajorCompoundRatio(is4);
-    }
-
-    private int getUsers_id(){
-        return users_id;
     }
 
 
@@ -151,7 +150,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             query += ", "+macro;
         }
         query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca)
-        query += "values (" + users_id;
+        query += "values (" + users.getId();
 
         for (String macro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(macro);
@@ -200,7 +199,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             double concentration_100fold = molecularMass.get(macro).getMass() / 10;
 
             String query = "insert into users_macro_calculatedMass (user_id, users_macro_consideredValues_id, macro, mass, unit, solution) " +
-                    "values ("+ users_id +", "+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "+concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+")";
+                    "values ("+ users.getId() +", "+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "+concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+")";
 
             System.out.println("query = " + query);
             try(Connection connection = conn.getConnection();
@@ -217,12 +216,11 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
-        String user_id = getUsers_id()+"";
         String values = "(is_considered, NO3N, NH4N, " +
                 "H2PO4, K, Ca, Mg, SO4S, unit, user_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+user_id+")";
+            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {

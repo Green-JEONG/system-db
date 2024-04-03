@@ -1,6 +1,7 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
+import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,10 +14,7 @@ import java.util.Map;
 
 public class MicroCalculationStrategy implements CalculationStrategy{
     private DatabaseConnector conn;
-    private int users_id;
-    private int getUsers_id(){
-        return this.users_id;
-    }
+    private Users users;
 
     private boolean isConsidered;
     private String unit;
@@ -48,7 +46,8 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //        }
 //    };
 
-    public MicroCalculationStrategy(boolean isConsidered, String unit, List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+    public MicroCalculationStrategy(Users users, boolean isConsidered, String unit, List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+        this.users = users;
         this.unit = unit;
         this.isConsidered = isConsidered;
         this.userMicroNutrients = userMicroNutrients;
@@ -156,7 +155,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
             double concentration_100fold = molecularMass.get(micro).getMass()*100/1000;
 
             String query = "insert into users_micro_calculatedMass (user_id, users_micro_consideredValues_id, micro, mass, unit, solution) " +
-                    "values ("+ users_id +", "+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "+concentration_100fold+", "+unit+", '"+molecularMass.get(micro).getSolution()+"')";
+                    "values ("+ users.getId() +", "+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "+concentration_100fold+", "+unit+", '"+molecularMass.get(micro).getSolution()+"')";
 
             System.out.println("query = " + query);
             try(Connection connection = conn.getConnection();
@@ -177,7 +176,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
             query += ", "+micro;
         }
         query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca)
-        query += "values (" + users_id;
+        query += "values (" + users.getId();
 
         for (String micro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(micro);
@@ -220,12 +219,11 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     private void insertIntoUsersMicroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_micro_consideredValues ";
-        String user_id = getUsers_id()+"";
         String values = "(is_considered, Fe, Cu, " +
                 "B, Mn, Zn, Mo, unit, user_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+user_id+")";
+            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {

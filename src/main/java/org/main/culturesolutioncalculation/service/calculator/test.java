@@ -1,5 +1,7 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
+import org.main.culturesolutioncalculation.service.users.Users;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ public class test {
 
     public void testSetStrategy(){
         CalculationStrategy strategy = new MacroCalculationStrategy(
-               "mM" , is4, isConsidered, consideredValues, fertilization
+               new Users(),"mM" , is4, isConsidered, consideredValues, fertilization
         );
         CalculatorClient client = new CalculatorClient(strategy);
         strategy.calculateDistributedValues();
