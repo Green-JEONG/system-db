@@ -3,7 +3,12 @@ package org.main.culturesolutioncalculation.service.users;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 import org.main.culturesolutioncalculation.service.users.Users;
 
+import java.net.ConnectException;
 import java.sql.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
 
 public class UserService {
 
@@ -26,34 +31,62 @@ public class UserService {
         }
     }
 
-    public Users findUserById(int id){
-        Users users = new Users();
-        String query = "select * from users where id = 1";
+    public Optional<Users> findByNameAndContact(String name, String contact){
+        String query = "select * from users where name = ? and contact = ?";
         try(Connection connection = conn.getConnection();
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery(query);)
-        {
-            while(resultSet.next()){
-                int userId = resultSet.getInt("id");
-                String userName = resultSet.getString("name");
-                String mediumType = resultSet.getString("medium_type");
-                String cropName = resultSet.getString("crop_name");
-                String address = resultSet.getString("address");
-                String contact = resultSet.getString("contact");
-                String cultivationScale = resultSet.getString("cultivation_scale");
+            PreparedStatement pstmt = connection.prepareStatement(query)){
 
-                users.setId(userId);
-                users.setName(userName);
-                users.setAddress(address);
-                users.setMediumType(mediumType);
-                users.setContact(contact);
-                users.setCropName(cropName);
-                users.setCultivationScale(cultivationScale);
+            pstmt.setString(1, name);
+            pstmt.setString(2, contact);
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if(resultSet.next()){
+                    Users users = new Users();
+                    int userId = resultSet.getInt("id");
+                    String mediumType = resultSet.getString("medium_type");
+                    String cropName = resultSet.getString("crop_name");
+                    String address = resultSet.getString("address");
+                    String cultivationScale = resultSet.getString("cultivation_scale");
+
+                    users.setId(userId);
+                    users.setName(name);
+                    users.setAddress(address);
+                    users.setMediumType(mediumType);
+                    users.setContact(contact);
+                    users.setCropName(cropName);
+                    users.setCultivationScale(cultivationScale);
+
+                    return Optional.of(users);
+                }
+            }
+        }catch (SQLException e){
+            e.printStackTrace(); // 에러 로깅
+        }
+        return Optional.empty();
+    }
+
+    public Map<Integer, Timestamp> findRequestHistory(Users users){
+        String query = "select id, request_date from requestHistory where user_id = ?";
+        Map<Integer, Timestamp> requestHistory = new LinkedHashMap<>();
+
+        try(Connection connection = conn.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query)){
+
+            pstmt.setInt(1, users.getId());
+
+            try(ResultSet resultSet = pstmt.executeQuery()){
+                while(resultSet.next()){
+                    requestHistory
+                            .put(resultSet.getInt("id"),resultSet.getTimestamp("request_date"));
+                }
+                return requestHistory;
+            }catch (SQLException e){
+                e.printStackTrace();
             }
 
         }catch (SQLException e){
-            e.printStackTrace();
+
         }
-        return users;
+        return requestHistory;
     }
 }
