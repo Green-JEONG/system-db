@@ -65,6 +65,7 @@ public class UserService {
         return Optional.empty();
     }
 
+
     public Map<Integer, Timestamp> findRequestHistory(Users users){
         String query = "select id, request_date from requestHistory where user_id = ?";
         Map<Integer, Timestamp> requestHistory = new LinkedHashMap<>();
@@ -85,7 +86,6 @@ public class UserService {
             }
 
         }catch (SQLException e){
-
         }
         return requestHistory;
     }

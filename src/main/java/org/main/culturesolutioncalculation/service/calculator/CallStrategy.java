@@ -9,7 +9,7 @@ import java.util.*;
 TODO 프론트에서 아래와 같은 방식으로 strategy 전달
 
  */
-public class test {
+public class CallStrategy {
     private boolean is4 = true;
     private boolean isConsidered = false;
     private Map<String, Double> fertilization = new LinkedHashMap<String, Double>() {
@@ -38,7 +38,7 @@ public class test {
     private String unit = "ppm";
 
 
-    public void testSetStrategy(){
+    public void callMicroStrategy(){
         CalculationStrategy strategy = new MicroCalculationStrategy(
                new Users(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
         );
@@ -47,6 +47,14 @@ public class test {
 
         Map<String, Map<String, Double>> calculateValue = client.calculate();
 
+        client.save();
+    }
+
+    public void callMacroStrategy(){
+        CalculationStrategy strategy = new MacroCalculationStrategy
+                (new Users(), "mM",true, false, consideredValues, fertilization);
+        CalculatorClient client = new CalculatorClient(strategy);
+        Map<String, Map<String, Double>> calculatedValues = client.calculate();
         client.save();
     }
 }
