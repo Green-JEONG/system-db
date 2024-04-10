@@ -3,8 +3,8 @@ module org.main.culturesolutioncalculation {
     requires javafx.fxml;
     requires java.sql;
     requires com.opencsv;
-    //requires itextpdf;
-    //requires xmlworker;
+    requires itextpdf;
+    requires xmlworker;
 
 
 
