@@ -1,13 +1,12 @@
 package org.main.culturesolutioncalculation.service.database;
 
+import org.main.culturesolutioncalculation.model.CropNutrientStandard;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO - test
-public class MediumReader {
+public class MediumService {
 
     DatabaseConnector conn;
 
@@ -54,8 +53,8 @@ public class MediumReader {
     }
 
     //해당 배양액의 모든 기준값 불러오기 + 디폴트로 네덜란드 배양액을 항상 불러오고 있어야 함 (프론트 측에서 파라미터가 선택되기 전까지 네덜란드 아이디 파라미터만 보내도록 설정)
-    public List<Map<String, Object>> getCultureMediumData(String mediumType) {
-        List<Map<String, Object>> dataList = new ArrayList<>();
+    public Optional<CropNutrientStandard> getCultureMediumData(String mediumType) {
+        CropNutrientStandard cropNutrientStandard;
         String query =
                 "SELECT * FROM culture_medium " +
                         "WHERE medium_type_id = (SELECT id FROM medium_types WHERE name = ?)";
@@ -66,29 +65,32 @@ public class MediumReader {
             pstmt.setString(1, mediumType);
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 while (resultSet.next()) {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("fertilizer_salts", resultSet.getString("fertilizer_salts"));
-                    data.put("EC(dSㆍm-1)", resultSet.getObject("EC(dSㆍm-1)"));
-                    data.put("NO3 (mmol/L)", resultSet.getObject("NO3 (mmol/L)"));
-                    data.put("NH4", resultSet.getObject("NH4"));
-                    data.put("H2PO4", resultSet.getObject("H2PO4"));
-                    data.put("K", resultSet.getObject("K"));
-                    data.put("Ca", resultSet.getObject("Ca"));
-                    data.put("Mg", resultSet.getObject("Mg"));
-                    data.put("SO4", resultSet.getObject("SO4"));
-                    data.put("Fe (μmol/L)", resultSet.getObject("Fe (μmol/L)"));
-                    data.put("Cu", resultSet.getObject("Cu"));
-                    data.put("B", resultSet.getObject("B"));
-                    data.put("Mn", resultSet.getObject("Mn"));
-                    data.put("Zn", resultSet.getObject("Zn"));
-                    data.put("Mo", resultSet.getObject("Mo"));
-                    dataList.add(data);
+                    cropNutrientStandard =
+                            new CropNutrientStandard(
+                                    resultSet.getString("fertilizer_salts"),
+                                    "",
+                                    resultSet.getDouble("EC(dSㆍm-1)"),
+                                    resultSet.getDouble("NO3 (mmol/L)"),
+                                    resultSet.getDouble("NH4"),
+                                    resultSet.getDouble("H2PO4"),
+                                    resultSet.getDouble("K"),
+                                    resultSet.getDouble("Ca"),
+                                    resultSet.getDouble("Mg"),
+                                    resultSet.getDouble("SO4"),
+                                    resultSet.getDouble("Fe (μmol/L)"),
+                                    resultSet.getDouble("Cu"),
+                                    resultSet.getDouble("B"),
+                                    resultSet.getDouble("Mn"),
+                                    resultSet.getDouble("Zn"),
+                                    resultSet.getDouble("Mo")
+                                    );
+                    return Optional.of(cropNutrientStandard);
+
                 }
-                return dataList;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return dataList;
+        return Optional.empty();
     }
 }

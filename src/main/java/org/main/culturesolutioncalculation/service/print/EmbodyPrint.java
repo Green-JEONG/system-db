@@ -18,6 +18,7 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.Users;
@@ -38,7 +39,9 @@ public class EmbodyPrint implements Print{
     private CSVDataReader csvDataReader;
     private RequestHistory requestHistory;
     private RequestHistoryService requestHistoryService;
+    private MediumService mediumService;
     private String pdfName;
+    private String mediumType;
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
 
@@ -64,6 +67,10 @@ public class EmbodyPrint implements Print{
     public EmbodyPrint(Users users, RequestHistory requestHistory){
         this.users = users;
         this.requestHistory = requestHistory;
+    }
+    public void setRequestHistory(){
+        mediumType = requestHistoryService.getMediumType(requestHistory);
+
     }
 
     @Override
@@ -225,6 +232,8 @@ public class EmbodyPrint implements Print{
         return pdfName;
     }
     public void setUp(){
+        //분석 기록에서 필요한 값 세팅
+        setRequestHistory();
         //원수 고려값 세팅
         setMacroConsideredValue();
         setMicroConsideredValue();
@@ -319,15 +328,22 @@ public class EmbodyPrint implements Print{
 
 
     //#TODO - 기존 csv에서 읽던 것을 db에서 읽도록 전체 수정해야 함
-    private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
+//    private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
+//
+//        csvDataReader = new CSVDataReader();
+//        NutrientSolution nutrientSolution = csvDataReader.readFile(users.getMediumType()); //네덜란드, 야마자키 등
+//        ArrayList<CropNutrientStandard> cropList = nutrientSolution.getCropList();
+//        Optional<CropNutrientStandard> cropNutrients = cropList.stream().filter(c -> c.getCropName().equals(users.getCropName()))
+//                .findFirst();
+//
+//        return cropNutrients.get();
+//    }
 
-        csvDataReader = new CSVDataReader();
-        NutrientSolution nutrientSolution = csvDataReader.readFile(users.getMediumType()); //네덜란드, 야마자키 등
-        ArrayList<CropNutrientStandard> cropList = nutrientSolution.getCropList();
-        Optional<CropNutrientStandard> cropNutrients = cropList.stream().filter(c -> c.getCropName().equals(users.getCropName()))
-                .findFirst();
-
-        return cropNutrients.get();
+    //#TODO - 이 함수 테스트 수행할것 - DB에서 읽어오는거
+    private CropNutrientStandard getCropNutrients(){
+        Optional<CropNutrientStandard> cultureMediumData = mediumService.getCultureMediumData(mediumType);
+        if(cultureMediumData.isEmpty()) throw new NoSuchElementException("해당 데이터 기준값이 존재하지 않습니다.");
+        return cultureMediumData.get();
     }
 
     private String getMicro(CropNutrientStandard cropNutrientStandard) {
