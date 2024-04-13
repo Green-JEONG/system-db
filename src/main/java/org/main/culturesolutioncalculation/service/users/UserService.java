@@ -14,11 +14,36 @@ public class UserService {
 
     private DatabaseConnector conn;
 
-    //유저 정보 저장
+
+    //유저 정보 저장 - 이름, 주소, 연락처
+
+    public boolean findByUser(Users users){ //유저가 db에 있으면 true, 없으면 false
+
+        String preQuery = "select * from users u where u.name = ? and u.address = ? and u.contact = ?";
+        try(Connection connection = conn.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(preQuery);
+        ){
+            pstmt.setString(1, users.getName());
+            pstmt.setString(2, users.getAddress());
+            pstmt.setString(3, users.getContact());
+
+            try(ResultSet resultSet = pstmt.executeQuery()){
+                while(resultSet.next()){
+                    return true;
+                }
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
     public void save(Users users){
-        String query = "insert into users (name, address, contact, crop_name, cultivation_scale, medium_type) " +
-                "values ("+users.getName()+", "+users.getAddress()+", "+users.getContact()+", "
-                +users.getCropName()+", "+users.getCultivationScale()+", "+users.getMediumType()+")";
+        if(findByUser(users)) return;
+
+        String query = "insert into users (name, address, contact) " +
+                "values ("+users.getName()+", "+users.getAddress()+", "+users.getContact()+")";
+
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
             int result = stmt.executeUpdate(query);
@@ -31,39 +56,6 @@ public class UserService {
         }
     }
 
-    public Optional<Users> findByNameAndContact(String name, String contact){
-        String query = "select * from users where name = ? and contact = ?";
-        try(Connection connection = conn.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)){
-
-            pstmt.setString(1, name);
-            pstmt.setString(2, contact);
-
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                if(resultSet.next()){
-                    Users users = new Users();
-                    int userId = resultSet.getInt("id");
-                    String mediumType = resultSet.getString("medium_type");
-                    String cropName = resultSet.getString("crop_name");
-                    String address = resultSet.getString("address");
-                    String cultivationScale = resultSet.getString("cultivation_scale");
-
-                    users.setId(userId);
-                    users.setName(name);
-                    users.setAddress(address);
-                    users.setMediumType(mediumType);
-                    users.setContact(contact);
-                    users.setCropName(cropName);
-                    users.setCultivationScale(cultivationScale);
-
-                    return Optional.of(users);
-                }
-            }
-        }catch (SQLException e){
-            e.printStackTrace(); // 에러 로깅
-        }
-        return Optional.empty();
-    }
 
 
     public Map<Integer, Timestamp> findRequestHistory(Users users){

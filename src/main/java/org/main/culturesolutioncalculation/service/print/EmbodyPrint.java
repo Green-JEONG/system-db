@@ -18,6 +18,8 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
 import org.main.culturesolutioncalculation.model.NutrientSolution;
@@ -34,8 +36,8 @@ public class EmbodyPrint implements Print{
 
     private DatabaseConnector conn;
     private CSVDataReader csvDataReader;
-    private int requestHistory_id;
-    private Timestamp requestDate;
+    private RequestHistory requestHistory;
+    private RequestHistoryService requestHistoryService;
     private String pdfName;
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
@@ -59,10 +61,9 @@ public class EmbodyPrint implements Print{
      */
     private Users users;
 
-    public EmbodyPrint(Users users, int requestHistory_id, Timestamp requestDate){
+    public EmbodyPrint(Users users, RequestHistory requestHistory){
         this.users = users;
-        this.requestHistory_id = requestHistory_id;
-        this.requestDate = requestDate;
+        this.requestHistory = requestHistory;
     }
 
     @Override
@@ -74,7 +75,7 @@ public class EmbodyPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -101,7 +102,7 @@ public class EmbodyPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -125,7 +126,7 @@ public class EmbodyPrint implements Print{
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -146,7 +147,7 @@ public class EmbodyPrint implements Print{
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -168,7 +169,7 @@ public class EmbodyPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -191,7 +192,7 @@ public class EmbodyPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -211,15 +212,15 @@ public class EmbodyPrint implements Print{
     public String getUserInfo() {
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+requestDate+"</p>" +
-                        "<p>재배 작물: "+users.getCropName()+"</p>" +
-                        "<p>배양액 종류: "+users.getMediumType()+"</p>" +
+                        "<p>의뢰 일시: "+requestHistory.getRequest_date()+"</p>" +
+                        "<p>재배 작물: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
+                        "<p>배양액 종류: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
                         "<br></br><br></br><br></br> ";
     }
     public void setPdfName() {
-        this.pdfName = users.getName()+"_"+requestDate+"_"+users.getCropName()+".pdf";
-    }
 
+        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_분석 기록";
+    }
     public String getPdfName() {
         return pdfName;
     }
@@ -317,7 +318,7 @@ public class EmbodyPrint implements Print{
     }
 
 
-
+    //#TODO - 기존 csv에서 읽던 것을 db에서 읽도록 전체 수정해야 함
     private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
 
         csvDataReader = new CSVDataReader();

@@ -1,6 +1,9 @@
 package org.main.culturesolutioncalculation.service.print;
 
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
+
 public interface Print {
+
 
     public void setMacroMolecularMass();
     public void setMicroMolecularMass();

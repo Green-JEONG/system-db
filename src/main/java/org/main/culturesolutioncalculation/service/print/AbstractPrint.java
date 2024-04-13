@@ -13,10 +13,13 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 
 import java.io.*;
+import java.lang.ref.ReferenceQueue;
 import java.nio.charset.Charset;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -39,22 +42,23 @@ public class AbstractPrint implements Print{
     사용자 이름, 분석 날짜, 재배 작물, 배양액 종류(네덜란드, 야마자키:이건 프론트에서 받아오기로)
      */
     private Users users;
-    private Timestamp requestDate;
-    private int requestHistory_id;
+
+    private RequestHistory requestHistory;
+
+    private RequestHistoryService requestHistoryService;
     private String pdfName;
 
     public void setPdfName() {
-        this.pdfName = users.getName()+"_"+requestDate+"_"+users.getCropName()+".pdf";
+
+        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_분석 기록 개요";
     }
 
     public String getPdfName() {
         return pdfName;
     }
-    public AbstractPrint(Users users, Timestamp requestDate, int requestHistory_id){
-
+    public AbstractPrint(Users users, RequestHistory requestHistory){
         this.users = users;
-        this.requestDate = requestDate;
-        this.requestHistory_id = requestHistory_id;
+        this.requestHistory = requestHistory;
     }
 
 
@@ -68,7 +72,7 @@ public class AbstractPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -95,7 +99,7 @@ public class AbstractPrint implements Print{
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory_id);
+            pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -196,9 +200,9 @@ public class AbstractPrint implements Print{
 
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+requestDate+"</p>" +
-                        "<p>재배 작물: "+users.getCropName()+"</p>" +
-                        "<p>배양액 종류: "+users.getMediumType()+"</p>" +
+                        "<p>의뢰 일시: "+requestHistory.getRequest_date()+"</p>" +
+                        "<p>재배 작물: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
+                        "<p>배양액 종류: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
                         "<hr>";
     }
 
