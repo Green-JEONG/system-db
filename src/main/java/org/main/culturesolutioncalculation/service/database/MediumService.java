@@ -93,4 +93,20 @@ public class MediumService {
         }
         return Optional.empty();
     }
+    //배양액 종류 추가 함수(네덜란드, 야마자키, 시립대 등등)
+    public void addMediumType(String name){
+        String query = "insert into medium_types(name) values('"+name+"')";
+        try(Connection connection = conn.getConnection();
+            Statement stmt = connection.createStatement();
+        ){
+            int result = stmt.executeUpdate(query);
+
+            if(result>0) System.out.println("success to insert medium_types");
+            else System.out.println("fail to insert medium_types");
+
+        }catch (SQLException e){
+
+        }
+    }
+    //해당 배양액에 해당하는 모든 기준값도 저장해야함 -> 이거 파일 넣으면 db 들어가도록?
 }
