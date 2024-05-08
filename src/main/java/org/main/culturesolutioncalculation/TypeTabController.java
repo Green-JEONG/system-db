@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 public class TypeTabController {
 
+    private TypeData data;
+
     @FXML
     private Tab typeTab;
 
@@ -43,12 +45,25 @@ public class TypeTabController {
 
         });
 
-        //table view 리스너 추가
+        // TableView 리스너 추가
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                // 배열의 첫 번째 요소 접근
-                selectedCropName = newSelection[0];
+                System.out.println("Selected item: " + newSelection[1]); // CropName 출력
+                System.out.println("Selected item ID: " + newSelection[0]); // ID 출력 (culture_medium에 있는 튜플 id와 동일)
+                selectedCropName = newSelection[1];
                 System.out.println("Selected first item: " + selectedCropName);
+                comboBox.setValue(selectedCropName);
+            }
+        });
+
+        // ComboBox 리스너 추가
+        comboBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null && !newValue.isEmpty()) {
+                selectedCropName = newValue;
+                tableView.getItems().stream()
+                        .filter(item -> item[1].equals(newValue))  // 첫 번째 값은 CropName
+                        .findFirst()
+                        .ifPresent(item -> tableView.getSelectionModel().select(item));
             }
         });
 
@@ -70,10 +85,24 @@ public class TypeTabController {
 
         if(userInfo != null) {
             userInfo.setSelectedCulture(listView.getSelectionModel().getSelectedItem());
+            String selectedComboBoxValue = comboBox.getValue();
+            String[] selectedItem = tableView.getSelectionModel().getSelectedItem();
 
-            //userInfo.setSelectedCrop(comboBox.getValue());
+            if (selectedComboBoxValue != null && !selectedComboBoxValue.isEmpty()) {
+                userInfo.setSelectedCrop(selectedComboBoxValue);
+            } else if (selectedCropName != null && !selectedCropName.isEmpty()) {
+                userInfo.setSelectedCrop(selectedCropName);
+            } else {
+                System.err.println("ComboBox 값과 selectedCropName 값이 모두 설정되지 않았습니다.");
+            }
 
-            userInfo.setSelectedCrop(selectedCropName);
+            //선택한 재배 작물 id userInfo에 주입
+            if (selectedItem != null) {
+                int selectedItemId = Integer.parseInt(selectedItem[0]);
+                userInfo.setCultureMediumId(selectedItemId); //(culture_medium에 있는 튜플 id와 동일)
+            } else {
+                System.err.println("TableView에서 선택된 항목이 없습니다.");
+            }
 
             tabPane.getSelectionModel().select(currentIndex + 1);
         } else {
@@ -82,19 +111,25 @@ public class TypeTabController {
     }
 
     private void updateComboBox(String newValue) {
-        ObservableList<String> cropList = TypeData.getCropList(newValue);
+        //ObservableList<String> cropList = TypeData.getCropList(newValue);
+        data = new TypeData();
+        ObservableList<String> cropList = data.getCropList(newValue);
+
         comboBox.setItems(cropList);
 
     }
 
     private void updateTableView(String newValue) {
-        ObservableList<String[]> compositionData = TypeData.getCompositionData(newValue);
+        //ObservableList<String[]> compositionData = TypeData.getCompositionData(newValue);
+
+        data  = new TypeData();
+        ObservableList<String[]> compositionData = data.getMediumTypeData(newValue);
 
         // 테이블 뷰에 컬럼 추가
         tableView.getColumns().clear();
         if (!compositionData.isEmpty()) {
             String[] headers = compositionData.remove(0); // 첫 번째 배열은 헤더
-            for (int i = 0; i < headers.length; i++) {
+            for (int i = 1; i < headers.length; i++) {
                 final int index = i;
                 TableColumn<String[], String> column = new TableColumn<>(headers[i]);
                 column.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()[index]));
@@ -104,4 +139,5 @@ public class TypeTabController {
 
         tableView.setItems(compositionData);
     }
+
 }

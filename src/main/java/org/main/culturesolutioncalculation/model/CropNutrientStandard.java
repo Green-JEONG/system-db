@@ -3,6 +3,7 @@ package org.main.culturesolutioncalculation.model;
 
 // 작물 배양액과 기준값
 public class CropNutrientStandard {
+    private final int id;
     private final  String cropName;
     private final String nutrientSolutionName;
     private final double EC;      // 전기전도도 (dS•m-1)
@@ -20,7 +21,8 @@ public class CropNutrientStandard {
     private final double Zn;      // 미량 아연 이온 (µmol/L)
     private final double Mo;     // 미량 몰리브덴 이온 (µmol/L)
 
-    public CropNutrientStandard(String cropName, String nutrientSolutionName, double EC, double NO3, double NH4, double H2PO4, double K, double Ca, double Mg, double SO4, double Fe, double Cu, double B, double Mn, double Zn, double Mo) {
+    public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double NO3, double NH4, double H2PO4, double K, double Ca, double Mg, double SO4, double Fe, double Cu, double B, double Mn, double Zn, double Mo) {
+        this.id = id;
         this.cropName = cropName;
         this.nutrientSolutionName = nutrientSolutionName;
         this.EC = EC;
@@ -39,6 +41,7 @@ public class CropNutrientStandard {
         this.Mo = Mo;
     }
 
+    public int getId(){return id;}
 
     public String getCropName() {
         return cropName;

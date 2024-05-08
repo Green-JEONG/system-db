@@ -43,6 +43,8 @@ public class EmbodyPrint implements Print{
     private MediumService mediumService;
     private String pdfName;
     private String mediumType;
+
+    private CropNutrientStandard cropNutrients;
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
 
@@ -72,7 +74,9 @@ public class EmbodyPrint implements Print{
     public void setRequestHistory(){
         mediumType = requestHistoryService.getMediumType(requestHistory);
 
+        cropNutrients = mediumService.getCropData(requestHistory.getCulture_medium_id()).get();
     }
+
 
     @Override
     public void setMacroMolecularMass() {
@@ -316,7 +320,6 @@ public class EmbodyPrint implements Print{
     private String getTable(String htmlStr) {
         htmlStr += "<table>" ;
 
-        CropNutrientStandard cropNutrients = getCropNutrients();
         htmlStr += getMacro(cropNutrients);
         htmlStr += getMicro(cropNutrients);
 
@@ -340,12 +343,6 @@ public class EmbodyPrint implements Print{
 //        return cropNutrients.get();
 //    }
 
-    //#TODO - 이 함수 테스트 수행할것 - DB에서 읽어오는거
-    private CropNutrientStandard getCropNutrients(){
-        Optional<CropNutrientStandard> cultureMediumData = mediumService.getCultureMediumData(mediumType);
-        if(cultureMediumData.isEmpty()) throw new NoSuchElementException("해당 데이터 기준값이 존재하지 않습니다.");
-        return cultureMediumData.get();
-    }
 
     private String getMicro(CropNutrientStandard cropNutrientStandard) {
         String Html =

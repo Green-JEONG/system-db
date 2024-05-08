@@ -20,13 +20,12 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
-
-
             initStage(stage);
-            Connection conn = DatabaseConnector.getInstance(url, user, password).getConnection();
+            // DatabaseConnector 인스턴스를 초기화
+            DatabaseConnector connector = DatabaseConnector.getInstance(url, user, password);
 
-            //종료 시 DB 연결 해제
-            stage.setOnCloseRequest(e -> DatabaseConnector.disconnect(conn));
+            // 종료 시 커넥션 풀도 함께 종료
+            stage.setOnCloseRequest(e -> DatabaseConnector.close());
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -5,6 +5,9 @@ module org.main.culturesolutioncalculation {
     requires com.opencsv;
     //requires itextpdf;
     //requires xmlworker;
+    //requires itextpdf;
+    //requires xmlworker;
+    requires com.zaxxer.hikari;
 
 
 

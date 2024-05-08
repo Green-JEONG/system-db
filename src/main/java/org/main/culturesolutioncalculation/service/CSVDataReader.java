@@ -76,6 +76,8 @@ public class CSVDataReader {
 
             String[] row = csvReader.readNext();
             while (row != null){
+                int i = 1;
+                int id = i;
                 String name = row[0];
                 double EC = Double.parseDouble(row[1]);
                 double NO3 = Double.parseDouble(row[2]);
@@ -91,8 +93,9 @@ public class CSVDataReader {
                 double Mn = Double.parseDouble(row[12]);
                 double Zn = Double.parseDouble(row[13]);
                 double Mo = Double.parseDouble(row[14]);
-                crops.add(new CropNutrientStandard(name, fileName,EC,NO3,NH4,H2PO4,K,Ca,Mg,SO4,Fe,Cu,B,Mn,Zn,Mo));
+                crops.add(new CropNutrientStandard(id, name, fileName,EC,NO3,NH4,H2PO4,K,Ca,Mg,SO4,Fe,Cu,B,Mn,Zn,Mo));
                 row = csvReader.readNext();
+                i++;
             }
 
         } catch (IOException | CsvException e) {

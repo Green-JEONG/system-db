@@ -20,13 +20,17 @@ import javafx.util.converter.DefaultStringConverter;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
 import org.main.culturesolutioncalculation.model.NutrientSolution;
 import org.main.culturesolutioncalculation.service.CSVDataReader;
+import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class MacroTabController {
 
     MainController mainController;
+
+    MediumService mediumService;
     UserInfo userInfo = mainController.getUserInfo();
 
     @FXML
@@ -95,10 +99,6 @@ public class MacroTabController {
         tableView = new TableView<>();
         data.clear();
 
-        
-        System.out.println("userInfo = " + userInfo.getSelectedCrop());
-
-
 
         String[] values = getStandardValues(userInfo.getSelectedCulture(), userInfo.getSelectedCrop());
 
@@ -141,21 +141,19 @@ public class MacroTabController {
 
     private String[] getStandardValues(String culture, String crop) {
 
-        //crop = "딸기(순)";
+
         System.out.println("culture = " + culture);
         System.out.println("crop = " + crop);
+
+
 
         String[] values = new String[7];
 
         // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
-        CSVDataReader csvDataReader = new CSVDataReader();
+        mediumService = new MediumService();
+        Optional<CropNutrientStandard> cropData = mediumService.getCropData(userInfo.getCultureMediumId());
+        CropNutrientStandard selectedCropNutrient = cropData.get();
 
-        System.out.println(culture);
-        NutrientSolution nutrientSolution = csvDataReader.readFile(culture);
-
-        ArrayList<CropNutrientStandard> cropList = nutrientSolution.getCropList();
-
-        CropNutrientStandard selectedCropNutrient = findCropNutrient(cropList, crop);
 
         if (selectedCropNutrient == null) {
             // 선택한 작물에 해당하는 정보가 없는 경우 처리

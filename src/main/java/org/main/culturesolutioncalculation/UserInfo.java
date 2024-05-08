@@ -14,12 +14,22 @@ public class UserInfo {
     private LocalDate processingDate;
     // 재배규모
     private String scale;
+
     // 배양액 종류
     private String selectedCulture;
 
     // 재배 작물
     private String selectedCrop;
 
+    //선택한 culture_medum의 id
+    private int cultureMediumId;
+
+    public void setCultureMediumId(int id){
+        this.cultureMediumId = id;
+    }
+    public int getCultureMediumId(){
+        return cultureMediumId;
+    }
 
     public UserInfo() {
     }
