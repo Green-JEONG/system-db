@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class TypeTabController {
 
@@ -23,6 +24,8 @@ public class TypeTabController {
 
     private UserInfo userInfo = MainController.getUserInfo();
 
+    private String selectedCropName = "";
+
     public TypeTabController() throws IOException {
     }
 
@@ -39,6 +42,16 @@ public class TypeTabController {
             updateTableView(newValue);
 
         });
+
+        //table view 리스너 추가
+        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                // 배열의 첫 번째 요소 접근
+                selectedCropName = newSelection[0];
+                System.out.println("Selected first item: " + selectedCropName);
+            }
+        });
+
     }
 
     @FXML
@@ -57,7 +70,10 @@ public class TypeTabController {
 
         if(userInfo != null) {
             userInfo.setSelectedCulture(listView.getSelectionModel().getSelectedItem());
-            userInfo.setSelectedCrop(comboBox.getValue());
+
+            //userInfo.setSelectedCrop(comboBox.getValue());
+
+            userInfo.setSelectedCrop(selectedCropName);
 
             tabPane.getSelectionModel().select(currentIndex + 1);
         } else {

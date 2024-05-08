@@ -20,13 +20,12 @@ public class UserService {
     //TODO 유저가 db에 있으면 유저 아이디 뱉고, db에 없으면 null반환
     public boolean findByUser(Users users){ //유저가 db에 있으면 true, 없으면 false
 
-        String preQuery = "select * from users u where u.name = ? and u.address = ? and u.contact = ?";
+        String preQuery = "select * from users u where u.contact = ?";
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(preQuery);
         ){
-            pstmt.setString(1, users.getName());
-            pstmt.setString(2, users.getAddress());
-            pstmt.setString(3, users.getContact());
+
+            pstmt.setString(1, users.getContact());
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -42,8 +41,7 @@ public class UserService {
     public void save(Users users){
         //이미 유저가 존재하면 user는 세이브 안하고 분석 기록 튜플 하나 생성
         if(findByUser(users)){
-            //유저 아이디
-            String query = "insert into requestHistory ";
+            return;
         }
         else {
             String query = "insert into users (name, address, contact) " +
@@ -63,28 +61,29 @@ public class UserService {
     }
 
 
+// 분석 기록 조회 RequestHistoryService에 있는 걸로 쓰는게 나을듯
+//    public Map<Integer, Timestamp> findRequestHistories(Users users){
+//        String query = "select id, request_date from requestHistory where user_id = ?";
+//        Map<Integer, Timestamp> requestHistory = new LinkedHashMap<>();
+//
+//        try(Connection connection = conn.getConnection();
+//            PreparedStatement pstmt = connection.prepareStatement(query)){
+//
+//            pstmt.setInt(1, users.getId());
+//
+//            try(ResultSet resultSet = pstmt.executeQuery()){
+//                while(resultSet.next()){
+//                    requestHistory
+//                            .put(resultSet.getInt("id"), resultSet.getTimestamp("request_date"));
+//                }
+//                return requestHistory;
+//            }catch (SQLException e){
+//                e.printStackTrace();
+//            }
+//
+//        }catch (SQLException e){
+//        }
+//        return requestHistory;
+//    }
 
-    public Map<Integer, Timestamp> findRequestHistory(Users users){
-        String query = "select id, request_date from requestHistory where user_id = ?";
-        Map<Integer, Timestamp> requestHistory = new LinkedHashMap<>();
-
-        try(Connection connection = conn.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)){
-
-            pstmt.setInt(1, users.getId());
-
-            try(ResultSet resultSet = pstmt.executeQuery()){
-                while(resultSet.next()){
-                    requestHistory
-                            .put(resultSet.getInt("id"),resultSet.getTimestamp("request_date"));
-                }
-                return requestHistory;
-            }catch (SQLException e){
-                e.printStackTrace();
-            }
-
-        }catch (SQLException e){
-        }
-        return requestHistory;
-    }
 }

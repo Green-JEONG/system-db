@@ -11,9 +11,11 @@ public class RequestHistoryService {
 
     private DatabaseConnector conn;
 
+    //분석 기록 저장
     public void save(RequestHistory requestHistory){
-        String query = "insert into requestHistory (request_date, user_id) values ("+
-                requestHistory.getRequest_date()+", "+requestHistory.getUser_id()+")";
+        String query = "insert into requestHistory (request_date, user_id, request_date, cultivacion_scale) values ("+
+                requestHistory.getRequest_date()+", "+requestHistory.getUser_id()
+                +", "+requestHistory.getRequest_date()+", "+ requestHistory.cultivation_scale+")";
 
         try (Connection connection = conn.getConnection();
              Statement stmt = connection.createStatement();

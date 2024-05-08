@@ -95,6 +95,11 @@ public class MacroTabController {
         tableView = new TableView<>();
         data.clear();
 
+        
+        System.out.println("userInfo = " + userInfo.getSelectedCrop());
+
+
+
         String[] values = getStandardValues(userInfo.getSelectedCulture(), userInfo.getSelectedCrop());
 
         for (int i = 0; i < columnTitles.length; i++) {
@@ -137,6 +142,8 @@ public class MacroTabController {
     private String[] getStandardValues(String culture, String crop) {
 
         //crop = "딸기(순)";
+        System.out.println("culture = " + culture);
+        System.out.println("crop = " + crop);
 
         String[] values = new String[7];
 

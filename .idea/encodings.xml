@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding" defaultCharsetForPropertiesFiles="EUC-KR">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/calculator/CallStrategy.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/calculator/MacroCalculationStrategy.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/calculator/MicroCalculationStrategy.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/print/AbstractPrint.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/print/EmbodyPrint.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/requestHistory/RequestHistoryService.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/org/main/culturesolutioncalculation/service/testing/Calculator.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/org/main/culturesolutioncalculation/data/네덜란드 배양액.txt" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/java/AbstractPrintTest.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/java/EmbodyPrintStrategyTest.java" charset="UTF-8" />
