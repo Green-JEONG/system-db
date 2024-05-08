@@ -6,7 +6,7 @@ import java.util.*;
 
 /*
 
-TODO ÇÁ·ĞÆ®¿¡¼­ ¾Æ·¡¿Í °°Àº ¹æ½ÄÀ¸·Î strategy Àü´Ş
+TODO í”„ë¡ íŠ¸ì—ì„œ ì•„ë˜ì™€ ê°™ì€ ë°©ì‹ìœ¼ë¡œ strategy ì „ë‹¬
 
  */
 public class CallStrategy {
@@ -34,13 +34,13 @@ public class CallStrategy {
             put("SO4S", 0.0);
         }
     };
-    List<String> userMicroNutrients = new LinkedList<>(Arrays.asList("Fe-EDTA", "H3BO3", "MnSO4¡¤H2O", "Na2MoO4¡¤2H2O"));
+    List<String> userMicroNutrients = new LinkedList<>(Arrays.asList("Fe-EDTA", "H3BO3", "MnSO4Â·H2O", "Na2MoO4Â·2H2O"));
     private String unit = "ppm";
 
 
     public void callMicroStrategy(){
         CalculationStrategy strategy = new MicroCalculationStrategy(
-               new Users(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
+                new Users(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
         );
 
         CalculatorClient client = new CalculatorClient(strategy);
@@ -58,3 +58,4 @@ public class CallStrategy {
         client.save();
     }
 }
+

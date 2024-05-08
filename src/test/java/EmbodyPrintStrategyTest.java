@@ -1,5 +1,3 @@
-package org.main.culturesolutioncalculation.service.print;
-
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
@@ -18,30 +16,31 @@ import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
 import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
-import org.main.culturesolutioncalculation.service.database.MediumService;
-import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
-import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
 import org.main.culturesolutioncalculation.model.NutrientSolution;
 import org.main.culturesolutioncalculation.service.CSVDataReader;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
-import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class EmbodyPrint implements Print{
+public class EmbodyPrintStrategyTest {
 
-    private DatabaseConnector conn;
-    private CSVDataReader csvDataReader;
-    private RequestHistory requestHistory;
-    private RequestHistoryService requestHistoryService;
-    private MediumService mediumService;
-    private String pdfName;
-    private String mediumType;
+    private final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private final String user = "root";
+    private final String password = "root";
+    private Users users;
+
+    private Connection connection;
+
     private Map<String, FinalCal> MacroMolecularMass = new LinkedHashMap<>();
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
 
@@ -51,10 +50,17 @@ public class EmbodyPrint implements Print{
     private List<String> microNutrientList = Arrays.asList(
             "Fe","Cu","B","Mn","Zn","Mo"
     );
-
     private Map<String,  Double> MacroConsideredValues = new LinkedHashMap<>();
     private Map<String,  Double> MicroConsideredValues = new LinkedHashMap<>();
 
+    private int requestHistory_id = 1;
+
+
+    // 문자열을 LocalDateTime 객체로 파싱
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    LocalDateTime dateTime = LocalDateTime.parse("2024-04-03 21:08:48", formatter);
+
+    Timestamp requestDate = Timestamp.valueOf(dateTime);
 
     private Map<String, Double> MacroFertilization = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
     private Map<String, Double> MicroFertilization = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
@@ -62,27 +68,93 @@ public class EmbodyPrint implements Print{
     분석 기록에 들어가야 할 정보들 :
     사용자 이름, 분석 날짜, 재배 작물, 배양액 종류(네덜란드, 야마자키:이건 프론트에서 받아오기로)
      */
-    private Users users;
 
-    public EmbodyPrint(Users users, RequestHistory requestHistory){
-        this.users = users;
-        this.requestHistory = requestHistory;
-    }
-    public void setRequestHistory(){
-        mediumType = requestHistoryService.getMediumType(requestHistory);
+
+    @BeforeEach
+    void connection() throws SQLException {
+        this.connection = DriverManager.getConnection(url, user, password);
 
     }
 
-    @Override
+
+    //@BeforeEach
+    public void setUsers(){
+        String query = "select * from users where id = 1";
+        try(Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+        ){
+            while(resultSet.next()){
+                int userId = resultSet.getInt("id");
+                String userName = resultSet.getString("name");
+                String address = resultSet.getString("address");
+                String contact = resultSet.getString("contact");
+
+
+                users = new Users(userId, userName,address, contact);
+
+                System.out.println("users.getName() = " + users.getName());
+
+
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void insertRequestHistory(){
+        requestDate = Timestamp.from(Instant.from(Instant.now()));
+        int users_id = users.getId();
+        String query = "insert into requestHistory (request_date, users_id) values ('"+requestDate+"', "+users_id+")";
+        try (
+                PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                System.out.println("insert success in requestHistory");
+                // 생성된 pk get
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        requestHistory_id = generatedKeys.getInt(1); // 생성된 ID
+                        System.out.println("Generated Request ID: " + requestHistory_id);
+                    } else {
+                        System.out.println("No ID was generated.");
+                    }
+                }
+
+            } else System.out.println("insert fail in requestHistory");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @BeforeEach
+    void setUp(){
+        setUsers();
+        //원수 고려값 세팅
+        setMacroConsideredValue();
+        setMicroConsideredValue();
+        //처방 농도 세팅
+        setMacroFertilization();
+        setMicroFertilization();
+        //100배액 세팅
+        setMacroMolecularMass();
+        setMicroMolecularMass();
+        //유저 정보에 따른 PDF 세팅
+        setPdfName();
+    }
+
+
     public void setMacroMolecularMass() {
         String query = "SELECT um.* FROM users_macro_calculatedMass um " +
                 "WHERE um.requestHistory_id = ?";
 
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (
+                PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -100,16 +172,16 @@ public class EmbodyPrint implements Print{
         }
     }
 
-    @Override
+
     public void setMicroMolecularMass() {
         String query = "SELECT um.* FROM users_micro_calculatedMass um " +
                 "WHERE um.requestHistory_id = ?";
 
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (
+                PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -130,10 +202,10 @@ public class EmbodyPrint implements Print{
         String query = "select um.* from users_macro_fertilization um " +
                 "where um.requestHistory_id = ?";
 
-        try(Connection connection = conn.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)){
+        try(
+                PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -151,10 +223,10 @@ public class EmbodyPrint implements Print{
         String query = "select um.* from users_micro_fertilization um " +
                 "where um.requestHistory_id = ?";
 
-        try(Connection connection = conn.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)){
+        try(
+                PreparedStatement pstmt = connection.prepareStatement(query)){
 
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
@@ -172,11 +244,11 @@ public class EmbodyPrint implements Print{
     public void setMacroConsideredValue(){
         String query = "SELECT um.* FROM users_macro_consideredValues um " +
                 "WHERE um.requestHistory_id = ?";
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (
+                PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -195,11 +267,11 @@ public class EmbodyPrint implements Print{
     public void setMicroConsideredValue(){
         String query = "SELECT um.* FROM users_micro_consideredValues um " +
                 "WHERE um.requestHistory_id = ?";
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (
+                PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             // 파라미터 바인딩
-            pstmt.setInt(1, requestHistory.getId());
+            pstmt.setInt(1, requestHistory_id);
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 // 결과 처리
@@ -215,41 +287,30 @@ public class EmbodyPrint implements Print{
         }
     }
 
-    @Override
+
     public String getUserInfo() {
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+requestHistory.getRequest_date()+"</p>" +
-                        "<p>재배 작물: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
-                        "<p>배양액 종류: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
+                        "<p>의뢰 일시: "+requestDate+"</p>" +
+//                        "<p>재배 작물: "+users.getCropName()+"</p>" +
+//                        "<p>배양액 종류: "+users.getMediumType()+"</p>" +
                         "<br></br><br></br><br></br> ";
     }
+    public String pdfName;
     public void setPdfName() {
-
-        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_분석 기록";
+        //this.pdfName = users.getName()+"_"+users.getRequestDate()+"_"+users.getCropName()+".pdf";
+        this.pdfName = "embodyPrintTest.pdf";
     }
+
     public String getPdfName() {
         return pdfName;
     }
-    public void setUp(){
-        //분석 기록에서 필요한 값 세팅
-        setRequestHistory();
-        //원수 고려값 세팅
-        setMacroConsideredValue();
-        setMicroConsideredValue();
-        //처방 농도 세팅
-        setMacroFertilization();
-        setMicroFertilization();
-        //100배액 세팅
-        setMacroMolecularMass();
-        setMicroMolecularMass();
-        //유저 정보에 따른 PDF 세팅
-        setPdfName();
-    }
 
-    @Override
+
+    @Test
     public void getPDF() {
 
+        //setUp();
 
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         try{
@@ -300,20 +361,26 @@ public class EmbodyPrint implements Print{
         }
     }
 
-    @Override
+
     public String getAllHtmlStr() {
 
         String htmlStr = "<html><head></head><body style='font-family: MalgunGothic;'> " +
                 "<h1>배양액 분석 기록 보고서</h1><br></br><hr> </hr>";
 
+        //사용자 정보
         htmlStr += getUserInfo();
-        htmlStr += getTable(htmlStr);
+        //테이블 정보
+        htmlStr += getTable();
+        //html 문서 마무리K
+        htmlStr += "</body></html>";
+
+        System.out.println("htmlStr = " + htmlStr);
 
         return htmlStr;
     }
 
-    private String getTable(String htmlStr) {
-        htmlStr += "<table>" ;
+    private String getTable() {
+        String htmlStr = "<table style='width: 100%; margin-bottom: 20px;'>";
 
         CropNutrientStandard cropNutrients = getCropNutrients();
         htmlStr += getMacro(cropNutrients);
@@ -323,27 +390,22 @@ public class EmbodyPrint implements Print{
         htmlStr += getSolution("B");
         htmlStr += getSolution("C");
 
+        htmlStr += "</table>";
+
         return htmlStr;
     }
 
 
-    //#TODO - 기존 csv에서 읽던 것을 db에서 읽도록 전체 수정해야 함
-//    private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
-//
-//        csvDataReader = new CSVDataReader();
-//        NutrientSolution nutrientSolution = csvDataReader.readFile(users.getMediumType()); //네덜란드, 야마자키 등
-//        ArrayList<CropNutrientStandard> cropList = nutrientSolution.getCropList();
-//        Optional<CropNutrientStandard> cropNutrients = cropList.stream().filter(c -> c.getCropName().equals(users.getCropName()))
-//                .findFirst();
-//
-//        return cropNutrients.get();
-//    }
+    private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
 
-    //#TODO - 이 함수 테스트 수행할것 - DB에서 읽어오는거
-    private CropNutrientStandard getCropNutrients(){
-        Optional<CropNutrientStandard> cultureMediumData = mediumService.getCultureMediumData(mediumType);
-        if(cultureMediumData.isEmpty()) throw new NoSuchElementException("해당 데이터 기준값이 존재하지 않습니다.");
-        return cultureMediumData.get();
+        CSVDataReader csvDataReader = new CSVDataReader();
+        //NutrientSolution nutrientSolution = csvDataReader.readFile(users.getMediumType()); //네덜란드, 야마자키 등
+        NutrientSolution nutrientSolution = csvDataReader.readFile("네덜란드 배양액"); //네덜란드, 야마자키 등
+        ArrayList<CropNutrientStandard> cropList = nutrientSolution.getCropList();
+        Optional<CropNutrientStandard> cropNutrients = cropList.stream().filter(c -> c.getCropName().equals("딸기(순)"))
+                .findFirst();
+
+        return cropNutrients.get();
     }
 
     private String getMicro(CropNutrientStandard cropNutrientStandard) {
@@ -402,13 +464,13 @@ public class EmbodyPrint implements Print{
         String Html =
                 "<tr>"+
                         "<th class=\"category\">다량원소</th>" +
-                        "<th colspan=\"2\">Ca</th>" +
-                        "<th colspan=\"2\">NO3N</th>" +
-                        "<th colspan=\"2\">NH4N</th>" +
-                        "<th colspan=\"2\">K</th>" +
-                        "<th colspan=\"2\">H2PO4</th>" +
-                        "<th colspan=\"2\">SO4</th>" +
-                        "<th colspan=\"2\">Mg</th>" +
+                        "<th>Ca</th>" +
+                        "<th>NO3N</th>" +
+                        "<th>NH4N</th>" +
+                        "<th>K</th>" +
+                        "<th>H2PO4</th>" +
+                        "<th>SO4</th>" +
+                        "<th>Mg</th>" +
                         "</tr>";
 
         //다량원소 기준량
@@ -427,11 +489,11 @@ public class EmbodyPrint implements Print{
         Html += "<tr>"+
                 "<td class=\"name\">원수성분</td>" +
                 "<td class=\"value\">"+MacroConsideredValues.get("Ca") +"</td>"+
-                "<td class=\"value\">"+MacroConsideredValues.get("NO3") +"</td>"+
-                "<td class=\"value\">"+MacroConsideredValues.get("NH4")+"</td>"+
+                "<td class=\"value\">"+MacroConsideredValues.get("NO3N") +"</td>"+
+                "<td class=\"value\">"+MacroConsideredValues.get("NH4N")+"</td>"+
                 "<td class=\"value\">"+MacroConsideredValues.get("K") +"</td>"+
                 "<td class=\"value\">"+MacroConsideredValues.get("H2PO4") +"</td>"+
-                "<td class=\"value\">"+MacroConsideredValues.get("SO4")+"</td>"+
+                "<td class=\"value\">"+MacroConsideredValues.get("SO4S")+"</td>"+
                 "<td class=\"value\">"+MacroConsideredValues.get("Mg")+"</td>"+
                 "</tr>";
 
@@ -439,11 +501,11 @@ public class EmbodyPrint implements Print{
         Html += "<tr>"+
                 "<td class=\"name\">처방농도</td>" +
                 "<td class=\"value\">"+MacroFertilization.get("Ca") +"</td>"+
-                "<td class=\"value\">"+MacroFertilization.get("NO3") +"</td>"+
-                "<td class=\"value\">"+MacroFertilization.get("NH4")+"</td>"+
+                "<td class=\"value\">"+MacroFertilization.get("NO3N") +"</td>"+
+                "<td class=\"value\">"+MacroFertilization.get("NH4N")+"</td>"+
                 "<td class=\"value\">"+MacroFertilization.get("K") +"</td>"+
                 "<td class=\"value\">"+MacroFertilization.get("H2PO4") +"</td>"+
-                "<td class=\"value\">"+MacroFertilization.get("SO4")+"</td>"+
+                "<td class=\"value\">"+MacroFertilization.get("SO4S")+"</td>"+
                 "<td class=\"value\">"+MacroFertilization.get("Mg")+"</td>"+
                 "</tr>";
 
@@ -490,4 +552,6 @@ public class EmbodyPrint implements Print{
         return Html;
 
     }
+
+
 }

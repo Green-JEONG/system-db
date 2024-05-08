@@ -20,6 +20,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
+
+
             initStage(stage);
             Connection conn = DatabaseConnector.getInstance(url, user, password).getConnection();
 
@@ -46,7 +48,13 @@ public class Main extends Application {
         //resources/org/main/culturesolutioncalculation/Main.fxml
         //Parent root = FXMLLoader.load(Main.class.getResource("Main.fxml"));
 
-        Parent root = FXMLLoader.load(Main.class.getResource("/org/main/culturesolutioncalculation/Main.fxml"));
+        URL url = Main.class.getResource("/org/main/culturesolutioncalculation/Main.fxml");
+        if (url == null) {
+            throw new RuntimeException("Resource not found: Main.fxml");
+        }
+        FXMLLoader loader = new FXMLLoader(url);
+        Parent root = loader.load();
+
         if (root == null) {
             throw new FileNotFoundException("FXML file not found");
         }

@@ -13,12 +13,12 @@ public class CallPrint {
     int requestHistory_id = 1;
     public void testPrint(){
         //Print print = new EmbodyPrint(new Users(), requestHistory_id, requestDate);
-        Print print = new AbstractPrint(new Users(), requestHistory);
-
-        PrintClient client = new PrintClient(print);
-
-        client.setUp();
-
-        client.getPDF();
+//        Print print = new AbstractPrint(new Users(), requestHistory);
+//
+//        PrintClient client = new PrintClient(print);
+//
+//        client.setUp();
+//
+//        client.getPDF();
     }
 }

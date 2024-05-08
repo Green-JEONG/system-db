@@ -41,6 +41,3 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-test/
-test.pdf
-embodyPrintTest.pdf

@@ -26,19 +26,19 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
 
-    Map<String, Map<String, Double>> distributedValues = new LinkedHashMap<>(); //ÇÁ·ĞÆ®¿¡¼­ º¸¿©Áö´Â ÀÚµ¿ °è»ê °á°ú
+    Map<String, Map<String, Double>> distributedValues = new LinkedHashMap<>(); //í”„ë¡ íŠ¸ì—ì„œ ë³´ì—¬ì§€ëŠ” ìë™ ê³„ì‚° ê²°ê³¼
 
     private Map<String, FinalCal> molecularMass =  new LinkedHashMap<>();
 
-    //1. ±âÁØ°ª - ÇÁ·ĞÆ®¿¡¼­ ³Ñ¾î¿È
+    //1. ê¸°ì¤€ê°’ - í”„ë¡ íŠ¸ì—ì„œ ë„˜ì–´ì˜´
     //private Map<String, Double> standardValues = new LinkedHashMap<>();
-    //2. ¿ø¼ö °í·Á°ª - ÇÁ·ĞÆ®¿¡¼­ ³Ñ¾î¿È
+    //2. ì›ìˆ˜ ê³ ë ¤ê°’ - í”„ë¡ íŠ¸ì—ì„œ ë„˜ì–´ì˜´
     private Map<String, Double> consideredValues = new LinkedHashMap<>();
 
-    //3. Ã³¹æ °ª. ³Ñ¾î¿Í¾ß ÇÒ Ã³¹æ ³óµµ ¾ç½Ä ¿¹½Ã - ¼ø¼­ ±×´ë·Î À¯ÁöµÇ¾î¾ß ÇÔ (±âÁØ°ª - ¿ø¼ö°í·Á°ª)
-    private Map<String, Double> userFertilization = new LinkedHashMap<>(); //db¿¡ ÀúÀåµÇ¾î¾ß ÇÒ Ã³¹æ ³óµµ (°è»ê ¼öÇà X)
-    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //°è»ê ¼öÇàÇÒ Ã³¹æ ³óµµ
-//    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
+    //3. ì²˜ë°© ê°’. ë„˜ì–´ì™€ì•¼ í•  ì²˜ë°© ë†ë„ ì–‘ì‹ ì˜ˆì‹œ - ìˆœì„œ ê·¸ëŒ€ë¡œ ìœ ì§€ë˜ì–´ì•¼ í•¨ (ê¸°ì¤€ê°’ - ì›ìˆ˜ê³ ë ¤ê°’)
+    private Map<String, Double> userFertilization = new LinkedHashMap<>(); //dbì— ì €ì¥ë˜ì–´ì•¼ í•  ì²˜ë°© ë†ë„ (ê³„ì‚° ìˆ˜í–‰ X)
+    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //ê³„ì‚° ìˆ˜í–‰í•  ì²˜ë°© ë†ë„
+    //    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
 //        {
 //            put("NO3N", 15.5);
 //            put("NH4N", 1.25);
@@ -62,24 +62,24 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     }
 
 
-    //ºĞÀÚ º° °®°í ÀÖ´Â ´Ù·® ¿ø¼Ò ºñÀ²À» °¡Á®¿È
-    private void getMajorCompoundRatio(boolean is4){ //4¼ö¿°ÀÎÁö 10¼ö¿°ÀÎÁö¸¦ ÆÇ´ÜÇÏ´Â ÆÄ¶ó¹ÌÅÍ
+    //ë¶„ì ë³„ ê°–ê³  ìˆëŠ” ë‹¤ëŸ‰ ì›ì†Œ ë¹„ìœ¨ì„ ê°€ì ¸ì˜´
+    private void getMajorCompoundRatio(boolean is4){ //4ìˆ˜ì—¼ì¸ì§€ 10ìˆ˜ì—¼ì¸ì§€ë¥¼ íŒë‹¨í•˜ëŠ” íŒŒë¼ë¯¸í„°
 
         String query = "select * from macronutrients";
-        query += is4? " where id != 2" : " where id != 1"; //id=1 : Áú»êÄ®½·4¼ö¿°, id=2 : Áú»êÄ®½·10¼ö¿°
+        query += is4? " where id != 2" : " where id != 1"; //id=1 : ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼, id=2 : ì§ˆì‚°ì¹¼ìŠ˜10ìˆ˜ì—¼
 
         try (Connection connection = conn.getConnection();
              Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery(query);) {
 
             while(resultSet.next()){
-                String macro = resultSet.getString("macro"); //Áú»êÄ®½·4¼ö¿°, Áú»êÄ®·ı, Áú»ê¾Ï¸ğ´½ µîµî
-                String solution = resultSet.getString("solution"); //¾ç¾× Å¸ÀÔ (A,B, C)
-                double mass = resultSet.getDouble("mass");//È­ÇÕ¹° Áú·®
+                String macro = resultSet.getString("macro"); //ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼, ì§ˆì‚°ì¹¼ë¥¨, ì§ˆì‚°ì•”ëª¨ëŠ„ ë“±ë“±
+                String solution = resultSet.getString("solution"); //ì–‘ì•¡ íƒ€ì… (A,B, C)
+                double mass = resultSet.getDouble("mass");//í™”í•©ë¬¼ ì§ˆëŸ‰
 
-                molecularMass.put(macro, new FinalCal(solution, mass)); //100¹è¾× °è»êÀ» À§ÇØ È­ÇÕ¹°°ú ±× Áú·® ÀúÀå
+                molecularMass.put(macro, new FinalCal(solution, mass)); //100ë°°ì•¡ ê³„ì‚°ì„ ìœ„í•´ í™”í•©ë¬¼ê³¼ ê·¸ ì§ˆëŸ‰ ì €ì¥
 
-                Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. Áú»êÄ®½·4¼ö¿°ÀÌ °®´Â ¿ø¼öÀÇ ÀÌ¸§°ú Áú·®ºñ¸¦ °®´Â map
+                Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼ì´ ê°–ëŠ” ì›ìˆ˜ì˜ ì´ë¦„ê³¼ ì§ˆëŸ‰ë¹„ë¥¼ ê°–ëŠ” map
                 for (String major : userFertilization.keySet()) {
                     if(resultSet.getDouble(major) != 0){
                         compoundRatio.put(major,resultSet.getDouble(major));
@@ -92,7 +92,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
     }
     //===========================================================================TODO=================
-    //ÀÚµ¿ °è»ê ½Ã ÇÁ·ĞÆ®¿¡ º¸¿©Áö´Â ºĞ¹èµÈ °ª
+    //ìë™ ê³„ì‚° ì‹œ í”„ë¡ íŠ¸ì— ë³´ì—¬ì§€ëŠ” ë¶„ë°°ëœ ê°’
     public Map<String, Map<String, Double>> calculateDistributedValues() {
 
         for (String compound : compoundsRatio.keySet()) {
@@ -101,7 +101,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
         return distributedValues;
     }
-    //È­ÇÕ¹°¿¡ Æ÷ÇÔµÈ ¿ø¼ö Áú·®ºñ¿¡ µû¸¥ ºĞ»ê °è»ê
+    //í™”í•©ë¬¼ì— í¬í•¨ëœ ì›ìˆ˜ ì§ˆëŸ‰ë¹„ì— ë”°ë¥¸ ë¶„ì‚° ê³„ì‚°
     private Map<String, Double> calculateCompoundDistribution(String compound, Map<String, Double> calFertilization) {
         double minRatioValue = calculateMinimumRatioForCompound(compound, calFertilization);
         Map<String, Double> compoundDistribution = new LinkedHashMap<>();
@@ -115,34 +115,34 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         updateMolecularMass(compound, minRatioValue);
         return compoundDistribution;
     }
-    //È­ÇÕ¹°¿¡ Æ÷ÇÔµÈ ¿ø¼ö¿¡ ´ëÇØ ÃÖ¼Ò ºñÀ² °ª °è»ê
+    //í™”í•©ë¬¼ì— í¬í•¨ëœ ì›ìˆ˜ì— ëŒ€í•´ ìµœì†Œ ë¹„ìœ¨ ê°’ ê³„ì‚°
     private double calculateMinimumRatioForCompound(String compound, Map<String, Double> calFertilization) {
         double minRatioValue = Double.MAX_VALUE;
 
-        for (String nutrient : compoundsRatio.get(compound).keySet()) { //ÇØ´ç È­ÇÕ¹°ÀÇ ¿ø¼ö
-            double availableAmount = userFertilization.get(nutrient); //ÇØ´ç ¿ø¼öÀÇ Ã³¹æ ³óµµ
-            double ratio = compoundsRatio.get(compound).get(nutrient); //ÇØ´ç ¿ø¼öÀÇ È­ÇÕ¹° Ã·°¡ ºñÀ²
+        for (String nutrient : compoundsRatio.get(compound).keySet()) { //í•´ë‹¹ í™”í•©ë¬¼ì˜ ì›ìˆ˜
+            double availableAmount = userFertilization.get(nutrient); //í•´ë‹¹ ì›ìˆ˜ì˜ ì²˜ë°© ë†ë„
+            double ratio = compoundsRatio.get(compound).get(nutrient); //í•´ë‹¹ ì›ìˆ˜ì˜ í™”í•©ë¬¼ ì²¨ê°€ ë¹„ìœ¨
             double amountBasedOnRatio = availableAmount / ratio;
             minRatioValue = Math.min(minRatioValue, amountBasedOnRatio);
         }
 
         return minRatioValue;
     }
-    //ÃÖ¼Ò ºñÀ² °ªÀ» »ç¿ëÇØ ¿ø¼ö ¹è´ç·® °è»ê
+    //ìµœì†Œ ë¹„ìœ¨ ê°’ì„ ì‚¬ìš©í•´ ì›ìˆ˜ ë°°ë‹¹ëŸ‰ ê³„ì‚°
     private double calculateNutrientAllocation(String nutrient, String compound, double minRatioValue) {
         double ratio = compoundsRatio.get(compound).get(nutrient);
         return ratio * minRatioValue;
     }
-    //ÃÖÁ¾ °è»êµÈ ÃÖ¼Ò ºñÀ² °ª¿¡ µû¶ó È­ÇÕ¹° Áú·® ¾÷µ¥ÀÌÆ®
+    //ìµœì¢… ê³„ì‚°ëœ ìµœì†Œ ë¹„ìœ¨ ê°’ì— ë”°ë¼ í™”í•©ë¬¼ ì§ˆëŸ‰ ì—…ë°ì´íŠ¸
     private void updateMolecularMass(String compound, double minRatioValue) {
         double mass = molecularMass.get(compound).getMass();
         molecularMass.get(compound).setMass(minRatioValue * mass);
     }
 
-    //¿ø¼ö °í·Á ¿©ºÎ, Ã³¹æ ³óµµ, °í·Á ¿ø¼ö, ±âÁØ°ª -> db¿¡ ÀúÀåÇÏ´Â ÇÔ¼ö
+    //ì›ìˆ˜ ê³ ë ¤ ì—¬ë¶€, ì²˜ë°© ë†ë„, ê³ ë ¤ ì›ìˆ˜, ê¸°ì¤€ê°’ -> dbì— ì €ì¥í•˜ëŠ” í•¨ìˆ˜
     public void save(){
         insertIntoRequestHistory();
-        insertIntoUsersMacroConsideredValues(); //¿ø¼ö °í·Á °ª Å×ÀÌºí¿¡ ÀúÀå
+        insertIntoUsersMacroConsideredValues(); //ì›ìˆ˜ ê³ ë ¤ ê°’ í…Œì´ë¸”ì— ì €ì¥
         insertIntoUsersMacroFertilization();
         insertIntoUsersMacroCalculatedMass();
     }
@@ -156,10 +156,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             int result = pstmt.executeUpdate();
             if (result > 0) {
                 System.out.println("insert success in requestHistory");
-                // »ı¼ºµÈ pk get
+                // ìƒì„±ëœ pk get
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        requestHistory_id = generatedKeys.getInt(1); // »ı¼ºµÈ ID
+                        requestHistory_id = generatedKeys.getInt(1); // ìƒì„±ëœ ID
                         System.out.println("Generated Request ID: " + requestHistory_id);
                     } else {
                         System.out.println("No ID was generated.");
@@ -174,13 +174,13 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     }
 
-    //TODO - insert Å×½ºÆ®
+    //TODO - insert í…ŒìŠ¤íŠ¸
     private void insertIntoUsersMacroFertilization(){
         String query = "insert into users_macro_fertilization (user_id";
         for (String macro : userFertilization.keySet()) {
             query += ", "+macro;
         }
-        query += ", requestHistory_id) "; //¿©±â±îÁö query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
+        query += ", requestHistory_id) "; //ì—¬ê¸°ê¹Œì§€ query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
         query += "values (" + users.getId();
 
         for (String macro : userFertilization.keySet()) {
@@ -198,13 +198,13 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
     }
 
-//    private void insertIntoUsersMacroFertilization() { //°è»êµÈ Ã³¹æ°ª DB ÀúÀå
+//    private void insertIntoUsersMacroFertilization() { //ê³„ì‚°ëœ ì²˜ë°©ê°’ DB ì €ì¥
 //        for (String macro : distributedValues.keySet()) {
 //            String query = "insert into users_macro_fertilization (user_id, macro";
 //            for (String element : distributedValues.get(macro).keySet()) {
 //                query += ", "+element;
 //            }
-//            query += ") "; //¿©±â±îÁö query = insert into user_macro_fertilization (macro, NO3N, Ca)
+//            query += ") "; //ì—¬ê¸°ê¹Œì§€ query = insert into user_macro_fertilization (macro, NO3N, Ca)
 //            query += "values (" + users_id +", "+"'"+macro+"'";
 //            for (String element : distributedValues.get(macro).keySet()) {
 //                query += ", "+distributedValues.get(macro).get(element);
@@ -222,9 +222,9 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //        }
 //    }
 
-    //TODO - insert Á¦´ë·Î µÇ´Â Áö È®ÀÎ
-    //100¹è¾×(kg) °è»ê½Ä Àú°Å ¸Â³ª È®ÀÎ¹Ş±â
-    private void insertIntoUsersMacroCalculatedMass() { //°è»êµÈ Áú·® °ª DB ÀúÀå
+    //TODO - insert ì œëŒ€ë¡œ ë˜ëŠ” ì§€ í™•ì¸
+    //100ë°°ì•¡(kg) ê³„ì‚°ì‹ ì €ê±° ë§ë‚˜ í™•ì¸ë°›ê¸°
+    private void insertIntoUsersMacroCalculatedMass() { //ê³„ì‚°ëœ ì§ˆëŸ‰ ê°’ DB ì €ì¥
         String unit = "'kg'";
 
         for (String macro : molecularMass.keySet()) {
@@ -235,7 +235,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
                     +concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+", "+requestHistory_id+")";
 
             try(Connection connection = conn.getConnection();
-                    Statement stmt = connection.createStatement();){
+                Statement stmt = connection.createStatement();){
                 int result = stmt.executeUpdate(query);
 
                 //if(result>0) System.out.println("success");
@@ -246,8 +246,8 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
     }
 
-    //TODO Å×½ºÆ®
-    private void insertIntoUsersMacroConsideredValues() { //°í·Á ¿ø¼ö °ª DB ÀúÀå
+    //TODO í…ŒìŠ¤íŠ¸
+    private void insertIntoUsersMacroConsideredValues() { //ê³ ë ¤ ì›ìˆ˜ ê°’ DB ì €ì¥
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
                 "H2PO4, K, Ca, Mg, SO4S, unit, user_id, requestHistory_id) values (";
@@ -264,14 +264,14 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
 
         try (Connection connection = conn.getConnection();
-            Statement stmt = connection.createStatement()) {
+             Statement stmt = connection.createStatement()) {
             int result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
             if (result > 0) {
                 System.out.println("success insert users_macro_consideredValues");
                 ResultSet generatedKeys = stmt.getGeneratedKeys();
                 if(generatedKeys.next()){
                     int id = generatedKeys.getInt(1);
-                    users_macro_consideredValues_id = id; //fk·Î »ç¿ëÇÏ±â À§ÇØ ¹èÁ¤
+                    users_macro_consideredValues_id = id; //fkë¡œ ì‚¬ìš©í•˜ê¸° ìœ„í•´ ë°°ì •
                 }
             } else {
                 System.out.println("insert failed users_macro_consideredValues");

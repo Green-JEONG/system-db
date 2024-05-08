@@ -32,7 +32,7 @@ public class CSVDataReader {
         }
         try {
             URI uri = new URI(resourceUrl.toString() + "org/main/culturesolutioncalculation/data");
-            this.resourcePath = Path.of("org/main/culturesolutioncalculation/data/");
+            this.resourcePath = Path.of("org/main/culturesolutioncalculation/data");
             //this.resourcePath = Paths.get(uri);
             System.out.println("Final URL: " + uri.toURL());
         } catch (URISyntaxException | MalformedURLException e) {
@@ -54,7 +54,7 @@ public class CSVDataReader {
 
         } catch (IOException e) {
             // IOException을 처리하도록 수정
-            logger.log(Level.SEVERE, "Error reading directory", e);
+            logger.log(Level.SEVERE, "Error reading directory: " + e.getMessage(), e);
         }
         return nutrientSolutionList;
     }
@@ -68,7 +68,7 @@ public class CSVDataReader {
         // CSVReader를 try-with-resources로 사용하여 리소스 해제
         try (//InputStream inputStream = Files.newInputStream(csvFilePath);
              InputStream inputStream = classLoader.getResourceAsStream(resourcePath);
-             InputStreamReader reader = new InputStreamReader(inputStream, "euc-kr");
+             InputStreamReader reader = new InputStreamReader(inputStream, "utf-8");
              BufferedReader bufferedReader = new BufferedReader(reader);
              CSVReader csvReader = new CSVReader(bufferedReader)) {
 

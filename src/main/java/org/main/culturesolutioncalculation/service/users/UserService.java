@@ -17,6 +17,7 @@ public class UserService {
 
     //유저 정보 저장 - 이름, 주소, 연락처
 
+    //TODO 유저가 db에 있으면 유저 아이디 뱉고, db에 없으면 null반환
     public boolean findByUser(Users users){ //유저가 db에 있으면 true, 없으면 false
 
         String preQuery = "select * from users u where u.name = ? and u.address = ? and u.contact = ?";
@@ -39,20 +40,25 @@ public class UserService {
         return false;
     }
     public void save(Users users){
-        if(findByUser(users)) return;
+        //이미 유저가 존재하면 user는 세이브 안하고 분석 기록 튜플 하나 생성
+        if(findByUser(users)){
+            //유저 아이디
+            String query = "insert into requestHistory ";
+        }
+        else {
+            String query = "insert into users (name, address, contact) " +
+                    "values (" + users.getName() + ", " + users.getAddress() + ", " + users.getContact() + ")";
 
-        String query = "insert into users (name, address, contact) " +
-                "values ("+users.getName()+", "+users.getAddress()+", "+users.getContact()+")";
+            try (Connection connection = conn.getConnection();
+                 Statement stmt = connection.createStatement();) {
+                int result = stmt.executeUpdate(query);
 
-        try(Connection connection = conn.getConnection();
-            Statement stmt = connection.createStatement();){
-            int result = stmt.executeUpdate(query);
+                if (result > 0) System.out.println("success insert users");
+                else System.out.println("insert failed users");
 
-            if(result>0) System.out.println("success insert users");
-            else System.out.println("insert failed users");
-
-        }catch (SQLException e){
-            e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

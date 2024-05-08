@@ -38,8 +38,8 @@ public class AbstractPrint implements Print{
     private Map<String, FinalCal> MicroMolecularMass = new LinkedHashMap<>();
 
     /*
-    ºĞ¼® ±â·Ï¿¡ µé¾î°¡¾ß ÇÒ Á¤º¸µé :
-    »ç¿ëÀÚ ÀÌ¸§, ºĞ¼® ³¯Â¥, Àç¹è ÀÛ¹°, ¹è¾ç¾× Á¾·ù(³×´ú¶õµå, ¾ß¸¶ÀÚÅ°:ÀÌ°Ç ÇÁ·ĞÆ®¿¡¼­ ¹Ş¾Æ¿À±â·Î)
+    ë¶„ì„ ê¸°ë¡ì— ë“¤ì–´ê°€ì•¼ í•  ì •ë³´ë“¤ :
+    ì‚¬ìš©ì ì´ë¦„, ë¶„ì„ ë‚ ì§œ, ì¬ë°° ì‘ë¬¼, ë°°ì–‘ì•¡ ì¢…ë¥˜(ë„¤ëœë€ë“œ, ì•¼ë§ˆìí‚¤:ì´ê±´ í”„ë¡ íŠ¸ì—ì„œ ë°›ì•„ì˜¤ê¸°ë¡œ)
      */
     private Users users;
 
@@ -50,7 +50,7 @@ public class AbstractPrint implements Print{
 
     public void setPdfName() {
 
-        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_ºĞ¼® ±â·Ï °³¿ä";
+        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_ë¶„ì„ ê¸°ë¡ ê°œìš”";
     }
 
     public String getPdfName() {
@@ -62,7 +62,7 @@ public class AbstractPrint implements Print{
     }
 
 
-    //µ¥ÀÌÅÍº£ÀÌ½º¿¡¼­ ²¨³»¿Í¾ßÇÔ
+    //ë°ì´í„°ë² ì´ìŠ¤ì—ì„œ êº¼ë‚´ì™€ì•¼í•¨
     @Override
     public void setMacroMolecularMass() {
         String query = "SELECT um.* FROM users_macro_calculatedMass um " +
@@ -71,17 +71,17 @@ public class AbstractPrint implements Print{
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
-            // ÆÄ¶ó¹ÌÅÍ ¹ÙÀÎµù
+            // íŒŒë¼ë¯¸í„° ë°”ì¸ë”©
             pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
-                // °á°ú Ã³¸®
+                // ê²°ê³¼ ì²˜ë¦¬
                 while (resultSet.next()) {
-                    String macro = resultSet.getString("macro"); //Áú»êÄ®½·4¼ö¿°, Áú»êÄ®·ı, Áú»ê¾Ï¸ğ´½ µîµî
-                    String solution = resultSet.getString("solution"); //¾ç¾× Å¸ÀÔ (A,B, C)
-                    double mass = resultSet.getDouble("mass");//È­ÇÕ¹° Áú·®
+                    String macro = resultSet.getString("macro"); //ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼, ì§ˆì‚°ì¹¼ë¥¨, ì§ˆì‚°ì•”ëª¨ëŠ„ ë“±ë“±
+                    String solution = resultSet.getString("solution"); //ì–‘ì•¡ íƒ€ì… (A,B, C)
+                    double mass = resultSet.getDouble("mass");//í™”í•©ë¬¼ ì§ˆëŸ‰
 
-                    MacroMolecularMass.put(macro, new FinalCal(solution, mass)); //100¹è¾× °è»êÀ» À§ÇØ È­ÇÕ¹°°ú ±× Áú·® ÀúÀå
+                    MacroMolecularMass.put(macro, new FinalCal(solution, mass)); //100ë°°ì•¡ ê³„ì‚°ì„ ìœ„í•´ í™”í•©ë¬¼ê³¼ ê·¸ ì§ˆëŸ‰ ì €ì¥
                 }
             }
 
@@ -98,17 +98,17 @@ public class AbstractPrint implements Print{
         try (Connection connection = conn.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
 
-            // ÆÄ¶ó¹ÌÅÍ ¹ÙÀÎµù
+            // íŒŒë¼ë¯¸í„° ë°”ì¸ë”©
             pstmt.setInt(1, requestHistory.getId());
 
             try (ResultSet resultSet = pstmt.executeQuery()) {
-                // °á°ú Ã³¸®
+                // ê²°ê³¼ ì²˜ë¦¬
                 while (resultSet.next()) {
-                    String micro = resultSet.getString("micro"); //Áú»êÄ®½·4¼ö¿°, Áú»êÄ®·ı, Áú»ê¾Ï¸ğ´½ µîµî
-                    String solution = resultSet.getString("solution"); //¾ç¾× Å¸ÀÔ (A,B, C)
-                    double mass = resultSet.getDouble("mass");//È­ÇÕ¹° Áú·®
+                    String micro = resultSet.getString("micro"); //ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼, ì§ˆì‚°ì¹¼ë¥¨, ì§ˆì‚°ì•”ëª¨ëŠ„ ë“±ë“±
+                    String solution = resultSet.getString("solution"); //ì–‘ì•¡ íƒ€ì… (A,B, C)
+                    double mass = resultSet.getDouble("mass");//í™”í•©ë¬¼ ì§ˆëŸ‰
 
-                    MicroMolecularMass.put(micro, new FinalCal(solution, mass)); //100¹è¾× °è»êÀ» À§ÇØ È­ÇÕ¹°°ú ±× Áú·® ÀúÀå
+                    MicroMolecularMass.put(micro, new FinalCal(solution, mass)); //100ë°°ì•¡ ê³„ì‚°ì„ ìœ„í•´ í™”í•©ë¬¼ê³¼ ê·¸ ì§ˆëŸ‰ ì €ì¥
                 }
             }
 
@@ -118,10 +118,10 @@ public class AbstractPrint implements Print{
     }
 
     public void setUp(){
-        //¿ø¼ö °í·Á°ª ¼¼ÆÃ
+        //ì›ìˆ˜ ê³ ë ¤ê°’ ì„¸íŒ…
         setMacroMolecularMass();
         setMicroMolecularMass();
-        //À¯Àú Á¤º¸¿¡ µû¸¥ PDF ¼¼ÆÃ
+        //ìœ ì € ì •ë³´ì— ë”°ë¥¸ PDF ì„¸íŒ…
         setPdfName();
     }
 
@@ -144,7 +144,7 @@ public class AbstractPrint implements Print{
             }
             cssResolver.addCss(cssFile);
 
-            //HTML°ú ÆùÆ® ÁØºñ
+            //HTMLê³¼ í°íŠ¸ ì¤€ë¹„
             XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
             fontProvider.register("css/MALGUN.ttf","MalgunGothic");
             CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
@@ -170,9 +170,9 @@ public class AbstractPrint implements Print{
         }catch (DocumentException e){
             e.printStackTrace();
         } catch (FileNotFoundException e) {
-        e.printStackTrace();
+            e.printStackTrace();
         } catch (IOException e) {
-        e.printStackTrace();
+            e.printStackTrace();
         }
 
     }
@@ -199,19 +199,19 @@ public class AbstractPrint implements Print{
     public String getUserInfo() {
 
         return
-                "<p>ÀÇ·ÚÀÚ ¼º¸í: "+users.getName()+"</p>" +
-                        "<p>ÀÇ·Ú ÀÏ½Ã: "+requestHistory.getRequest_date()+"</p>" +
-                        "<p>Àç¹è ÀÛ¹°: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
-                        "<p>¹è¾ç¾× Á¾·ù: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
+                "<p>ì˜ë¢°ì ì„±ëª…: "+users.getName()+"</p>" +
+                        "<p>ì˜ë¢° ì¼ì‹œ: "+requestHistory.getRequest_date()+"</p>" +
+                        "<p>ì¬ë°° ì‘ë¬¼: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
+                        "<p>ë°°ì–‘ì•¡ ì¢…ë¥˜: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
                         "<hr>";
     }
 
     private String getSolution(String solution) {
         String unit = "Kg";
         String Html =
-                "<th class=\"category\">"+solution+"¾×</th>" +
-                "<th colspan=\"2\">100¹è¾× ±âÁØ</th>" +
-                "</tr>";
+                "<th class=\"category\">"+solution+"ì•¡</th>" +
+                        "<th colspan=\"2\">100ë°°ì•¡ ê¸°ì¤€</th>" +
+                        "</tr>";
 
         for (String macro : MacroMolecularMass.keySet()) {
             if(MacroMolecularMass.get(macro).getSolution().equals(solution)){

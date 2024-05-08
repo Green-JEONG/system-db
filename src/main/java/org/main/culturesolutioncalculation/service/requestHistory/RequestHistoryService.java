@@ -24,7 +24,7 @@ public class RequestHistoryService {
             e.printStackTrace();
         }
     }
-    //ÇØ´ç À¯ÀúÀÇ ºĞ¼® ¸®½ºÆ® ¹İÈ¯
+    //í•´ë‹¹ ìœ ì €ì˜ ë¶„ì„ ë¦¬ìŠ¤íŠ¸ ë°˜í™˜
     public List<RequestHistory> findByUser(Users users){
         List<RequestHistory> histories = new LinkedList<>();
 
@@ -58,12 +58,12 @@ public class RequestHistoryService {
        public String getUserInfo() {
 
         return
-                "<p>ÀÇ·ÚÀÚ ¼º¸í: "+users.getName()+"</p>" +
-                        "<p>ÀÇ·Ú ÀÏ½Ã: "+requestHistory.getRequest_date()+"</p>" +
-                        "<p>Àç¹è ÀÛ¹°: "+users.getCropName()+"</p>" +
-                        "<p>¹è¾ç¾× Á¾·ù: "+users.getMediumType()+"</p>" +
+                "<p>ì˜ë¢°ì ì„±ëª…: "+users.getName()+"</p>" +
+                        "<p>ì˜ë¢° ì¼ì‹œ: "+requestHistory.getRequest_date()+"</p>" +
+                        "<p>ì¬ë°° ì‘ë¬¼: "+users.getCropName()+"</p>" +
+                        "<p>ë°°ì–‘ì•¡ ì¢…ë¥˜: "+users.getMediumType()+"</p>" +
                         "<hr>";
-    } Àç¹èÀÛ¹°ÀÌ¶û, ¹è¾ç¾× Á¾·ù Ã£¾Æ¾ß ÇÔ
+    } ì¬ë°°ì‘ë¬¼ì´ë‘, ë°°ì–‘ì•¡ ì¢…ë¥˜ ì°¾ì•„ì•¼ í•¨
      */
     public String getCropName(RequestHistory requestHistory){
         String query = "select fertilizer_salts from culture_medium where id = ?";
@@ -84,7 +84,7 @@ public class RequestHistoryService {
         }
         return cropName;
     }
-    public String getMediumType(RequestHistory requestHistory){ //¹è¾ç¾× Á¾·ù ³»º¸³»±â (³×´ú¶õµå, ¾ß¸¶ÀÚÅ° µî)
+    public String getMediumType(RequestHistory requestHistory){ //ë°°ì–‘ì•¡ ì¢…ë¥˜ ë‚´ë³´ë‚´ê¸° (ë„¤ëœë€ë“œ, ì•¼ë§ˆìí‚¤ ë“±)
         String query = "select name from medium_types " +
                 "where id = (select medium_type_id from culture_medium where id = ?)";
         String mediumType = "";

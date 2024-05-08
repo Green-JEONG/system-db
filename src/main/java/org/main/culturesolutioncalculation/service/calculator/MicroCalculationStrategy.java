@@ -21,20 +21,20 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private int users_micro_consideredValues_id;
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
 
-    Map<String, Map<String, Double>> distributedValues = new LinkedHashMap<>(); //ÇÁ·ĞÆ®¿¡¼­ º¸¿©Áö´Â ÀÚµ¿ °è»ê °á°ú
+    Map<String, Map<String, Double>> distributedValues = new LinkedHashMap<>(); //í”„ë¡ íŠ¸ì—ì„œ ë³´ì—¬ì§€ëŠ” ìë™ ê³„ì‚° ê²°ê³¼
 
     private Map<String, FinalCal> molecularMass =  new LinkedHashMap<>();
 
-    List<String> userMicroNutrients = new LinkedList<>(); //À¯Àú°¡ ¼±ÅÃÇß´ø ¹Ì·®¿ø¼Ò ºñ·á ¸®½ºÆ®
+    List<String> userMicroNutrients = new LinkedList<>(); //ìœ ì €ê°€ ì„ íƒí–ˆë˜ ë¯¸ëŸ‰ì›ì†Œ ë¹„ë£Œ ë¦¬ìŠ¤íŠ¸
 
-    //1. ±âÁØ°ª - ÇÁ·ĞÆ®¿¡¼­ ³Ñ¾î¿È
+    //1. ê¸°ì¤€ê°’ - í”„ë¡ íŠ¸ì—ì„œ ë„˜ì–´ì˜´
     //private Map<String, Double> standardValues = new LinkedHashMap<>();
-    //2. ¿ø¼ö °í·Á°ª - ÇÁ·ĞÆ®¿¡¼­ ³Ñ¾î¿È
+    //2. ì›ìˆ˜ ê³ ë ¤ê°’ - í”„ë¡ íŠ¸ì—ì„œ ë„˜ì–´ì˜´
     private Map<String, Double> consideredValues = new LinkedHashMap<>();
 
-    //³Ñ¾î¿Í¾ß ÇÒ Ã³¹æ ³óµµ ¾ç½Ä - ¼ø¼­ ±×´ë·Î À¯ÁöµÇ¾î¾ß ÇÔ. front¿¡¼­ ³Ñ¾î¿Í¾ßÇÔ
-    private Map<String, Double> userFertilization = new LinkedHashMap<>(); //db¿¡ ÀúÀåµÇ¾î¾ß ÇÒ Ã³¹æ ³óµµ (°è»ê ¼öÇà X)
-    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //°è»ê ¼öÇàÇÒ Ã³¹æ ³óµµ
+    //ë„˜ì–´ì™€ì•¼ í•  ì²˜ë°© ë†ë„ ì–‘ì‹ - ìˆœì„œ ê·¸ëŒ€ë¡œ ìœ ì§€ë˜ì–´ì•¼ í•¨. frontì—ì„œ ë„˜ì–´ì™€ì•¼í•¨
+    private Map<String, Double> userFertilization = new LinkedHashMap<>(); //dbì— ì €ì¥ë˜ì–´ì•¼ í•  ì²˜ë°© ë†ë„ (ê³„ì‚° ìˆ˜í–‰ X)
+    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //ê³„ì‚° ìˆ˜í–‰í•  ì²˜ë°© ë†ë„
 //    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
 //        {
 //            put("Fe", 15.5);
@@ -58,10 +58,10 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         getMajorCompoundRatio(userMicroNutrients);
     }
 
-    //ºĞÀÚ º° °®°í ÀÖ´Â ¹Ì·® ¿ø¼Ò ºñÀ²À» °¡Á®¿È. userMicroNutrients : »ç¿ëÀÚ°¡ ¼±ÅÃÇÑ ¹Ì·®¿ø¼Ò ¸®½ºÆ®
+    //ë¶„ì ë³„ ê°–ê³  ìˆëŠ” ë¯¸ëŸ‰ ì›ì†Œ ë¹„ìœ¨ì„ ê°€ì ¸ì˜´. userMicroNutrients : ì‚¬ìš©ìê°€ ì„ íƒí•œ ë¯¸ëŸ‰ì›ì†Œ ë¦¬ìŠ¤íŠ¸
     private void getMajorCompoundRatio(List<String> userMicroNutrients){
 
-        String query = "select * from micronutrients where micro in ('CuSO4¡¤5H2O', 'ZnSO4¡¤7H2O'"; //È²»ê ±¸¸®, È²»ê ¾Æ¿¬ È­ÇÕ¹°Àº ¹«Á¶°Ç ¼±ÅÃ
+        String query = "select * from micronutrients where micro in ('CuSO4Â·5H2O', 'ZnSO4Â·7H2O'"; //í™©ì‚° êµ¬ë¦¬, í™©ì‚° ì•„ì—° í™”í•©ë¬¼ì€ ë¬´ì¡°ê±´ ì„ íƒ
 
         for (String micro : userMicroNutrients) {
             query += ", '"+micro+"'";
@@ -73,13 +73,13 @@ public class MicroCalculationStrategy implements CalculationStrategy{
              ResultSet resultSet = stmt.executeQuery(query);) {
 
             while(resultSet.next()){
-                String micro = resultSet.getString("micro"); //Áú»êÄ®½·4¼ö¿°, Áú»êÄ®·ı, Áú»ê¾Ï¸ğ´½ µîµî
+                String micro = resultSet.getString("micro"); //ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼, ì§ˆì‚°ì¹¼ë¥¨, ì§ˆì‚°ì•”ëª¨ëŠ„ ë“±ë“±
                 String solution = resultSet.getString("solution");
                 double mass = resultSet.getDouble("mass");
 
-                molecularMass.put(micro, new FinalCal(solution, mass)); //100¹è¾× °è»êÀ» À§ÇØ È­ÇÕ¹°°ú ±× Áú·®, ¾ç¾× ÀúÀå
+                molecularMass.put(micro, new FinalCal(solution, mass)); //100ë°°ì•¡ ê³„ì‚°ì„ ìœ„í•´ í™”í•©ë¬¼ê³¼ ê·¸ ì§ˆëŸ‰, ì–‘ì•¡ ì €ì¥
 
-                Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. Áú»êÄ®½·4¼ö¿°ÀÌ °®´Â ¿ø¼öÀÇ ÀÌ¸§°ú Áú·®ºñ¸¦ °®´Â map
+                Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. ì§ˆì‚°ì¹¼ìŠ˜4ìˆ˜ì—¼ì´ ê°–ëŠ” ì›ìˆ˜ì˜ ì´ë¦„ê³¼ ì§ˆëŸ‰ë¹„ë¥¼ ê°–ëŠ” map
                 for (String major : userFertilization.keySet()) {
                     if (resultSet.getDouble(major) != 0) {
                         compoundRatio.put(major, resultSet.getDouble(major));
@@ -88,7 +88,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                             if (set.next()) {
                                 double micro_mass = set.getDouble("mass");
                                 int content_count = set.getInt("content_count");
-                                compoundRatio.put("mass", micro_mass); // ¿øÀÚ·®µµ °°ÀÌ ÀúÀåÇØ¾ß ÇÔ
+                                compoundRatio.put("mass", micro_mass); // ì›ìëŸ‰ë„ ê°™ì´ ì €ì¥í•´ì•¼ í•¨
                                 compoundRatio.put("content_count", content_count*1.0);
                             }
                         }
@@ -102,9 +102,9 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         }
     }
 
-    // ºĞÀÚ·®*½Ãºñ·®/¿øÀÚ·®/ÇÔ·®°¹¼ö = 100¹è¾×
+    // ë¶„ìëŸ‰*ì‹œë¹„ëŸ‰/ì›ìëŸ‰/í•¨ëŸ‰ê°¯ìˆ˜ = 100ë°°ì•¡
     /*
-      name = ZnSO4Â·7H2O
+      name = ZnSO4ì¨Œ7H2O
       compoundsRatio = {content_count=1.0, Zn=1.0, mass=65.37}
      */
     public Map<String, Map<String, Double>> calculateDistributedValues() {
@@ -112,39 +112,39 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
         for (String compound : compoundsRatio.keySet()) {
             Map<String, Double> calculatedCompounds = calculateCompoundDistribution(compound, calFertilization);
-            distributedValues.put(compound, calculatedCompounds); // °è»êµÈ È­ÇÕ¹° ºĞÆ÷ ÀúÀå
+            distributedValues.put(compound, calculatedCompounds); // ê³„ì‚°ëœ í™”í•©ë¬¼ ë¶„í¬ ì €ì¥
         }
 
         return distributedValues;
     }
-    // °è»êµÈ È­ÇÕ¹° ºĞÆ÷¸¦ ¹İÈ¯
+    // ê³„ì‚°ëœ í™”í•©ë¬¼ ë¶„í¬ë¥¼ ë°˜í™˜
     private Map<String, Double> calculateCompoundDistribution(String compound, Map<String, Double> calFertilization) {
         Map<String, Double> distributionResult = new LinkedHashMap<>();
-        double atomicWeight = compoundsRatio.get(compound).get("mass"); // ¿øÀÚ·®
-        double molecularWeight = molecularMass.get(compound).getMass(); // ºĞÀÚ·®
-        double contentCount = compoundsRatio.get(compound).get("content_count"); // ÇÔ·® °³¼ö
+        double atomicWeight = compoundsRatio.get(compound).get("mass"); // ì›ìëŸ‰
+        double molecularWeight = molecularMass.get(compound).getMass(); // ë¶„ìëŸ‰
+        double contentCount = compoundsRatio.get(compound).get("content_count"); // í•¨ëŸ‰ ê°œìˆ˜
 
         for (String nutrient : calFertilization.keySet()) {
             if (compoundsRatio.get(compound).containsKey(nutrient)) {
                 double fertilizationAmount = calFertilization.get(nutrient);
                 double calculatedValue = calculateMicroElementValue(molecularWeight, fertilizationAmount, atomicWeight, contentCount);
                 distributionResult.put(nutrient, fertilizationAmount);
-                molecularMass.get(compound).setMass(calculatedValue); // ÃÖÁ¾ °ª ¾÷µ¥ÀÌÆ®
+                molecularMass.get(compound).setMass(calculatedValue); // ìµœì¢… ê°’ ì—…ë°ì´íŠ¸
             }
         }
 
         return distributionResult;
     }
 
-    // ¹Ì·® ¿ø¼Ò °ªÀ» °è»ê
+    // ë¯¸ëŸ‰ ì›ì†Œ ê°’ì„ ê³„ì‚°
     private double calculateMicroElementValue(double molecularWeight, double fertilizationAmount, double atomicWeight, double contentCount) {
         return molecularWeight * fertilizationAmount / atomicWeight / contentCount;
     }
 
-    //¿ø¼ö °í·Á ¿©ºÎ, Ã³¹æ ³óµµ, °í·Á ¿ø¼ö, ±âÁØ°ª -> db¿¡ ÀúÀåÇÏ´Â ÇÔ¼ö
+    //ì›ìˆ˜ ê³ ë ¤ ì—¬ë¶€, ì²˜ë°© ë†ë„, ê³ ë ¤ ì›ìˆ˜, ê¸°ì¤€ê°’ -> dbì— ì €ì¥í•˜ëŠ” í•¨ìˆ˜
     public void save(){
         insertIntoRequestHistory();
-        insertIntoUsersMicroConsideredValues(); //¿ø¼ö °í·Á °ª Å×ÀÌºí¿¡ ÀúÀå
+        insertIntoUsersMicroConsideredValues(); //ì›ìˆ˜ ê³ ë ¤ ê°’ í…Œì´ë¸”ì— ì €ì¥
         insertIntoUsersMicroFertilization();
         insertIntoUsersMicroCalculatedMass();
 
@@ -159,10 +159,10 @@ public class MicroCalculationStrategy implements CalculationStrategy{
             int result = pstmt.executeUpdate();
             if(result>0) {
                 System.out.println("insert success in requestHistory");
-                // »ı¼ºµÈ pk get
+                // ìƒì„±ëœ pk get
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        requestHistory_id = generatedKeys.getInt(1); // »ı¼ºµÈ ID
+                        requestHistory_id = generatedKeys.getInt(1); // ìƒì„±ëœ ID
                         System.out.println("Generated Request ID: " + requestHistory_id);
                     } else {
                         System.out.println("No ID was generated.");
@@ -179,7 +179,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     }
 
     //TODO - insert test
-    //¹Ì·®¿ø¼Ò 100¹è¾×½Ä Àú°Å ¸Â³ª È®ÀÎ¹Ş±â
+    //ë¯¸ëŸ‰ì›ì†Œ 100ë°°ì•¡ì‹ ì €ê±° ë§ë‚˜ í™•ì¸ë°›ê¸°
     private void insertIntoUsersMicroCalculatedMass() {
         String unit = "'kg'";
         for (String micro : molecularMass.keySet()) {
@@ -205,7 +205,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         for (String micro : userFertilization.keySet()) {
             query += ", "+micro;
         }
-        query += ", requestHistory_id) "; //¿©±â±îÁö query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
+        query += ", requestHistory_id) "; //ì—¬ê¸°ê¹Œì§€ query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
         query += "values (" + users.getId();
 
         for (String micro : userFertilization.keySet()) {
@@ -228,7 +228,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //            for (String element : distributedValues.get(micro).keySet()) {
 //                query += ", "+element;
 //            }
-//            query += ") "; //¿©±â±îÁö query = insert into user_macro_fertilization (macro, NO3N, Ca)
+//            query += ") "; //ì—¬ê¸°ê¹Œì§€ query = insert into user_macro_fertilization (macro, NO3N, Ca)
 //            query += "values (" +users_id+", "+"'"+micro+"'";
 //            for (String element : distributedValues.get(micro).keySet()) {
 //                query += ", "+distributedValues.get(micro).get(element);
@@ -247,7 +247,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //    }
 
     //TODO - insert test
-    private void insertIntoUsersMicroConsideredValues() { //°í·Á ¿ø¼ö °ª DB ÀúÀå
+    private void insertIntoUsersMicroConsideredValues() { //ê³ ë ¤ ì›ìˆ˜ ê°’ DB ì €ì¥
         String query = "insert into users_micro_consideredValues ";
         String values = "(is_considered, Fe, Cu, " +
                 "B, Mn, Zn, Mo, unit, user_id, requestHistory_id) values (";
@@ -270,7 +270,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                 ResultSet generatedKeys = stmt.getGeneratedKeys();
                 if(generatedKeys.next()){
                     int id = generatedKeys.getInt(1);
-                    users_micro_consideredValues_id = id; //fk·Î »ç¿ëÇÏ±â À§ÇØ ¹èÁ¤
+                    users_micro_consideredValues_id = id; //fkë¡œ ì‚¬ìš©í•˜ê¸° ìœ„í•´ ë°°ì •
                 }
             } else {
                 System.out.println("insert failed users_micro_consideredValues");
