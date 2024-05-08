@@ -141,12 +141,6 @@ public class MacroTabController {
 
     private String[] getStandardValues(String culture, String crop) {
 
-
-        System.out.println("culture = " + culture);
-        System.out.println("crop = " + crop);
-
-
-
         String[] values = new String[7];
 
         // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
