@@ -12,35 +12,42 @@ import java.util.Optional;
 
 public class UserService {
 
+    private final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private final String user = "root";
+    private final String password = "root";
     private DatabaseConnector conn;
 
+    public UserService() {
+        this.conn = DatabaseConnector.getInstance(url, user, password);
+    }
 
     //유저 정보 저장 - 이름, 주소, 연락처
 
     //TODO 유저가 db에 있으면 유저 아이디 뱉고, db에 없으면 null반환
-    public boolean findByUser(Users users){ //유저가 db에 있으면 true, 없으면 false
+    public int findByContact(String contact){ //유저가 db에 있으면 true, 없으면 false
 
         String preQuery = "select * from users u where u.contact = ?";
+        int userId = 0;
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(preQuery);
         ){
 
-            pstmt.setString(1, users.getContact());
+            pstmt.setString(1, contact);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
-                    return true;
+                    userId = resultSet.getInt("id");
                 }
             }
-
+            return userId;
         }catch (SQLException e){
             e.printStackTrace();
         }
-        return false;
+        return userId;
     }
     public void save(Users users){
         //이미 유저가 존재하면 user는 세이브 안하고 분석 기록 튜플 하나 생성
-        if(findByUser(users)){
+        if(findByContact(users.getContact())<1){
             return;
         }
         else {

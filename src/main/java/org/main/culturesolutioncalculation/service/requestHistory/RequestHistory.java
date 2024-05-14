@@ -66,4 +66,19 @@ public class RequestHistory{
     public String getReportIssuanceMethod() {
         return reportIssuanceMethod;
     }
+
+    @Override
+    public String toString() {
+        return "RequestHistory{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", requestDate=" + requestDate +
+                ", cultureMediumId=" + cultureMediumId +
+                ", cultivation_scale=" + cultivation_scale +
+                ", sampleType='" + sampleType + '\'' +
+                ", varietyName='" + varietyName + '\'' +
+                ", substrateType='" + substrateType + '\'' +
+                ", reportIssuanceMethod='" + reportIssuanceMethod + '\'' +
+                '}';
+    }
 }

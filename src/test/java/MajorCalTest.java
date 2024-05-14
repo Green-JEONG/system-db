@@ -270,7 +270,7 @@ public class MajorCalTest {
     void 원수고려값삽입테스트(){
         boolean isConsidered = true;
         String unit = "mM";
-        Users users = new Users(1, "yaewon","jeju-si, jeju-do, South Korea","010-1234-5678");
+        Users users = new Users(1, "yaewon","jeju-si, jeju-do, South Korea","010-1234-5678", "yaewon@naver.com");
         int requestHistory_id = 1;
 
         String query = "insert into users_macro_consideredValues ";

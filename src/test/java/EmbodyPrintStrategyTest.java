@@ -74,9 +74,10 @@ public class EmbodyPrintStrategyTest {
                 String userName = resultSet.getString("name");
                 String address = resultSet.getString("address");
                 String contact = resultSet.getString("contact");
+                String email = resultSet.getString("email");
 
 
-                users = new Users(userId, userName,address, contact);
+                users = new Users(userId, userName,address, contact,email);
 
                 System.out.println("users.getName() = " + users.getName());
 

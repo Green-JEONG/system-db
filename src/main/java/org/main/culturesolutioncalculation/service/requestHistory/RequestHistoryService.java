@@ -9,7 +9,15 @@ import java.util.List;
 
 public class RequestHistoryService {
 
+    private final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private final String user = "root";
+    private final String password = "root";
+
     private DatabaseConnector conn;
+
+    public RequestHistoryService() {
+        this.conn = DatabaseConnector.getInstance(url, user, password);
+    }
 
     //분석 기록 저장
     //TODO 테스트 해야 함
@@ -57,7 +65,7 @@ public class RequestHistoryService {
     }
 
     //해당 유저의 분석 리스트 반환
-    public List<RequestHistory> findByUser(Users users){
+    public List<RequestHistory> findByUser(int userId){
         List<RequestHistory> histories = new LinkedList<>();
 
         String query = "select * from requestHistory where " +
@@ -65,9 +73,11 @@ public class RequestHistoryService {
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)
         ){
-            pstmt.setInt(1, users.getId());
+            pstmt.setInt(1, userId);
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
+
+                    System.out.println("resultSet.getTimestamp(\"request_date\") = " + resultSet.getTimestamp("request_date"));
                     histories.add(new RequestHistory(
                             resultSet.getInt("id"),
                             resultSet.getInt("user_id"),
@@ -80,6 +90,10 @@ public class RequestHistoryService {
                             resultSet.getString("report_issuance_method")
                     ));
                 }
+                for (RequestHistory history : histories) {
+                    System.out.println("history = " + history);
+                }
+
                 return histories;
             }
         }catch (SQLException e){

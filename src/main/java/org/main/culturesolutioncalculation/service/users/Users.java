@@ -14,17 +14,20 @@ public class Users {
     private String address;
     private String contact;
 
+    private String email;
+
 
 
     public Users(){
 
     }
 
-    public Users(int id, String name, String address, String contact) {
+    public Users(int id, String name, String address, String contact, String email) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.contact = contact;
+        this.email = email;
     }
 
     public int getId() {
@@ -45,6 +48,9 @@ public class Users {
         return contact;
     }
 
+    public String getEmail() {
+        return email;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -61,5 +67,15 @@ public class Users {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    @Override
+    public String toString() {
+        return "Users{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", contact='" + contact + '\'' +
+                '}';
     }
 }

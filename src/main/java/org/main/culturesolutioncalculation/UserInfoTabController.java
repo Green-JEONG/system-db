@@ -2,9 +2,13 @@ package org.main.culturesolutioncalculation;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.UserService;
+import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class UserInfoTabController {
     @FXML
@@ -28,6 +32,15 @@ public class UserInfoTabController {
 
     private UserInfo userInfo = MainController.getUserInfo();
 
+    private RequestHistoryService requestHistoryService;
+
+    private UserService userService;
+
+    public UserInfoTabController() {
+
+        this.requestHistoryService = new RequestHistoryService();
+        this.userService = new UserService();
+    }
 
     public void initialize() {
         date.setValue(LocalDate.now());
@@ -36,6 +49,19 @@ public class UserInfoTabController {
     @FXML
     private void requestHistory() {
 
+        int userId = userService.findByContact(contact.getText().toString());
+
+        List<RequestHistory> findHistory = requestHistoryService.findByUser(userId);
+
+
+        System.out.println("requestHistory 호출됨");
+
+        for (RequestHistory requestHistory : findHistory) {
+            System.out.println("requestHistory = " + requestHistory.getUserId());
+            System.out.println("requestHistory.getCultureMediumId() = " + requestHistory.getCultureMediumId());
+            System.out.println("requestHistory.getRequestDate() = " + requestHistory.getRequestDate());
+
+        }
     }
 
     @FXML

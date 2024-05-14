@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 
 public class UserInfo {
+
+    private int id;
     // 고객 이름
     private String customerName;
     // 주소
@@ -15,6 +17,7 @@ public class UserInfo {
     // 재배규모
     private String scale;
 
+    private String email;
     // 배양액 종류
     private String selectedCulture;
 
@@ -34,6 +37,10 @@ public class UserInfo {
     public UserInfo() {
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getCustomerName() {
         return customerName;
     }
@@ -44,6 +51,10 @@ public class UserInfo {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setAddress(String address) {
