@@ -141,38 +141,37 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     //원수 고려 여부, 처방 농도, 고려 원수, 기준값 -> db에 저장하는 함수
     public void save(){
-        insertIntoRequestHistory();
+        //insertIntoRequestHistory();
         insertIntoUsersMacroConsideredValues(); //원수 고려 값 테이블에 저장
         insertIntoUsersMacroFertilization();
         insertIntoUsersMacroCalculatedMass();
     }
 
-    public void insertIntoRequestHistory() {
-        String query = "insert into requestHistory (user_id, request_date) " +
-                "values (" + users.getId() + ", '" + request_date + "')";
-
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            int result = pstmt.executeUpdate();
-            if (result > 0) {
-                System.out.println("insert success in requestHistory");
-                // 생성된 pk get
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        requestHistory_id = generatedKeys.getInt(1); // 생성된 ID
-                        System.out.println("Generated Request ID: " + requestHistory_id);
-                    } else {
-                        System.out.println("No ID was generated.");
-                    }
-                }
-
-            } else System.out.println("insert fail in requestHistory");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    public void insertIntoRequestHistory() {
+//        String query = "insert into requestHistory (user_id, request_date) " +
+//                "values (" + users.getId() + ", '" + request_date + "')";
+//
+//        try (Connection connection = conn.getConnection();
+//             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+//            int result = pstmt.executeUpdate();
+//            if (result > 0) {
+//                System.out.println("insert success in requestHistory");
+//                // 생성된 pk get
+//                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+//                    if (generatedKeys.next()) {
+//                        requestHistory_id = generatedKeys.getInt(1); // 생성된 ID
+//                        System.out.println("Generated Request ID: " + requestHistory_id);
+//                    } else {
+//                        System.out.println("No ID was generated.");
+//                    }
+//                }
+//
+//            } else System.out.println("insert fail in requestHistory");
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     //TODO - insert 테스트
     private void insertIntoUsersMacroFertilization(){

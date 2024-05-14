@@ -5,7 +5,7 @@ module org.main.culturesolutioncalculation {
     requires com.opencsv;
 
     requires com.zaxxer.hikari;
-    requires html2pdf;
+    //requires html2pdf;
 
 
     opens org.main.culturesolutioncalculation to javafx.fxml;

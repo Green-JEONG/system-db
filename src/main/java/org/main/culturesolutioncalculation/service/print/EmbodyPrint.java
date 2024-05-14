@@ -59,7 +59,7 @@ public class EmbodyPrint implements Print{
     public void setRequestHistory(){
         mediumType = requestHistoryService.getMediumType(requestHistory);
 
-        cropNutrients = mediumService.getCropData(requestHistory.getCulture_medium_id()).get();
+        cropNutrients = mediumService.getCropData(requestHistory.getCultureMediumId()).get();
     }
 
 
@@ -209,14 +209,14 @@ public class EmbodyPrint implements Print{
     public String getUserInfo() {
         return
                 "<p>의뢰자 성명: "+users.getName()+"</p>" +
-                        "<p>의뢰 일시: "+requestHistory.getRequest_date()+"</p>" +
+                        "<p>의뢰 일시: "+requestHistory.getRequestDate()+"</p>" +
                         "<p>재배 작물: "+requestHistoryService.getCropName(requestHistory)+"</p>" +
                         "<p>배양액 종류: "+requestHistoryService.getMediumType(requestHistory)+"</p>" +
                         "<br></br><br></br><br></br> ";
     }
     public void setPdfName() {
 
-        this.pdfName = requestHistory.getRequest_date()+": "+users.getName()+"_분석 기록";
+        this.pdfName = requestHistory.getRequestDate()+": "+users.getName()+"_분석 기록";
     }
     public String getPdfName() {
         return pdfName;

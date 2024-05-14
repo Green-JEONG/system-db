@@ -61,29 +61,4 @@ public class UserService {
     }
 
 
-// 분석 기록 조회 RequestHistoryService에 있는 걸로 쓰는게 나을듯
-//    public Map<Integer, Timestamp> findRequestHistories(Users users){
-//        String query = "select id, request_date from requestHistory where user_id = ?";
-//        Map<Integer, Timestamp> requestHistory = new LinkedHashMap<>();
-//
-//        try(Connection connection = conn.getConnection();
-//            PreparedStatement pstmt = connection.prepareStatement(query)){
-//
-//            pstmt.setInt(1, users.getId());
-//
-//            try(ResultSet resultSet = pstmt.executeQuery()){
-//                while(resultSet.next()){
-//                    requestHistory
-//                            .put(resultSet.getInt("id"), resultSet.getTimestamp("request_date"));
-//                }
-//                return requestHistory;
-//            }catch (SQLException e){
-//                e.printStackTrace();
-//            }
-//
-//        }catch (SQLException e){
-//        }
-//        return requestHistory;
-//    }
-
 }

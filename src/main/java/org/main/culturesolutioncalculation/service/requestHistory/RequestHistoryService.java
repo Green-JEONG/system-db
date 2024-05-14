@@ -12,10 +12,39 @@ public class RequestHistoryService {
     private DatabaseConnector conn;
 
     //분석 기록 저장
+    //TODO 테스트 해야 함
     public void save(RequestHistory requestHistory){
-        String query = "insert into requestHistory (request_date, user_id, request_date, cultivacion_scale) values ("+
-                requestHistory.getRequest_date()+", "+requestHistory.getUser_id()
-                +", "+requestHistory.getRequest_date()+", "+ requestHistory.cultivation_scale+")";
+        String query = "insert into requestHistory (request_date, user_id, request_date, cultivacion_scale";
+        boolean hasSampleType = false, hasVarietyName = false, hasSubstrateType = false, hasReportIssuanceMethod = false;
+
+        //선택된 사항들도 추가
+        if(requestHistory.getSampleType()!=null) {
+            query += ", sample_type";
+            hasSampleType = true;
+        }
+        if(requestHistory.getVarietyName()!=null) {
+            query += ", variety_name";
+            hasVarietyName = true;
+        }
+        if(requestHistory.getSubstrateType()!=null) {
+            query += ", substrate_type";
+            hasSubstrateType = true;
+        }
+        if(requestHistory.getReportIssuanceMethod()!=null) {
+            query += ", report_issuance_method";
+            hasReportIssuanceMethod = true;
+        }
+
+        query += ") values ("+
+                requestHistory.getRequestDate()+", "+requestHistory.getUserId()
+                +", "+requestHistory.getRequestDate()+", "+ requestHistory.cultivation_scale;
+
+        if(hasSampleType) query = query +", '"+requestHistory.getSampleType()+"'";
+        if(hasVarietyName) query = query +", '"+requestHistory.getVarietyName()+"'";
+        if(hasSubstrateType) query = query +", '"+requestHistory.getSubstrateType()+"'";
+        if(hasReportIssuanceMethod) query = query +", '"+requestHistory.getReportIssuanceMethod()+"'";
+
+        query += ")";
 
         try (Connection connection = conn.getConnection();
              Statement stmt = connection.createStatement();
@@ -26,6 +55,7 @@ public class RequestHistoryService {
             e.printStackTrace();
         }
     }
+
     //해당 유저의 분석 리스트 반환
     public List<RequestHistory> findByUser(Users users){
         List<RequestHistory> histories = new LinkedList<>();
@@ -43,7 +73,11 @@ public class RequestHistoryService {
                             resultSet.getInt("user_id"),
                             resultSet.getTimestamp("request_date"),
                             resultSet.getInt("culture_medium_id"),
-                            resultSet.getInt("cultivation_scale")
+                            resultSet.getInt("cultivation_scale"),
+                            resultSet.getString("sample_type"),
+                            resultSet.getString("variety_name"),
+                            resultSet.getString("substrate_type"),
+                            resultSet.getString("report_issuance_method")
                     ));
                 }
                 return histories;
@@ -73,7 +107,7 @@ public class RequestHistoryService {
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)
         ){
-            pstmt.setInt(1, requestHistory.getCulture_medium_id());
+            pstmt.setInt(1, requestHistory.getCultureMediumId());
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
                     cropName = resultSet.getString("fertilizer_salts");
