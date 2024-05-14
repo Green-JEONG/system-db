@@ -34,6 +34,11 @@ public class UserInfoTabController {
     }
 
     @FXML
+    private void requestHistory() {
+
+    }
+
+    @FXML
     private void saveUserInfo() {
         if(userInfo != null) {
             userInfo.setCustomerName(username.getText().toString());

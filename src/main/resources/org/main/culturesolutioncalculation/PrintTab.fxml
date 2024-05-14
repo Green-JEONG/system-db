@@ -5,50 +5,24 @@
 
 <?import java.net.URL?>
 
+<?import javafx.scene.control.skin.TableHeaderRow?>
+<?import javafx.collections.FXCollections?>
+
 <Tab xmlns="http://javafx.com/javafx"
      xmlns:fx="http://javafx.com/fxml"
      fx:controller="org.main.culturesolutioncalculation.PrintTabController"
      text="프린트">
     <content>
-        <SplitPane dividerPositions="0.25">
+        <SplitPane dividerPositions="0.333, 0.667">
             <stylesheets>
                 <URL value="@style/application.css" />
             </stylesheets>
             <!-- 첫 번째 팬 -->
             <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <VBox styleClass="vbox-container">
-                    <Button text="가져오기" onAction="#load" />
-                    <!-- UserInfo 출력 -->
-                    <VBox spacing="10">
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="고객 이름: " />
-                            <Label fx:id="customerNameLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="주소: " />
-                            <Label fx:id="addressLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="연락처: " />
-                            <Label fx:id="contactLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="의뢰 일자: " />
-                            <Label fx:id="processingDateLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="재배규모: " />
-                            <Label fx:id="scaleLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="배양액 종류: " />
-                            <Label fx:id="selectedCultureLabel" />
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                            <Label text="재배작물: " />
-                            <Label fx:id="selectedCropLabel" />
-                        </HBox>
-                    </VBox>
+                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0">
+                    <HBox alignment="CENTER">
+                        <Label text="수경재배 배양액 조성표 " />
+                    </HBox>
                     <!-- SettingInfo 출력 -->
                     <VBox spacing="10">
                         <Label fx:id="settingsLabel" lineSpacing="10"/>
@@ -58,9 +32,43 @@
 
             <!-- 두 번째 팬 -->
             <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0">
+                    <HBox alignment="CENTER">
+                        <Label text="배양액 처방서 " />
+                    </HBox>
                 </VBox>
+                <!-- TableView 추가 -->
+                <TableView>
+                    <!-- 열 정의 -->
+                    <columns>
+                        <TableColumn text="다량원소"/>
+                        <TableColumn text="Ca"/>
+                        <TableColumn text="NO3"/>
+                        <TableColumn text="NH4"/>
+                        <TableColumn text="K"/>
+                        <TableColumn text="H2PO4"/>
+                        <TableColumn text="SO4"/>
+                    </columns>
+                </TableView>
+                <Button text="가져오기" onAction="#load" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.bottomAnchor="30.0" />
             </AnchorPane>
+
+            <!-- 세 번째 팬 -->
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0" >
+                    <HBox alignment="CENTER">
+                        <Label text="배양액 분석결과서 " />
+                    </HBox>
+                </VBox>
+                <TableView>
+                    <!-- 열 정의 -->
+                    <columns>
+                        <TableColumn text="A액"/>
+                        <TableColumn text="100배액 기준"/>
+                    </columns>
+                </TableView>
+            </AnchorPane>
+
         </SplitPane>
     </content>
 </Tab>

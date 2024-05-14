@@ -14,7 +14,7 @@
             <stylesheets>
                 <URL value="@style/application.css" />
             </stylesheets>
-            <VBox spacing="5">
+            <VBox spacing="10">
                 <HBox spacing="10">
                     <Label text="성명: " />
                     <TextField fx:id="username" promptText="입력" />
@@ -32,12 +32,38 @@
                     <DatePicker fx:id="date" />
                 </HBox>
                 <HBox spacing="5">
+                    <Label text="배양액 종류: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
+                    <Label text="재배작물: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
                     <Label text="재배규모: " />
                     <TextField fx:id="scale" promptText="입력" />
                 </HBox>
+                <HBox spacing="5">
+                    <Label text="시료종류: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
+                    <Label text="채취일: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
+                    <Label text="채취장소: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
+                    <Label text="품명: " />
+                    <TextField fx:id="" promptText="입력" />
+                </HBox>
             </VBox>
-
+            <HBox>
+            <Button text="기존 분석 이력" onAction="#requestHistory" />
             <Button text="다음" onAction="#saveUserInfo" />
+            </HBox>
         </VBox>
     </content>
 </Tab>
