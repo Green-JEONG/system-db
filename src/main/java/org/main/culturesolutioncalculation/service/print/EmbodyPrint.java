@@ -1,29 +1,14 @@
 package org.main.culturesolutioncalculation.service.print;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorker;
-import com.itextpdf.tool.xml.XMLWorkerFontProvider;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
-import com.itextpdf.tool.xml.css.CssFile;
-import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
-import com.itextpdf.tool.xml.html.CssAppliers;
-import com.itextpdf.tool.xml.html.CssAppliersImpl;
-import com.itextpdf.tool.xml.html.Tags;
-import com.itextpdf.tool.xml.parser.XMLParser;
-import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
-import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
-import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
-import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
-import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+
+import com.itextpdf.html2pdf.ConverterProperties;
+import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.Users;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
-import org.main.culturesolutioncalculation.model.NutrientSolution;
 import org.main.culturesolutioncalculation.service.CSVDataReader;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
@@ -252,54 +237,18 @@ public class EmbodyPrint implements Print{
         setPdfName();
     }
 
-    @Override
     public void getPDF() {
+        String htmlStr = getAllHtmlStr();
 
+        try (FileOutputStream outputStream = new FileOutputStream(getPdfName())) {
+            ConverterProperties properties = new ConverterProperties();
+            DefaultFontProvider fontProvider = new DefaultFontProvider(false, false, false);
+            fontProvider.addFont("src/main/resources/css/malgun.ttf");
 
-        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
-        try{
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(getPdfName()));
-            writer.setInitialLeading(12.5f);
+            properties.setFontProvider(fontProvider);
+            properties.setCharset("utf-8");
 
-            document.open();
-            XMLWorkerHelper helper = XMLWorkerHelper.getInstance();
-
-            CSSResolver cssResolver = new StyleAttrCSSResolver();
-            CssFile cssFile = null;
-            try{
-                cssFile = helper.getCSS(new FileInputStream("src/main/resources/css/pdf.css"));
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
-            }
-            cssResolver.addCss(cssFile);
-
-            //HTML과 폰트 준비
-            XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
-            fontProvider.register("css/MALGUN.ttf","MalgunGothic");
-            CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
-
-            HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
-            htmlContext.setTagFactory(Tags.getHtmlTagProcessorFactory());
-
-            //Pipelines
-            PdfWriterPipeline pdf = new PdfWriterPipeline(document, writer);
-            HtmlPipeline html = new HtmlPipeline(htmlContext, pdf);
-            CssResolverPipeline css = new CssResolverPipeline(cssResolver, html);
-
-            XMLWorker worker = new XMLWorker(css, true);
-            XMLParser xmlParser = new XMLParser(worker, Charset.forName("UTF-8"));
-
-            String htmlStr = getAllHtmlStr();
-
-            StringReader stringReader = new StringReader(htmlStr);
-            xmlParser.parse(stringReader);
-            document.close();
-            writer.close();
-
-        }catch (DocumentException e){
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            HtmlConverter.convertToPdf(htmlStr, outputStream, properties);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -308,7 +257,19 @@ public class EmbodyPrint implements Print{
     @Override
     public String getAllHtmlStr() {
 
-        String htmlStr = "<html><head></head><body style='font-family: MalgunGothic;'> " +
+        String htmlStr = "<html><head>" +
+                "<style>" +
+                "@font-face { font-family: 'MalgunGothic'; src: url('src/main/resources/css/malgun.ttf'); }" +
+                "body { font-family: 'MalgunGothic'; }" +
+                "p { font-weight: bold; }" +
+                "h3 { font-size: 15px; font-weight: bold; color: #0082E9; padding: 10px 0 10px 0px; margin: 0 10px; }" +
+                "table { border-collapse: collapse; width: 100%; }" +
+                "h1 { font-weight: bold; font-size: 30px; text-align: center; }" +
+                "th, td { border: 1px solid black; padding: 8px; text-align: left; }" +
+                "th { text-align: center; }" +
+                ".category { background-color: #f2f2f2; color: black; border: 1px solid black; }" +
+                "</style>" +
+                "</head><body> " +
                 "<h1>배양액 분석 기록 보고서</h1><br></br><hr> </hr>";
 
         htmlStr += getUserInfo();

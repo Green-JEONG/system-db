@@ -3,12 +3,9 @@ module org.main.culturesolutioncalculation {
     requires javafx.fxml;
     requires java.sql;
     requires com.opencsv;
-    //requires itextpdf;
-    //requires xmlworker;
-    //requires itextpdf;
-    //requires xmlworker;
-    requires com.zaxxer.hikari;
 
+    requires com.zaxxer.hikari;
+    requires html2pdf;
 
 
     opens org.main.culturesolutioncalculation to javafx.fxml;

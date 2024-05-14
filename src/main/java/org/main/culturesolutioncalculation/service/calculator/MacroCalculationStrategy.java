@@ -222,8 +222,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //        }
 //    }
 
-    //TODO - insert 제대로 되는 지 확인
-    //100배액(kg) 계산식 저거 맞나 확인받기
+    //TODO - insert 제대로 되는 지 확인 & 100배액(kg) 계산식 저거 맞나 확인받기
     private void insertIntoUsersMacroCalculatedMass() { //계산된 질량 값 DB 저장
         String unit = "'kg'";
 
@@ -246,25 +245,27 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         }
     }
 
-    //TODO 테스트
+
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
                 "H2PO4, K, Ca, Mg, SO4S, unit, user_id, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+", "+requestHistory_id+")";
+            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+unit+"', "+users.getId()+", "+requestHistory_id+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
+            values += ", '"+unit+"', ";
+            values += users.getId()+", ";
             values += requestHistory_id+")";
             query += values;
         }
 
         try (Connection connection = conn.getConnection();
-             Statement stmt = connection.createStatement()) {
+                Statement stmt = connection.createStatement()) {
             int result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
             if (result > 0) {
                 System.out.println("success insert users_macro_consideredValues");
@@ -272,6 +273,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
                 if(generatedKeys.next()){
                     int id = generatedKeys.getInt(1);
                     users_macro_consideredValues_id = id; //fk로 사용하기 위해 배정
+                    System.out.println("users_macro_consideredValues_id = " + users_macro_consideredValues_id);
                 }
             } else {
                 System.out.println("insert failed users_macro_consideredValues");

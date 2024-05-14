@@ -253,12 +253,14 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                 "B, Mn, Zn, Mo, unit, user_id, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id) values (false, "+unit+", "+users.getId()+", "+requestHistory_id+")";
+            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+unit+"', "+users.getId()+", "+requestHistory_id+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
+            values += ", '"+unit+"', ";
+            values += users.getId()+", ";
             values += requestHistory_id+")";
             query += values;
         }

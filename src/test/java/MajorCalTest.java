@@ -2,6 +2,7 @@ import javafx.scene.control.skin.HyperlinkSkin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
+import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -19,6 +20,19 @@ public class MajorCalTest {
 
     Map<String, Map<String, Double>> distributedValues = new LinkedHashMap<>(); //����Ʈ���� �������� �ڵ� ��� ���
 
+    private Map<String, Double> consideredValues = new LinkedHashMap<>(){
+        {
+            put("NO3N", 1.1);
+            put("NH4N", 1.25);
+            put("H2P04",1.25);
+            put("K",0.5);
+            put("Ca",0.75);
+            put("Mg",0.5);
+            put("SO4S",0.75);
+        }
+    };
+
+    private int users_macro_consideredValues_id;
 
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>();
 
@@ -248,6 +262,50 @@ public class MajorCalTest {
             if(result>0) System.out.println("success");
             else System.out.println("insert failed");
         }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void 원수고려값삽입테스트(){
+        boolean isConsidered = true;
+        String unit = "mM";
+        Users users = new Users(1, "yaewon","jeju-si, jeju-do, South Korea","010-1234-5678");
+        int requestHistory_id = 1;
+
+        String query = "insert into users_macro_consideredValues ";
+        String values = "(is_considered, NO3N, NH4N, " +
+                "H2PO4, K, Ca, Mg, SO4S, unit, user_id, requestHistory_id) values (";
+
+        if(!isConsidered){
+            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+unit+"', "+users.getId()+", "+requestHistory_id+")";
+        } else{
+            values += "true";
+            for (String value : consideredValues.keySet()) {
+                values += ", "+consideredValues.get(value);
+            }
+            values += ", '"+unit+"', ";
+            values += users.getId()+", ";
+            values += requestHistory_id+")";
+            query += values;
+        }
+
+        System.out.println("query = " + query);
+
+        try (Statement stmt = connection.createStatement()) {
+            int result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+            if (result > 0) {
+                System.out.println("success insert users_macro_consideredValues");
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if(generatedKeys.next()){
+                    int id = generatedKeys.getInt(1);
+                    users_macro_consideredValues_id = id; //fk로 사용하기 위해 배정
+                    System.out.println("users_macro_consideredValues_id = " + users_macro_consideredValues_id);
+                }
+            } else {
+                System.out.println("insert failed users_macro_consideredValues");
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

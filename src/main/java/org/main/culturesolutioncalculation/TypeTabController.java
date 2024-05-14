@@ -29,6 +29,7 @@ public class TypeTabController {
     private String selectedCropName = "";
 
     public TypeTabController() throws IOException {
+        data = new TypeData();
     }
 
     public void initialize() {
@@ -112,7 +113,6 @@ public class TypeTabController {
 
     private void updateComboBox(String newValue) {
         //ObservableList<String> cropList = TypeData.getCropList(newValue);
-        data = new TypeData();
         ObservableList<String> cropList = data.getCropList(newValue);
 
         comboBox.setItems(cropList);
@@ -120,9 +120,6 @@ public class TypeTabController {
     }
 
     private void updateTableView(String newValue) {
-        //ObservableList<String[]> compositionData = TypeData.getCompositionData(newValue);
-
-        data  = new TypeData();
         ObservableList<String[]> compositionData = data.getMediumTypeData(newValue);
 
         // 테이블 뷰에 컬럼 추가

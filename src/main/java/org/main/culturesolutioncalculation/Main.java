@@ -9,7 +9,6 @@ import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.sql.Connection;
 
 public class Main extends Application {
 

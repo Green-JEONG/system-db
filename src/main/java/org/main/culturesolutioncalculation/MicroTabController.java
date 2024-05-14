@@ -23,6 +23,7 @@ import org.main.culturesolutioncalculation.service.CSVDataReader;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -38,6 +39,10 @@ public class MicroTabController {
     private TableView<ObservableList<String>> tableView;
 
     private ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+
+    public MicroTabController(){
+        mediumService = new MediumService();
+    }
 
     @FXML
     private void initialize() {
@@ -141,7 +146,6 @@ public class MicroTabController {
         String[] values = new String[7];
 
         // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
-        mediumService = new MediumService();
         Optional<CropNutrientStandard> cropData = mediumService.getCropData(userInfo.getCultureMediumId());
         CropNutrientStandard selectedCropNutrient = cropData.get();
 

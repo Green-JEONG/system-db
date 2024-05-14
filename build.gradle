@@ -41,20 +41,13 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.31'
     implementation 'com.opencsv:opencsv:5.7.1'
 
-    implementation 'com.itextpdf:itextpdf:5.5.13.3'
-    implementation 'com.itextpdf.tool:xmlworker:5.5.13.3'
-
-
-    // https://mvnrepository.com/artifact/com.itextpdf/itext-xtra
-    //implementation group: 'com.itextpdf', name: 'itext-xtra', version: '5.5.13'
-
-    // https://mvnrepository.com/artifact/com.itextpdf/itext-pdfa
-    //implementation group: 'com.itextpdf', name: 'itext-pdfa', version: '5.5.6'
     implementation 'org.apache.commons:commons-imaging:1.0-alpha2'
 
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
     implementation 'com.zaxxer:HikariCP:5.0.1'
+
+    implementation 'com.itextpdf:html2pdf:4.0.5'
 
 }
 

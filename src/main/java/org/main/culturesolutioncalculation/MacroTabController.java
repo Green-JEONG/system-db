@@ -30,7 +30,7 @@ public class MacroTabController {
 
     MainController mainController;
 
-    MediumService mediumService;
+    private MediumService mediumService;
     UserInfo userInfo = mainController.getUserInfo();
 
     @FXML
@@ -39,6 +39,10 @@ public class MacroTabController {
     private TableView<ObservableList<String>> tableView;
 
     private ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+
+    public MacroTabController(){
+        mediumService = new MediumService();
+    }
 
     public void initialize() {
         initTableView();
@@ -144,7 +148,6 @@ public class MacroTabController {
         String[] values = new String[7];
 
         // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
-        mediumService = new MediumService();
         Optional<CropNutrientStandard> cropData = mediumService.getCropData(userInfo.getCultureMediumId());
         CropNutrientStandard selectedCropNutrient = cropData.get();
 
