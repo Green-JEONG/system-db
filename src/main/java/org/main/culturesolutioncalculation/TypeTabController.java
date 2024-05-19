@@ -33,7 +33,7 @@ public class TypeTabController {
     }
 
     public void initialize() {
-        listView.getItems().addAll("네덜란드 배양액", "야마자키 배양액");
+        listView.getItems().addAll("네덜란드 배양액", "야마자키 배양액", "네덜란드1999 배양액", "서울시립대(육묘-초기) 배양액", "서울시립대(초기-말기) 배양액", "야마사키 배양액", "한국원시 배양액");
 
         // 네덜란드 배양액을 기본 선택으로 설정
         listView.getSelectionModel().select("네덜란드 배양액");
