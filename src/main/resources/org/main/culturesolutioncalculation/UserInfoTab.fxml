@@ -14,56 +14,152 @@
             <stylesheets>
                 <URL value="@style/application.css" />
             </stylesheets>
+
+            <HBox alignment="CENTER" spacing="10">
             <VBox spacing="10">
                 <HBox spacing="10">
-                    <Label text="성명: " />
+                    <Label text="성명 : " />
                     <TextField fx:id="username" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="주소: " />
+                    <Label text="주소 : " />
                     <TextField fx:id="address" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="연락처: " />
+                    <Label text="연락처 : " />
                     <TextField fx:id="contact" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="의뢰 일자: " />
+                    <Label text="의뢰 일자 : " />
                     <DatePicker fx:id="date" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="배양액 종류: " />
-                    <TextField fx:id="" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
-                    <Label text="재배작물: " />
-                    <TextField fx:id="" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
-                    <Label text="재배규모: " />
+                    <Label text="재배규모 : " />
                     <TextField fx:id="scale" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="시료종류: " />
-                    <TextField fx:id="" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
-                    <Label text="채취일: " />
-                    <TextField fx:id="" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
-                    <Label text="채취장소: " />
-                    <TextField fx:id="" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
-                    <Label text="품명: " />
-                    <TextField fx:id="" promptText="입력" />
+                    <Label text="분석기록 " />
+                    <Button text="조회" onAction="#requestHistory" />
                 </HBox>
             </VBox>
-            <HBox>
-            <Button text="기존 분석 이력" onAction="#requestHistory" />
-            <Button text="다음" onAction="#saveUserInfo" />
             </HBox>
+
+            <HBox alignment="CENTER">
+                <BorderPane styleClass="outer-borderpane">
+                    <top>
+                        <Label text="시료종류" styleClass="label-bold" />
+                    </top>
+                    <center>
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label text="(택 1)" />
+                            <BorderPane styleClass="borderpane" minHeight="100">
+                                <center>
+                                    <VBox spacing="5">
+                                        <RadioButton text="원수" fx:id="" />
+                                        <RadioButton text="급액" fx:id=""  />
+                                        <RadioButton text="배액" fx:id=""  />
+                                    </VBox>
+                                </center>
+                            </BorderPane>
+                        </VBox>
+                    </center>
+                </BorderPane>
+                <BorderPane styleClass="outer-borderpane">
+                    <top>
+                        <Label text="작물명" styleClass="label-bold" />
+                    </top>
+                    <center>
+                        <HBox spacing="5">
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label text="(택 1)" />
+                            <BorderPane styleClass="borderpane" minHeight="100">
+                                <center>
+                                    <VBox spacing="5">
+                                        <RadioButton text="딸기" fx:id="" />
+                                        <RadioButton text="오이" fx:id=""  />
+                                        <RadioButton text="토마토" fx:id=""  />
+                                        <RadioButton text="가지" fx:id=""  />
+                                        <RadioButton text="기타" fx:id=""  />
+                                    </VBox>
+                                </center>
+                            </BorderPane>
+                        </VBox>
+                        </HBox>
+                    </center>
+                </BorderPane>
+<!--                <HBox spacing="5">-->
+<!--                    <Label text="품종명 : " />-->
+<!--                    <TextField fx:id="" promptText="입력" />-->
+<!--                </HBox>-->
+                <BorderPane styleClass="outer-borderpane">
+                    <top>
+                        <Label text="품종명" styleClass="label-bold" />
+                    </top>
+                    <center>
+                        <HBox spacing="5">
+                            <VBox alignment="CENTER" spacing="5">
+                                <Label text="(입력)" />
+                                <BorderPane styleClass="borderpane" minHeight="100">
+                                    <center>
+                                        <VBox spacing="5">
+                                            <TextField fx:id="" promptText="입력" />
+                                        </VBox>
+                                    </center>
+                                </BorderPane>
+                            </VBox>
+                        </HBox>
+                    </center>
+                </BorderPane>
+                <BorderPane styleClass="outer-borderpane">
+                    <top>
+                        <Label text="배지종류" styleClass="label-bold" />
+                    </top>
+                    <center>
+                        <HBox spacing="5">
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label text="(택 1)" />
+                            <BorderPane styleClass="borderpane" minHeight="100">
+                                <center>
+                                    <VBox spacing="5">
+                                        <RadioButton text="코이어" fx:id="" />
+                                        <RadioButton text="암면" fx:id=""  />
+                                        <RadioButton text="피트모스" fx:id=""  />
+                                        <RadioButton text="기타" fx:id=""  />
+                                    </VBox>
+                                </center>
+                            </BorderPane>
+                        </VBox>
+                        </HBox>
+                    </center>
+                </BorderPane>
+                <BorderPane styleClass="outer-borderpane">
+                    <top>
+                        <Label text="결과서 교부방법" styleClass="label-bold" />
+                    </top>
+                    <center>
+                        <HBox spacing="5">
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label text="(택 1)" />
+                            <BorderPane styleClass="borderpane" minHeight="100">
+                                <center>
+                                    <VBox spacing="5">
+                                        <RadioButton text="우편" fx:id="" />
+                                        <RadioButton text="문자" fx:id=""  />
+                                        <RadioButton text="이메일" fx:id=""  />
+                                        <RadioButton text="기타" fx:id=""  />
+                                    </VBox>
+                                </center>
+                            </BorderPane>
+                        </VBox>
+                        </HBox>
+                    </center>
+                </BorderPane>
+            </HBox>
+
+            <HBox alignment="CENTER" spacing="10">
+                <Button text="다음" onAction="#saveUserInfo" />
+            </HBox>
+
         </VBox>
     </content>
 </Tab>
