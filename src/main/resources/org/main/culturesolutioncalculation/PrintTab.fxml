@@ -13,62 +13,41 @@
      fx:controller="org.main.culturesolutioncalculation.PrintTabController"
      text="프린트">
     <content>
-        <SplitPane dividerPositions="0.333, 0.667">
+        <SplitPane dividerPositions="0.5, 0.5">
             <stylesheets>
                 <URL value="@style/application.css" />
             </stylesheets>
             <!-- 첫 번째 팬 -->
             <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0">
-                    <HBox alignment="CENTER">
-                        <Label text="수경재배 배양액 조성표 " />
-                    </HBox>
-                    <!-- SettingInfo 출력 -->
-                    <VBox spacing="10">
-                        <Label fx:id="settingsLabel" lineSpacing="10"/>
+                <VBox styleClass="vbox-container"
+                      AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0"
+                      AnchorPane.topAnchor="0.0"
+                      AnchorPane.bottomAnchor="0.0"
+                      alignment="CENTER"
+                      spacing="10">
+                    <VBox alignment="CENTER" spacing="10">
+                        <Label text="분석결과서 " />
+                        <Button text="가져오기" onAction="#load" />
                     </VBox>
                 </VBox>
             </AnchorPane>
 
             <!-- 두 번째 팬 -->
             <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0">
-                    <HBox alignment="CENTER">
-                        <Label text="배양액 처방서 " />
-                    </HBox>
+                <VBox styleClass="vbox-container"
+                      AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0"
+                      AnchorPane.topAnchor="0.0"
+                      AnchorPane.bottomAnchor="0.0"
+                      alignment="CENTER"
+                      spacing="10">
+                    <VBox alignment="CENTER" spacing="10">
+                        <Label text="배양액 조성표 " />
+                        <Button text="가져오기" onAction="#load" />
+                    </VBox>
                 </VBox>
-                <!-- TableView 추가 -->
-                <TableView>
-                    <!-- 열 정의 -->
-                    <columns>
-                        <TableColumn text="다량원소"/>
-                        <TableColumn text="Ca"/>
-                        <TableColumn text="NO3"/>
-                        <TableColumn text="NH4"/>
-                        <TableColumn text="K"/>
-                        <TableColumn text="H2PO4"/>
-                        <TableColumn text="SO4"/>
-                    </columns>
-                </TableView>
-                <Button text="가져오기" onAction="#load" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.bottomAnchor="30.0" />
             </AnchorPane>
-
-            <!-- 세 번째 팬 -->
-            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <VBox styleClass="vbox-container" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" prefWidth="200.0" prefHeight="50.0" >
-                    <HBox alignment="CENTER">
-                        <Label text="배양액 분석결과서 " />
-                    </HBox>
-                </VBox>
-                <TableView>
-                    <!-- 열 정의 -->
-                    <columns>
-                        <TableColumn text="A액"/>
-                        <TableColumn text="100배액 기준"/>
-                    </columns>
-                </TableView>
-            </AnchorPane>
-
         </SplitPane>
     </content>
 </Tab>

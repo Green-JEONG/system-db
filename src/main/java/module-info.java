@@ -5,6 +5,7 @@ module org.main.culturesolutioncalculation {
     requires com.opencsv;
 
     requires com.zaxxer.hikari;
+    requires java.desktop;
     //requires html2pdf;
 
 

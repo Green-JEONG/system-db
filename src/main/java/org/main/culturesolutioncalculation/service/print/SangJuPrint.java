@@ -4,6 +4,8 @@ import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,8 +13,9 @@ import java.io.IOException;
 public class SangJuPrint {
     public void generatePDF() {
         String htmlStr = getHtmlStr();
+        String outputPath = "수경재배배양액조성표.pdf";
 
-        try (FileOutputStream outputStream = new FileOutputStream("수경재배배양액조성표.pdf")) {
+        try (FileOutputStream outputStream = new FileOutputStream(outputPath)) {
             ConverterProperties properties = new ConverterProperties();
             DefaultFontProvider fontProvider = new DefaultFontProvider(false, false, false);
             fontProvider.addFont("src/main/resources/css/malgun.ttf");
@@ -21,6 +24,13 @@ public class SangJuPrint {
             properties.setCharset("utf-8");
 
             HtmlConverter.convertToPdf(htmlStr, outputStream, properties);
+
+            // Open the generated PDF file
+            File pdfFile = new File(outputPath);
+            if (pdfFile.exists() && Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(pdfFile);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

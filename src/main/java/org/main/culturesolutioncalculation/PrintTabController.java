@@ -2,6 +2,7 @@ package org.main.culturesolutioncalculation;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import org.main.culturesolutioncalculation.service.print.SangJuPrint;
 
 import java.util.Map;
 
@@ -43,6 +44,10 @@ public class PrintTabController {
                 String settingText = entry.getKey() + ": " + entry.getValue().toString();
                 settingsLabel.setText(settingsLabel.getText() + settingText + "\n");
             }
+
+            // Call generatePDF method to create and open the PDF
+            SangJuPrint sangJuPrint = new SangJuPrint();
+            sangJuPrint.generatePDF();
 
         } catch (NullPointerException e) {
             System.out.println("값이 입력되지 않았습니다.");
