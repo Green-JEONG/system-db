@@ -30,16 +30,16 @@
                     <TextField fx:id="contact" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
+                    <Label text="이메일 : " />
+                    <TextField fx:id="email" promptText="입력" />
+                </HBox>
+                <HBox spacing="5">
                     <Label text="의뢰 일자 : " />
                     <DatePicker fx:id="date" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="재배규모 : " />
-                    <TextField fx:id="scale" promptText="입력" />
-                </HBox>
-                <HBox spacing="5">
                     <Label text="분석기록 " />
-                    <Button text="조회" onAction="#requestHistory" />
+                    <Button text="조회" onAction="#getRequestHistory" />
                 </HBox>
             </VBox>
             </HBox>
@@ -55,9 +55,9 @@
                             <BorderPane styleClass="borderpane" minHeight="100">
                                 <center>
                                     <VBox spacing="5">
-                                        <RadioButton text="원수" fx:id="" />
-                                        <RadioButton text="급액" fx:id=""  />
-                                        <RadioButton text="배액" fx:id=""  />
+                                        <RadioButton text="원수" fx:id="sampleType1" />
+                                        <RadioButton text="급액" fx:id="sampleType2"  />
+                                        <RadioButton text="배액" fx:id="sampleType3"  />
                                     </VBox>
                                 </center>
                             </BorderPane>
@@ -75,11 +75,11 @@
                             <BorderPane styleClass="borderpane" minHeight="100">
                                 <center>
                                     <VBox spacing="5">
-                                        <RadioButton text="딸기" fx:id="" />
-                                        <RadioButton text="오이" fx:id=""  />
-                                        <RadioButton text="토마토" fx:id=""  />
-                                        <RadioButton text="가지" fx:id=""  />
-                                        <RadioButton text="기타" fx:id=""  />
+                                        <RadioButton text="딸기" fx:id="cropType1" />
+                                        <RadioButton text="오이" fx:id="cropType2"  />
+                                        <RadioButton text="토마토" fx:id="cropType3"  />
+                                        <RadioButton text="가지" fx:id="cropType4"  />
+                                        <RadioButton text="기타" fx:id="cropType5"  />
                                     </VBox>
                                 </center>
                             </BorderPane>
@@ -102,7 +102,7 @@
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <TextField fx:id="" promptText="입력" />
+                                            <TextField fx:id="varietyName" promptText="입력" />
                                         </VBox>
                                     </center>
                                 </BorderPane>
@@ -121,10 +121,10 @@
                             <BorderPane styleClass="borderpane" minHeight="100">
                                 <center>
                                     <VBox spacing="5">
-                                        <RadioButton text="코이어" fx:id="" />
-                                        <RadioButton text="암면" fx:id=""  />
-                                        <RadioButton text="피트모스" fx:id=""  />
-                                        <RadioButton text="기타" fx:id=""  />
+                                        <RadioButton text="코이어" fx:id="substrateType1" />
+                                        <RadioButton text="암면" fx:id="substrateType2"  />
+                                        <RadioButton text="피트모스" fx:id="substrateType3"  />
+                                        <RadioButton text="기타" fx:id="substrateType4"  />
                                     </VBox>
                                 </center>
                             </BorderPane>
@@ -143,10 +143,10 @@
                             <BorderPane styleClass="borderpane" minHeight="100">
                                 <center>
                                     <VBox spacing="5">
-                                        <RadioButton text="우편" fx:id="" />
-                                        <RadioButton text="문자" fx:id=""  />
-                                        <RadioButton text="이메일" fx:id=""  />
-                                        <RadioButton text="기타" fx:id=""  />
+                                        <RadioButton text="우편" fx:id="deliveryMethod1" />
+                                        <RadioButton text="문자" fx:id="deliveryMethod2"  />
+                                        <RadioButton text="이메일" fx:id="deliveryMethod3"  />
+                                        <RadioButton text="기타" fx:id="deliveryMethod4"  />
                                     </VBox>
                                 </center>
                             </BorderPane>

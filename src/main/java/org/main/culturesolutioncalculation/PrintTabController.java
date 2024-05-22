@@ -2,14 +2,19 @@ package org.main.culturesolutioncalculation;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.print.SangJuPrint;
 
 import java.util.Map;
 
 public class PrintTabController {
     MainController mainController = new MainController();
-    UserInfo userInfo = mainController.getUserInfo();
+    UserInfo userInfo = MainController.getUserInfo();
+
+    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
     SettingInfo settingInfo = mainController.getSettingInfo();
+
+    private MediumService mediumService;
 
     @FXML
     private Label customerNameLabel;
@@ -18,9 +23,10 @@ public class PrintTabController {
     @FXML
     private Label contactLabel;
     @FXML
-    private Label processingDateLabel;
+    private Label emailLabel;
+
     @FXML
-    private Label scaleLabel;
+    private Label processingDateLabel;
     @FXML
     private Label selectedCultureLabel;
     @FXML
@@ -29,16 +35,20 @@ public class PrintTabController {
     @FXML
     private Label settingsLabel;
 
+    public PrintTabController() {
+        this.mediumService = new MediumService();
+    }
+
     @FXML
     public void load() {
         try {
-            customerNameLabel.setText(userInfo.getCustomerName());
+            customerNameLabel.setText(userInfo.getName());
             addressLabel.setText(userInfo.getAddress());
             contactLabel.setText(userInfo.getContact());
-            processingDateLabel.setText(userInfo.getProcessingDate().toString());
-            scaleLabel.setText(userInfo.getScale());
-            selectedCultureLabel.setText(userInfo.getSelectedCulture());
-            selectedCropLabel.setText(userInfo.getSelectedCrop());
+            emailLabel.setText(userInfo.getEmail());
+            processingDateLabel.setText(requestHistoryInfo.getRequestDate().toString());
+            selectedCultureLabel.setText(mediumService.getMediumTypeName(requestHistoryInfo.getMediumTypeId()));
+            selectedCropLabel.setText(requestHistoryInfo.getSelectedCropName());
 
             for (Map.Entry<String, Integer> entry : settingInfo.getTotalSetting().entrySet()) {
                 String settingText = entry.getKey() + ": " + entry.getValue().toString();

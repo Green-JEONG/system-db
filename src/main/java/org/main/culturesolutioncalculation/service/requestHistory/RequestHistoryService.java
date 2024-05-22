@@ -1,5 +1,6 @@
 package org.main.culturesolutioncalculation.service.requestHistory;
 
+import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 import org.main.culturesolutioncalculation.service.users.Users;
 
@@ -21,52 +22,69 @@ public class RequestHistoryService {
 
     //분석 기록 저장
     //TODO 테스트 해야 함
-    public void save(RequestHistory requestHistory){
-        String query = "insert into requestHistory (request_date, user_id, request_date, cultivacion_scale";
-        boolean hasSampleType = false, hasVarietyName = false, hasSubstrateType = false, hasReportIssuanceMethod = false;
+    public void save(RequestHistoryInfo requestHistory){
+        String query = "INSERT INTO requestHistory " +
+                "(request_date, user_id";
+        String values = "VALUES (?, ?";
 
-        //선택된 사항들도 추가
-        if(requestHistory.getSampleType()!=null) {
+        if (requestHistory.getSampleType() != null) {
             query += ", sample_type";
-            hasSampleType = true;
+            values += ", ?";
         }
-        if(requestHistory.getVarietyName()!=null) {
+        if (requestHistory.getVarietyName() != null) {
             query += ", variety_name";
-            hasVarietyName = true;
+            values += ", ?";
         }
-        if(requestHistory.getSubstrateType()!=null) {
+        if (requestHistory.getSubstrateType() != null) {
             query += ", substrate_type";
-            hasSubstrateType = true;
+            values += ", ?";
         }
-        if(requestHistory.getReportIssuanceMethod()!=null) {
-            query += ", report_issuance_method";
-            hasReportIssuanceMethod = true;
+        if (requestHistory.getDeliveryMethod() != null) {
+            query += ", delivery_method";
+            values += ", ?";
         }
 
-        query += ") values ("+
-                requestHistory.getRequestDate()+", "+requestHistory.getUserId()
-                +", "+requestHistory.getRequestDate()+", "+ requestHistory.cultivation_scale;
+        query += ") " + values + ")";
 
-        if(hasSampleType) query = query +", '"+requestHistory.getSampleType()+"'";
-        if(hasVarietyName) query = query +", '"+requestHistory.getVarietyName()+"'";
-        if(hasSubstrateType) query = query +", '"+requestHistory.getSubstrateType()+"'";
-        if(hasReportIssuanceMethod) query = query +", '"+requestHistory.getReportIssuanceMethod()+"'";
-
-        query += ")";
+        System.out.println("query = " + query);
 
         try (Connection connection = conn.getConnection();
-             Statement stmt = connection.createStatement();
-        ){
-            stmt.executeUpdate(query);
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
 
-        }catch (SQLException e){
+            pstmt.setTimestamp(1, requestHistory.getRequestDate());
+            pstmt.setLong(2, requestHistory.getUserInfo().getId());
+
+            int index = 3;
+
+            if (requestHistory.getSampleType() != null) {
+                pstmt.setString(index++, requestHistory.getSampleType());
+            }
+            if (requestHistory.getVarietyName() != null) {
+                pstmt.setString(index++, requestHistory.getVarietyName());
+            }
+            if (requestHistory.getSubstrateType() != null) {
+                pstmt.setString(index++, requestHistory.getSubstrateType());
+            }
+            if (requestHistory.getDeliveryMethod() != null) {
+                pstmt.setString(index++, requestHistory.getDeliveryMethod());
+            }
+
+            int result = pstmt.executeUpdate();
+
+            if (result > 0) {
+                System.out.println("Success insert requestHistory");
+            } else {
+                System.out.println("Insert failed requestHistory");
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     //해당 유저의 분석 리스트 반환
-    public List<RequestHistory> findByUser(int userId){
-        List<RequestHistory> histories = new LinkedList<>();
+    public List<RequestHistoryInfo> findByUser(int userId){
+        List<RequestHistoryInfo> histories = new LinkedList<>();
 
         String query = "select * from requestHistory where " +
                 "user_id = ?";
@@ -76,24 +94,18 @@ public class RequestHistoryService {
             pstmt.setInt(1, userId);
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
-
-                    System.out.println("resultSet.getTimestamp(\"request_date\") = " + resultSet.getTimestamp("request_date"));
-                    histories.add(new RequestHistory(
+                    histories.add(new RequestHistoryInfo(
                             resultSet.getInt("id"),
-                            resultSet.getInt("user_id"),
                             resultSet.getTimestamp("request_date"),
                             resultSet.getInt("culture_medium_id"),
-                            resultSet.getInt("cultivation_scale"),
                             resultSet.getString("sample_type"),
                             resultSet.getString("variety_name"),
+                            resultSet.getString("crop_type"),
                             resultSet.getString("substrate_type"),
-                            resultSet.getString("report_issuance_method")
+                            resultSet.getString("delivery_method"),
+                            resultSet.getString("selected_crop_name")
                     ));
                 }
-                for (RequestHistory history : histories) {
-                    System.out.println("history = " + history);
-                }
-
                 return histories;
             }
         }catch (SQLException e){

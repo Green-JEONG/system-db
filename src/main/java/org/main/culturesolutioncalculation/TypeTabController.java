@@ -1,12 +1,16 @@
 package org.main.culturesolutioncalculation;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TypeTabController {
 
@@ -22,27 +26,60 @@ public class TypeTabController {
     private TableView<String[]> tableView;
 
     @FXML
-    private ListView<String> listView;
+    private ListView<String> listView; //배양액 타입
+
+    private Map<Integer, String> mediumTypesMap = new HashMap<>();
+    private Map<String, Integer> nameToIdMap = new HashMap<>();
 
     private UserInfo userInfo = MainController.getUserInfo();
 
+    private RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
+
+    private MediumService mediumService;
+
     private String selectedCropName = "";
+
+    private int selectedMediumTypeId;
 
     public TypeTabController() throws IOException {
         data = new TypeData();
+        mediumService = new MediumService();
     }
 
     public void initialize() {
+
+        //배양액 이름 맵 받아오기
+        Map<Integer, String> mediumTypes = mediumService.getMediumTypes(); // 아이디, 이름
+
+        // mediumTypesMap과 nameToIdMap 초기화
+        for (Map.Entry<Integer, String> entry : mediumTypes.entrySet()) {
+            mediumTypesMap.put(entry.getKey(), entry.getValue());
+            nameToIdMap.put(entry.getValue(), entry.getKey());
+        }
+
+        // listView에 아이템 추가
+        ObservableList<String> items = FXCollections.observableArrayList(mediumTypes.values());
+        listView.setItems(items);
+
+
         listView.getItems().addAll("네덜란드 배양액", "야마자키 배양액", "네덜란드1999 배양액", "서울시립대(육묘-초기) 배양액", "서울시립대(초기-말기) 배양액", "야마사키 배양액", "한국원시 배양액");
 
-        // 네덜란드 배양액을 기본 선택으로 설정
-        listView.getSelectionModel().select("네덜란드 배양액");
-        updateComboBox("네덜란드 배양액");
-        updateTableView("네덜란드 배양액");
+        // 네덜란드 배양액을 기본으로 설정
+        String defaultMedium = "네덜란드 배양액";
+        listView.getSelectionModel().select(defaultMedium);
+        updateComboBox(defaultMedium);
+        updateTableView(defaultMedium);
 
+
+        // ListView 선택 변경 리스너 설정
         listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateComboBox(newValue);
             updateTableView(newValue);
+
+            // 선택된 배양액의 id 세팅
+            Integer selectedId = nameToIdMap.get(newValue);
+            selectedMediumTypeId = selectedId;
+            System.out.println("Selected Medium ID: " + selectedId);
 
         });
 
@@ -84,30 +121,31 @@ public class TypeTabController {
         TabPane tabPane = typeTab.getTabPane();
         int currentIndex = tabPane.getTabs().indexOf(typeTab);
 
-        if(userInfo != null) {
-            userInfo.setSelectedCulture(listView.getSelectionModel().getSelectedItem());
+        if(requestHistoryInfo != null) {
+            // 배양액 타입 아이디 세팅
+            requestHistoryInfo.setMediumTypeId(selectedMediumTypeId);
             String selectedComboBoxValue = comboBox.getValue();
             String[] selectedItem = tableView.getSelectionModel().getSelectedItem();
 
             if (selectedComboBoxValue != null && !selectedComboBoxValue.isEmpty()) {
-                userInfo.setSelectedCrop(selectedComboBoxValue);
+                requestHistoryInfo.setSelectedCropName(selectedComboBoxValue);
             } else if (selectedCropName != null && !selectedCropName.isEmpty()) {
-                userInfo.setSelectedCrop(selectedCropName);
+                requestHistoryInfo.setSelectedCropName(selectedCropName);
             } else {
                 System.err.println("ComboBox 값과 selectedCropName 값이 모두 설정되지 않았습니다.");
             }
 
-            //선택한 재배 작물 id userInfo에 주입
+            //선택한 재배 작물 id requestHistoryInfo에 주입
             if (selectedItem != null) {
                 int selectedItemId = Integer.parseInt(selectedItem[0]);
-                userInfo.setCultureMediumId(selectedItemId); //(culture_medium에 있는 튜플 id와 동일)
+                requestHistoryInfo.setMediumTypeId(selectedItemId); //(culture_medium에 있는 튜플 id와 동일)
             } else {
                 System.err.println("TableView에서 선택된 항목이 없습니다.");
             }
 
             tabPane.getSelectionModel().select(currentIndex + 1);
         } else {
-            System.err.println("UserInfo 객체가 초기화되지 않았습니다.");
+            System.err.println("RequestHistoryInfo 객체가 초기화되지 않았습니다.");
         }
     }
 

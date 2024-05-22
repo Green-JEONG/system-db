@@ -8,6 +8,8 @@ import java.io.IOException;
 public class MainController {
     private static UserInfo userInfo = new UserInfo();
 
+    private static RequestHistoryInfo requestHistoryInfo = new RequestHistoryInfo();
+
     private static SettingInfo settingInfo = new SettingInfo();
 
     private static TableData tableData = new TableData();
@@ -22,6 +24,10 @@ public class MainController {
 
     public static TableData getTableData() {
         return tableData;
+    }
+
+    public static RequestHistoryInfo getRequestHistoryInfo() {
+        return requestHistoryInfo;
     }
 
     public MacroTabController getMacroTabController() {

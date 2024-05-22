@@ -28,8 +28,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class MicroTabController {
-    MainController mainController;
-    UserInfo userInfo = mainController.getUserInfo();
+    UserInfo userInfo = MainController.getUserInfo();
+
+    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
 
     private MediumService mediumService;
 
@@ -103,7 +104,7 @@ public class MicroTabController {
         tableView = new TableView<>();
         data.clear();
 
-        String[] values = getStandardValues(userInfo.getSelectedCulture(), userInfo.getSelectedCrop());
+        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
 
         for (int i = 0; i < columnTitles.length; i++) {
             final int columnIndex = i;
@@ -142,11 +143,11 @@ public class MicroTabController {
 
     }
 
-    private String[] getStandardValues(String culture, String crop) {
+    private String[] getStandardValues(int mediumTypeId, String crop) {
         String[] values = new String[7];
 
         // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
-        Optional<CropNutrientStandard> cropData = mediumService.getCropData(userInfo.getCultureMediumId());
+        Optional<CropNutrientStandard> cropData = mediumService.getCropData(mediumTypeId);
         CropNutrientStandard selectedCropNutrient = cropData.get();
 
         if (selectedCropNutrient == null) {

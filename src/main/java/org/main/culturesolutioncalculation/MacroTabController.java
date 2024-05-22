@@ -28,10 +28,10 @@ import java.util.Optional;
 
 public class MacroTabController {
 
-    MainController mainController;
-
     private MediumService mediumService;
-    UserInfo userInfo = mainController.getUserInfo();
+    UserInfo userInfo = MainController.getUserInfo();
+
+    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
 
     @FXML
     private Tab macroTab;
@@ -104,7 +104,7 @@ public class MacroTabController {
         data.clear();
 
 
-        String[] values = getStandardValues(userInfo.getSelectedCulture(), userInfo.getSelectedCrop());
+        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
 
         for (int i = 0; i < columnTitles.length; i++) {
             final int columnIndex = i;
@@ -143,12 +143,12 @@ public class MacroTabController {
 
     }
 
-    private String[] getStandardValues(String culture, String crop) {
+    private String[] getStandardValues(int mediumCultureId, String crop) {
 
         String[] values = new String[7];
 
-        // 선택한 배양액 이름에 해당하는 NutrientSolution 객체 가져오기
-        Optional<CropNutrientStandard> cropData = mediumService.getCropData(userInfo.getCultureMediumId());
+        // 선택한 배양액 아이디에 해당하는 NutrientSolution 객체 가져오기
+        Optional<CropNutrientStandard> cropData = mediumService.getCropData(mediumCultureId);
         CropNutrientStandard selectedCropNutrient = cropData.get();
 
 

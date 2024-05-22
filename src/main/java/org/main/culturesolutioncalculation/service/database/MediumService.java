@@ -18,7 +18,7 @@ public class MediumService {
     }
 
     // 화면에 배양액 종류 보여주기
-    public Map<Integer, String> getMediumType(){
+    public Map<Integer, String> getMediumTypes(){
         Map<Integer, String> mediumTypes = new HashMap<>();
         String query = "SELECT id, name FROM medium_types";
 
@@ -149,6 +149,26 @@ public class MediumService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getMediumTypeName(int mediumTypeId) {
+        String query = "select name from medium_types where id = ?";
+        String mediumTypeName = "";
+        try (Connection connection = conn.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, mediumTypeId);
+            try(ResultSet resultSet = pstmt.executeQuery()){
+                while(resultSet.next()){
+                    mediumTypeName = resultSet.getString("name");
+                }
+                return mediumTypeName;
+            }catch(SQLException e){
+                throw new NoSuchElementException("해당 아이디의 배양액 타입은 존재하지 않습니다");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return mediumTypeName;
     }
     //해당 배양액에 해당하는 모든 기준값도 저장해야함 -> 이거 파일 넣으면 db 들어가도록?
 }
