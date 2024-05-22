@@ -145,7 +145,7 @@ public class MacroTabController {
 
     private String[] getStandardValues(int mediumCultureId, String crop) {
 
-        String[] values = new String[7];
+        String[] values = new String[8];
 
         // 선택한 배양액 아이디에 해당하는 NutrientSolution 객체 가져오기
         Optional<CropNutrientStandard> cropData = mediumService.getCropData(mediumCultureId);
@@ -166,6 +166,7 @@ public class MacroTabController {
         values[4] = String.valueOf(selectedCropNutrient.getCa());
         values[5] = String.valueOf(selectedCropNutrient.getMg());
         values[6] = String.valueOf(selectedCropNutrient.getSO4());
+        values[7] = String.valueOf(selectedCropNutrient.getP());
 
         return values;
     }

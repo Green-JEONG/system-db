@@ -93,7 +93,8 @@ public class CSVDataReader {
                 double Mn = Double.parseDouble(row[12]);
                 double Zn = Double.parseDouble(row[13]);
                 double Mo = Double.parseDouble(row[14]);
-                crops.add(new CropNutrientStandard(id, name, fileName,EC,NO3,NH4,H2PO4,K,Ca,Mg,SO4,Fe,Cu,B,Mn,Zn,Mo));
+                double P = Double.parseDouble(row[15]);
+                crops.add(new CropNutrientStandard(id, name, fileName,EC,NO3,NH4,H2PO4,K,Ca,Mg,SO4,Fe,Cu,B,Mn,Zn,Mo, P));
                 row = csvReader.readNext();
                 i++;
             }

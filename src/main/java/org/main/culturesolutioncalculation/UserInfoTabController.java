@@ -145,6 +145,17 @@ public class UserInfoTabController {
 
     @FXML
     private void saveUserInfo() {
+
+        //사용자 정보 입려 안하고 다음 탭 버튼 누르면 경고
+        if (username.getText().isEmpty() || address.getText().isEmpty() || contact.getText().isEmpty() || email.getText().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("입력 오류");
+            alert.setHeaderText(null);
+            alert.setContentText("사용자 정보를 입력해주세요");
+            alert.showAndWait();
+            return;
+        }
+
         if(userInfo != null) {
             userInfo.setName(username.getText().toString());
             userInfo.setAddress(address.getText().toString());

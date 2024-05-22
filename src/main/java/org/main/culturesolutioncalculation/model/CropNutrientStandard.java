@@ -21,7 +21,9 @@ public class CropNutrientStandard {
     private final double Zn;      // 미량 아연 이온 (µmol/L)
     private final double Mo;     // 미량 몰리브덴 이온 (µmol/L)
 
-    public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double NO3, double NH4, double H2PO4, double K, double Ca, double Mg, double SO4, double Fe, double Cu, double B, double Mn, double Zn, double Mo) {
+    private final double P; // 다량 인산 이온
+
+    public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double NO3, double NH4, double H2PO4, double K, double Ca, double Mg, double SO4, double Fe, double Cu, double B, double Mn, double Zn, double Mo, double P) {
         this.id = id;
         this.cropName = cropName;
         this.nutrientSolutionName = nutrientSolutionName;
@@ -39,6 +41,7 @@ public class CropNutrientStandard {
         this.Mn = Mn;
         this.Zn = Zn;
         this.Mo = Mo;
+        this.P = P;
     }
 
     public int getId(){return id;}
@@ -107,25 +110,7 @@ public class CropNutrientStandard {
         return Mo;
     }
 
-    @Override
-    public String toString() {
-        return "CropNutrientStandard{" +
-                "cropName='" + cropName + '\'' +
-                ", nutrientSolutionName='" + nutrientSolutionName + '\'' +
-                ", EC=" + EC +
-                ", NO3=" + NO3 +
-                ", NH4=" + NH4 +
-                ", H2PO4=" + H2PO4 +
-                ", K=" + K +
-                ", Ca=" + Ca +
-                ", Mg=" + Mg +
-                ", SO4=" + SO4 +
-                ", Fe=" + Fe +
-                ", Cu=" + Cu +
-                ", B=" + B +
-                ", Mn=" + Mn +
-                ", Zn=" + Zn +
-                ", Mo=" + Mo +
-                '}';
+    public double getP() {
+        return P;
     }
 }

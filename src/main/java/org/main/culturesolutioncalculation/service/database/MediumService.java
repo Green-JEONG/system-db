@@ -83,7 +83,8 @@ public class MediumService {
                             resultSet.getDouble("B"),
                             resultSet.getDouble("Mn"),
                             resultSet.getDouble("Zn"),
-                            resultSet.getDouble("Mo")
+                            resultSet.getDouble("Mo"),
+                            resultSet.getDouble("P")
                     );
                     return Optional.of(cropNutrientStandard);
                 }
@@ -123,7 +124,8 @@ public class MediumService {
                             resultSet.getDouble("B"),
                             resultSet.getDouble("Mn"),
                             resultSet.getDouble("Zn"),
-                            resultSet.getDouble("Mo")
+                            resultSet.getDouble("Mo"),
+                            resultSet.getDouble("P")
                     ));
                 }
             }

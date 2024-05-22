@@ -412,6 +412,7 @@ public class EmbodyPrintStrategyTest {
     }
 
 
+    //TODO : 이거 DB에서 읽어오도록 수정할 것 -> csvDataReader 쓰는 거 다 삭제!!
     private CropNutrientStandard getCropNutrients (){ //해당 배양액 종류에 해당하는 재배 작물의 원수 기준량 추출
 
         CSVDataReader csvDataReader = new CSVDataReader();
