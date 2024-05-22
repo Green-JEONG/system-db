@@ -26,8 +26,8 @@
                             <BorderPane styleClass="borderpane" minHeight="100">
                                 <center>
                                     <VBox spacing="5">
-                                        <RadioButton text="Ca(NO3)2·4H2O" fx:id="group3_1" />
-                                        <RadioButton text="5[Ca(NO3)2·2H2O]NH4NO3" fx:id="group3_2"  />
+                                        <RadioButton text="Ca(NO3)2·4H2O" fx:id="calciumNitrate4" />
+                                        <RadioButton text="5[Ca(NO3)2·2H2O]NH4NO3" fx:id="calciumNitrate10"  />
                                     </VBox>
                                 </center>
                             </BorderPane>
@@ -83,8 +83,8 @@
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <RadioButton text="Na2MoO4·2H2O" fx:id="group7_1" />
-                                            <RadioButton text="(NH4)2Mo7O24·4H2O" fx:id="group7_2"  />
+                                            <RadioButton text="Na2MoO4·2H2O" fx:id="sodiumMolybdateDihydrate" />
+                                            <RadioButton text="(NH4)2Mo7O24·4H2O" fx:id="ammoniumHeptamolybdateTetrahydrate"  />
                                         </VBox>
                                     </center>
                                 </BorderPane>
@@ -105,9 +105,9 @@
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <RadioButton text="ppm(피피엠)" fx:id="group1_1" />
-                                            <RadioButton text="mM(밀리몰)" fx:id="group1_2" />
-                                            <RadioButton text="me(밀리당량)" fx:id="group1_3" />
+                                            <RadioButton text="ppm(피피엠)" fx:id="macroPpm" />
+                                            <RadioButton text="mM(밀리몰)" fx:id="macroMm" />
+                                            <RadioButton text="me(밀리당량)" fx:id="macroMe" />
                                         </VBox>
                                     </center>
                                 </BorderPane>
@@ -118,8 +118,8 @@
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <RadioButton text="ppm(피피엠)" fx:id="group2_1" />
-                                            <RadioButton text="µM(마이크로몰)" fx:id="group2_2"  />
+                                            <RadioButton text="ppm(피피엠)" fx:id="microPpm" />
+                                            <RadioButton text="µM(마이크로몰)" fx:id="microUm"  />
                                         </VBox>
                                     </center>
                                 </BorderPane>
@@ -138,40 +138,39 @@
                         <HBox spacing="5">
                             <!-- 원수 고려 O -->
                             <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                            <VBox alignment="CENTER" spacing="5">
-                                <Label text="원수 고려 O" />
-                                <BorderPane styleClass="borderpane" minHeight="100">
-                                    <center>
-                                        <VBox spacing="5">
-                                            <HBox spacing="5">
-                                            <VBox>
-                                            <RadioButton text="산도 (pH)" fx:id="group8_1" />
-                                            <RadioButton text="농도 (EC)" fx:id="" />
-                                            <RadioButton text="질산태질소 (NO3-N)" fx:id="" />
-                                            <RadioButton text="암모니아태질소 (NH4-N)" fx:id="" />
-                                            <RadioButton text="인 (P)" fx:id="" />
-                                            <RadioButton text="칼륨 (K)" fx:id="" />
-                                            <RadioButton text="칼슘 (Ca)" fx:id="" />
-                                            <RadioButton text="마그네슘 (Mg)" fx:id="" />
-                                            <RadioButton text="황 (S)" fx:id="" />
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="원수 고려 O" />
+                                    <BorderPane styleClass="borderpane" minHeight="100">
+                                        <center>
+                                            <VBox spacing="5">
+                                                <HBox spacing="5">
+                                                    <VBox>
+                                                        <CheckBox text="산도 (pH)" fx:id="ph" />
+                                                        <CheckBox text="농도 (EC)" fx:id="ec" />
+                                                        <CheckBox text="질산태질소 (NO3-N)" fx:id="no3n" />
+                                                        <CheckBox text="암모니아태질소 (NH4-N)" fx:id="nh4n" />
+                                                        <CheckBox text="인 (P)" fx:id="p" />
+                                                        <CheckBox text="칼륨 (K)" fx:id="k" />
+                                                        <CheckBox text="칼슘 (Ca)" fx:id="ca" />
+                                                        <CheckBox text="마그네슘 (Mg)" fx:id="mg" />
+                                                        <CheckBox text="황 (S)" fx:id="s" />
+                                                    </VBox>
+                                                    <VBox>
+                                                        <CheckBox text="염소 (Cl)" fx:id="cl" />
+                                                        <CheckBox text="나트륨 (Na)" fx:id="na" />
+                                                        <CheckBox text="철 (Fe)" fx:id="fe" />
+                                                        <CheckBox text="붕소 (B)" fx:id="b" />
+                                                        <CheckBox text="망간 (Mn)" fx:id="mn" />
+                                                        <CheckBox text="아연 (Zn)" fx:id="zn" />
+                                                        <CheckBox text="구리 (Cu)" fx:id="cu" />
+                                                        <CheckBox text="몰리브뎀 (Mo)" fx:id="mo" />
+                                                        <CheckBox text="중탄산 (HCO3)" fx:id="hco3" />
+                                                    </VBox>
+                                                </HBox>
                                             </VBox>
-
-                                            <VBox>
-                                            <RadioButton text="염소 (Cl)" fx:id="" />
-                                            <RadioButton text="나트륨 (Na)" fx:id="" />
-                                            <RadioButton text="철 (Fe)" fx:id="" />
-                                            <RadioButton text="붕소 (B)" fx:id="" />
-                                            <RadioButton text="망간 (Mn)" fx:id="" />
-                                            <RadioButton text="아연 (Zn)" fx:id="" />
-                                            <RadioButton text="구리 (Cu)" fx:id="" />
-                                            <RadioButton text="몰리브뎀 (Mo)" fx:id="" />
-                                            <RadioButton text="중탄산 (HCO3)" fx:id="" />
-                                            </VBox>
-                                            </HBox>
-                                        </VBox>
-                                    </center>
-                                </BorderPane>
-                            </VBox>
+                                        </center>
+                                    </BorderPane>
+                                </VBox>
                             </AnchorPane>
                             <!-- 원수 고려 X -->
                             <VBox alignment="CENTER" spacing="5">
@@ -179,19 +178,19 @@
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <RadioButton text="고려하지 않습니다." fx:id="group8_2"  />
+                                            <RadioButton text="고려하지 않습니다." fx:id="considerFalse"  />
                                         </VBox>
                                     </center>
                                 </BorderPane>
                             </VBox>
                             <!-- 원수 입력 단위 -->
                             <VBox alignment="CENTER" spacing="5">
-                                <Label text="원수 입력 단위" />
+                                <Label text="고려 원수 입력 단위" />
                                 <BorderPane styleClass="borderpane" minHeight="100">
                                     <center>
                                         <VBox spacing="5">
-                                            <RadioButton text="ppm(피피엠)" fx:id="group9_1" />
-                                            <RadioButton text="mM(밀리몰), µM(마이크로몰)" fx:id="group9_2"  />
+                                            <RadioButton text="ppm(피피엠)" fx:id="consideredUnitPpm" />
+                                            <RadioButton text="mM(밀리몰), µM(마이크로몰)" fx:id="consideredUnitMm"  />
                                         </VBox>
                                     </center>
                                 </BorderPane>

@@ -3,26 +3,26 @@ package org.main.culturesolutioncalculation;
 import java.util.Map;
 
 public class TableData {
-    private Map<String, Integer> macroSettings;
-    private Map<String, Integer> microSettings;
+    private Map<String, String> macroSettings;
+    private Map<String, String> microSettings;
 
     public TableData() {
     }
 
 
-    public void setMacroSettings(Map<String, Integer> macroSettings) {
-        this.macroSettings = macroSettings;
-    }
-
-    public void setMicroSettings(Map<String, Integer> microSettings) {
-        this.microSettings = microSettings;
-    }
-
-    public Map<String, Integer> getMacroSettings() {
+    public Map<String, String> getMacroSettings() {
         return macroSettings;
     }
 
-    public Map<String, Integer> getMicroSettings() {
+    public Map<String, String> getMicroSettings() {
         return microSettings;
+    }
+
+    public void setMacroSettings(Map<String, String> macroSettings) {
+        this.macroSettings = macroSettings;
+    }
+
+    public void setMicroSettings(Map<String, String> microSettings) {
+        this.microSettings = microSettings;
     }
 }

@@ -25,7 +25,7 @@ public class MicroResultController {
 
     @FXML
     public void initialize() {
-        Map<String, Integer> microSettings = tableData.getMicroSettings();
+        Map<String, String> microSettings = tableData.getMicroSettings();
         if (microSettings == null) {
             initTableView();
         } else {
@@ -77,22 +77,23 @@ public class MicroResultController {
         tableView.setItems(data);
     }
 
-    private void showResultTable(Map<String, Integer> microSettings) {
+    // TODO 이거 뭐하는 함수인지 좀 더 까봐야 함
+    private void showResultTable(Map<String, String> microSettings) {
         initTableView();
 
-        String settingElementUnit = String.valueOf(microSettings.get("설정 미량원소 단위").intValue());
-        String ironFertilizer = String.valueOf(microSettings.get("철 비료").intValue());
-        String boronFertilizer = String.valueOf(microSettings.get("붕소 비료").intValue());
-        String manganeseFertilizer = String.valueOf(microSettings.get("망간 비료").intValue());
-        String molybdenumFertilizer = String.valueOf(microSettings.get("몰리브뎀 비료").intValue());
-
-        // 특정 행에 값 설정
-        int rowIndex = 4; // 5번째 행
-        data.get(rowIndex).set(3, settingElementUnit); // 설정 다량원소 단위 열
-        data.get(rowIndex).set(4, ironFertilizer); // 질산칼슘 비료 열
-        data.get(rowIndex).set(5, boronFertilizer); // 붕소 비료 열
-        data.get(rowIndex).set(6, manganeseFertilizer); // 망간 비료 열
-        data.get(rowIndex).set(7, molybdenumFertilizer); // 몰리브뎀 비료 열
+//        String settingElementUnit = String.valueOf(microSettings.get("설정 미량원소 단위").intValue());
+//        String ironFertilizer = String.valueOf(microSettings.get("철 비료").intValue());
+//        String boronFertilizer = String.valueOf(microSettings.get("붕소 비료").intValue());
+//        String manganeseFertilizer = String.valueOf(microSettings.get("망간 비료").intValue());
+//        String molybdenumFertilizer = String.valueOf(microSettings.get("몰리브뎀 비료").intValue());
+//
+//        // 특정 행에 값 설정
+//        int rowIndex = 4; // 5번째 행
+//        data.get(rowIndex).set(3, settingElementUnit); // 설정 다량원소 단위 열
+//        data.get(rowIndex).set(4, ironFertilizer); // 질산칼슘 비료 열
+//        data.get(rowIndex).set(5, boronFertilizer); // 붕소 비료 열
+//        data.get(rowIndex).set(6, manganeseFertilizer); // 망간 비료 열
+//        data.get(rowIndex).set(7, molybdenumFertilizer); // 몰리브뎀 비료 열
 
         tableView.setItems(data);
 

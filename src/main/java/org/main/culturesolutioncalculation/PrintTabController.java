@@ -50,8 +50,8 @@ public class PrintTabController {
             selectedCultureLabel.setText(mediumService.getMediumTypeName(requestHistoryInfo.getMediumTypeId()));
             selectedCropLabel.setText(requestHistoryInfo.getSelectedCropName());
 
-            for (Map.Entry<String, Integer> entry : settingInfo.getTotalSetting().entrySet()) {
-                String settingText = entry.getKey() + ": " + entry.getValue().toString();
+            for (Map.Entry<String, String> entry : settingInfo.getTotalSetting().entrySet()) {
+                String settingText = entry.getKey() + ": " + entry.getValue();
                 settingsLabel.setText(settingsLabel.getText() + settingText + "\n");
             }
 

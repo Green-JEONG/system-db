@@ -59,9 +59,9 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     }
 
     //분자 별 갖고 있는 미량 원소 비율을 가져옴. userMicroNutrients : 사용자가 선택한 미량원소 리스트
-    private void getMajorCompoundRatio(List<String> userMicroNutrients){
+    private void getMajorCompoundRatio(List<String> userMicroNutrients){ // 몰리브뎀 화합물 종류만 들어옴
 
-        String query = "select * from micronutrients where micro in ('CuSO4·5H2O', 'ZnSO4·7H2O'"; //황산 구리, 황산 아연 화합물은 무조건 선택
+        String query = "select * from micronutrients where micro in ('CuSO4·5H2O', 'ZnSO4·7H2O', 'Fe-EDTA', 'H3BO3', 'MnSO4·5H2O'"; //황산 구리, 황산 아연, Fe-EDTA, H3BO3, MnSO4·5H2O 화합물은 무조건 선택
 
         for (String micro : userMicroNutrients) {
             query += ", '"+micro+"'";
@@ -104,7 +104,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     // 분자량*시비량/원자량/함량갯수 = 100배액
     /*
-      name = ZnSO4쨌7H2O
+      name = ZnSO4·7H2O
       compoundsRatio = {content_count=1.0, Zn=1.0, mass=65.37}
      */
     public Map<String, Map<String, Double>> calculateDistributedValues() {

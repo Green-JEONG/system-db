@@ -27,7 +27,7 @@ public class MacroResultController {
 
     @FXML
     public void initialize() {
-        Map<String, Integer> macroSettings = tableData.getMacroSettings();
+        Map<String, String> macroSettings = tableData.getMacroSettings();
         if (macroSettings == null) {
             initTableView();
         } else {
@@ -81,16 +81,17 @@ public class MacroResultController {
     }
 
 
-    private void showResultTable(Map<String, Integer> macroSettings) {
+    //TODO -> 이거 뭐하는 함수인지 좀 더 까봐야겠음
+    private void showResultTable(Map<String, String> macroSettings) {
         initTableView();
 
-        Integer settingElementUnit = macroSettings.get("설정 다량원소 단위").intValue();
-        Integer calciumNitrateFertilizer = macroSettings.get("질산칼슘 비료").intValue();
-
-        // 특정 행에 값 설정
-        int rowIndex = 4; // 5번째 행
-        data.get(rowIndex).set(6, String.valueOf(settingElementUnit)); // 설정 다량원소 단위 열
-        data.get(rowIndex).set(7, String.valueOf(calciumNitrateFertilizer)); // 질산칼슘 비료 열
+//        Integer settingElementUnit = macroSettings.get("설정 다량원소 단위").intValue();
+//        Integer calciumNitrateFertilizer = macroSettings.get("질산칼슘 비료").intValue();
+//
+//        // 특정 행에 값 설정
+//        int rowIndex = 4; // 5번째 행
+//        data.get(rowIndex).set(6, String.valueOf(settingElementUnit)); // 설정 다량원소 단위 열
+//        data.get(rowIndex).set(7, String.valueOf(calciumNitrateFertilizer)); // 질산칼슘 비료 열
 
 
         tableView.setItems(data);

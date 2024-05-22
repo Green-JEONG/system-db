@@ -119,17 +119,17 @@ public class ToolbarController {
     @FXML
     public void onCalcButtonClick(ActionEvent actionEvent) {
         // 설정 정보 가져오기
-        Map<String, Integer> totalSetting = settingInfo.getTotalSetting();
+        Map<String, String> totalSetting = settingInfo.getTotalSetting();
 
         // 다량원소 탭 설정 정보
-        Map<String, Integer> macroSettings = new HashMap<>();
+        Map<String, String> macroSettings = new HashMap<>();
         macroSettings.put("설정 다량원소 단위", totalSetting.get("설정 다량원소 단위"));
         macroSettings.put("질산칼슘 비료", totalSetting.get("질산칼슘 비료"));
         macroSettings.put("원수 고려 유무", totalSetting.get("원수 고려 유무"));
         macroSettings.put("원수 입력 단위", totalSetting.get("원수 입력 단위"));
 
         // 미량원소 탭 설정 정보
-        Map<String, Integer> microSettings = new HashMap<>();
+        Map<String, String> microSettings = new HashMap<>();
         microSettings.put("설정 미량원소 단위", totalSetting.get("설정 미량원소 단위"));
         microSettings.put("철 비료", totalSetting.get("철 비료"));
         microSettings.put("붕소 비료", totalSetting.get("붕소 비료"));
