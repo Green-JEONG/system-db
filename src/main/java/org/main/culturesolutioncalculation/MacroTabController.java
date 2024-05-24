@@ -24,6 +24,7 @@ import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 public class MacroTabController {
@@ -32,6 +33,9 @@ public class MacroTabController {
     UserInfo userInfo = MainController.getUserInfo();
 
     RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
+
+    SettingInfo settingInfo = MainController.getSettingInfo();
+
 
     @FXML
     private Tab macroTab;
@@ -167,6 +171,13 @@ public class MacroTabController {
         values[5] = String.valueOf(selectedCropNutrient.getMg());
         values[6] = String.valueOf(selectedCropNutrient.getSO4());
         values[7] = String.valueOf(selectedCropNutrient.getP());
+
+        Map<String, String> totalSetting = settingInfo.getTotalSetting();
+
+        //원수 고려 안하는 경우 원수값 입력 row에 다 0으로 고정
+        if(totalSetting.get("원수 고려 유무").equals("0")){
+
+        }
 
         return values;
     }
