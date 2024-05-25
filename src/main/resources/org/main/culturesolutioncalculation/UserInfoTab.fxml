@@ -15,7 +15,7 @@
                 <URL value="@style/application2.css" />
             </stylesheets>
 
-            <HBox spacing="10" style="-fx-padding: 0 0 0 90;">
+            <HBox spacing="10" style="-fx-padding: 0 0 0 110;">
             <VBox spacing="10">
                 <HBox spacing="10">
                     <Label text="이름 : " />
@@ -42,6 +42,14 @@
                     <Button text="조회" onAction="#getRequestHistory" />
                 </HBox>
             </VBox>
+
+<!--                <VBox spacing="10">-->
+<!--                    <HBox spacing="5">-->
+<!--                        <Label text="의뢰 일자 : " />-->
+<!--                        <DatePicker fx:id="" />-->
+<!--                    </HBox>-->
+<!--                </VBox>-->
+
             </HBox>
 
             <HBox alignment="CENTER">
