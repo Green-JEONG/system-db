@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.Node;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -41,14 +42,13 @@ public class MacroResultController {
             tableView = new TableView<>();
         }
 
-        String[] columnTitles = {"(100 배액 기준)\n   비료염 종류", "분자식", "시비량", "단위", "NO3-N", "NH4-N", "P", "K", "Ca", "Mg", "SO4-S"};
+        String[] columnTitles = {"(100 배액 기준)\n   비료염 종류", "분자식", "시비량", "단위", "NO3-N", "NH4-N", "P", "K", "Ca", "Mg", "SO4-S", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
         String[] rowTitles = {"설정농도(mM)", "시비농도(mM)", "질산칼륨", "질산칼슘(4수염)", "질산칼슘(10수염)", "제1인산암모늄", "제1인산칼륨", "황산마그네슘", "질산마그네슘", "질산암모늄(초안)",
-                "황산암모늄(유안)", "염화암모늄(염안)", "황산칼륨", "염화칼륨", "염화칼슘", "킬레이트철", "붕산", "황산망간", "황산아연", "황산구리", "몰리브덴산나트륨", "몰리브덴산암모늄", "중탄산칼륨", "수산화칼륨", "합계"};
+                "황산암모늄(유안)", "염화암모늄(염안)", "황산칼륨", "염화칼륨", "염화칼슘", "중탄산칼륨", "수산화칼륨", "합계"};
 
         // 분자식에 들어갈 값
         String[] formula = {"", "", "KNO3", "Ca(NO3)2-4H2O", "5[Ca(NO3)2·2H2O]NH4NO3", "NH4H2PO4", "KH2PO4", "MgSO4-7H2O", "Mg(NO3)2-6H2O",
-                "NH4NO3", "(NH4)2SO4", "NH4CI", "K2SO4", "KCI", "CaCI2·2H2O", "EDTAFeNa·3H2O", "H3BO3", "MnSO4·H2O", "ZnSO4·7H2O",
-                "CuSO4·5H2O", "Na2MoO4·2H2O", "(NH4)6Mo7O24·4H2O", "KHCO3", "KOH", ""};
+                "NH4NO3", "(NH4)2SO4", "NH4CI", "K2SO4", "KCI", "CaCI2·2H2O", "KHCO3", "KOH", ""};
 
         for (int i = 0; i < columnTitles.length; i++) {
             final int columnIndex = i;
