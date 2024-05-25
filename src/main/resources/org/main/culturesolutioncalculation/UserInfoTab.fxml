@@ -12,13 +12,13 @@
     <content>
         <VBox alignment="CENTER" spacing="10">
             <stylesheets>
-                <URL value="@style/application.css" />
+                <URL value="@style/application2.css" />
             </stylesheets>
 
-            <HBox alignment="CENTER" spacing="10">
+            <HBox spacing="10" style="-fx-padding: 0 0 0 90;">
             <VBox spacing="10">
                 <HBox spacing="10">
-                    <Label text="성명 : " />
+                    <Label text="이름 : " />
                     <TextField fx:id="username" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
