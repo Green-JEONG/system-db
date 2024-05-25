@@ -26,7 +26,7 @@
                     <TextField fx:id="address" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
-                    <Label text="연락처 : " />
+                    <Label text="전화번호 : " />
                     <TextField fx:id="contact" promptText="입력" />
                 </HBox>
                 <HBox spacing="5">
