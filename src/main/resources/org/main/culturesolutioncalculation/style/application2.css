@@ -3,19 +3,19 @@
 /* 전체 Body에 대한 스타일 */
 body {
     -fx-background-color: #f4f4f4;
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
 }
 
 /* 전체 Label에 대한 스타일 */
 .label {
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
 }
 
 /* 전체 Button에 대한 스타일 */
 .button {
     -fx-background-color: #007bff;
     -fx-text-fill: white;
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
     -fx-cursor: hand;
     -fx-background-radius: 5px;
 }
@@ -23,12 +23,12 @@ body {
 /* 전체 TextField에 대한 스타일 */
 .text-field {
     -fx-background-radius: 3px;
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
 }
 
 /* 전체 TextArea에 대한 스타일 */
 .text-area {
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
     -fx-pref-width: 300px;
     -fx-pref-height: 200px;
     -fx-background-radius: 5px;
