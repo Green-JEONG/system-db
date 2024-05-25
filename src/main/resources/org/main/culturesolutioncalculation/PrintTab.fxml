@@ -2,11 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import java.net.URL?>
-
-<?import javafx.scene.control.skin.TableHeaderRow?>
-<?import javafx.collections.FXCollections?>
 
 <Tab xmlns="http://javafx.com/javafx"
      xmlns:fx="http://javafx.com/fxml"
@@ -27,9 +23,33 @@
                       alignment="CENTER"
                       spacing="10">
                     <VBox alignment="CENTER" spacing="10">
-                        <Label text="분석결과서 " />
-                        <Button text="가져오기" onAction="#load" />
+                        <Label text="분석결과서 " style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     </VBox>
+                        <VBox spacing="10">
+                            <HBox spacing="10">
+                                <Label text="의뢰자 : " />
+                            </HBox>
+                            <HBox spacing="5">
+                                <Label text="전화번호 : " />
+                            </HBox>
+                            <HBox spacing="5">
+                                <Label text="주소 : " />
+                            </HBox>
+                            <HBox spacing="5">
+                                <Label text="작물명 : " />
+                            </HBox>
+                            <HBox spacing="5">
+                                <Label text="시료종류 : " />
+                            </HBox>
+                        </VBox>
+                        <TableView fx:id="analysisTable">
+                            <columns>
+                            </columns>
+                        </TableView>
+                    <HBox alignment="CENTER" spacing="10">
+                        <Button text="가져오기" onAction="#loadAnalysisData" />
+                        <Button text="프린트" onAction="#load" />
+                    </HBox>
                 </VBox>
             </AnchorPane>
 
@@ -43,9 +63,43 @@
                       alignment="CENTER"
                       spacing="10">
                     <VBox alignment="CENTER" spacing="10">
-                        <Label text="배양액 조성표 " />
-                        <Button text="가져오기" onAction="#load" />
+                        <Label text="배양액 조성표 " style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                     </VBox>
+                    <VBox spacing="10">
+                        <HBox spacing="10">
+                            <Label text="시료번호 : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="의뢰인-이름 : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="의뢰인-주소 : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="의뢰인-전화번호 : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="재배작물 : " />
+                            <Label text="품종 : " style="-fx-padding: 0 0 0 150;"/>
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="원수수질-pH : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="원수수질-EC(dS/m) : " />
+                        </HBox>
+                        <HBox spacing="5">
+                            <Label text="원수수질-중탄산(mg/L) : " />
+                        </HBox>
+                    </VBox>
+                        <TableView fx:id="compositionTable">
+                            <columns>
+                            </columns>
+                        </TableView>
+                    <HBox alignment="CENTER" spacing="10">
+                        <Button text="가져오기" onAction="#loadCompositionData" />
+                        <Button text="프린트" onAction="#load" />
+                    </HBox>
                 </VBox>
             </AnchorPane>
         </SplitPane>
