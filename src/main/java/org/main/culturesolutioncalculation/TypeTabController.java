@@ -51,6 +51,10 @@ public class TypeTabController {
         //배양액 이름 맵 받아오기
         Map<Integer, String> mediumTypes = mediumService.getMediumTypes(); // 아이디, 이름
 
+        for (Integer i : mediumTypes.keySet()) {
+            mediumTypes.get(i);
+        }
+
         // mediumTypesMap과 nameToIdMap 초기화
         for (Map.Entry<Integer, String> entry : mediumTypes.entrySet()) {
             mediumTypesMap.put(entry.getKey(), entry.getValue());

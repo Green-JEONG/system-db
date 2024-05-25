@@ -17,11 +17,59 @@ public class RequestHistoryInfo {
     private String deliveryMethod; //교부 방법
 
     private String selectedCropName;
+    private double ph; //산도
+    private double ec; //농도
+    private double hco3; //중탄산
+
+    public double getPh() {
+        return ph;
+    }
+
+    public double getEc() {
+        return ec;
+    }
+
+    public double getHco3() {
+        return hco3;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setPh(double ph) {
+        this.ph = ph;
+    }
+
+    public void setEc(double ec) {
+        this.ec = ec;
+    }
+
+    public void setHco3(double hco3) {
+        this.hco3 = hco3;
+    }
 
     public RequestHistoryInfo() {
 
     }
 
+    public RequestHistoryInfo(int id, Timestamp requestDate, UserInfo userInfo, int mediumTypeId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName, double ph, double ec, double hco3) {
+        this.id = id;
+        this.requestDate = requestDate;
+        this.userInfo = userInfo;
+        this.mediumTypeId = mediumTypeId;
+        this.sampleType = sampleType;
+        this.varietyName = varietyName;
+        this.cropType = cropType;
+        this.substrateType = substrateType;
+        this.deliveryMethod = deliveryMethod;
+        this.selectedCropName = selectedCropName;
+        this.ph = ph;
+        this.ec = ec;
+        this.hco3 = hco3;
+    }
+
+    // 유저 정보를 통해 조회할 때는 ph, ec, hco3
     public RequestHistoryInfo(int id, Timestamp requestDate, int mediumTypeId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName) {
         this.id = id;
         this.requestDate = requestDate;

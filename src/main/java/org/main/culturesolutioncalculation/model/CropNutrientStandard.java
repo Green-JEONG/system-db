@@ -6,7 +6,9 @@ public class CropNutrientStandard {
     private final int id;
     private final  String cropName;
     private final String nutrientSolutionName;
-    private final double EC;      // 전기전도도 (dS•m-1)
+    private double EC;      // 전기전도도 (dS•m-1)
+    private double PH; //산도
+    private double HCO3; //농도
     private final double NO3;   // 다량 질산 이온 (mmol/L)
     private final double NH4;    // 다량 암모늄 이온 (mmol/L)
     private final double H2PO4;  // 다량 인산 이온 (mmol/L)
@@ -23,6 +25,7 @@ public class CropNutrientStandard {
 
     private final double P; // 다량 인산 이온
 
+    //db에는 산도, 중탄산 없으므로 이 생성자 사용
     public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double NO3, double NH4, double H2PO4, double K, double Ca, double Mg, double SO4, double Fe, double Cu, double B, double Mn, double Zn, double Mo, double P) {
         this.id = id;
         this.cropName = cropName;
@@ -42,6 +45,37 @@ public class CropNutrientStandard {
         this.Zn = Zn;
         this.Mo = Mo;
         this.P = P;
+    }
+
+    public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double PH, double HCO3, double NO3, double NH4, double h2PO4, double k, double ca, double mg, double SO4, double fe, double cu, double b, double mn, double zn, double mo, double p) {
+        this.id = id;
+        this.cropName = cropName;
+        this.nutrientSolutionName = nutrientSolutionName;
+        this.EC = EC;
+        this.PH = PH;
+        this.HCO3 = HCO3;
+        this.NO3 = NO3;
+        this.NH4 = NH4;
+        H2PO4 = h2PO4;
+        K = k;
+        Ca = ca;
+        Mg = mg;
+        this.SO4 = SO4;
+        Fe = fe;
+        Cu = cu;
+        B = b;
+        Mn = mn;
+        Zn = zn;
+        Mo = mo;
+        P = p;
+    }
+
+    public double getPH() {
+        return PH;
+    }
+
+    public double getHCO3() {
+        return HCO3;
     }
 
     public int getId(){return id;}

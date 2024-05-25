@@ -54,11 +54,10 @@ public class MacroTabController {
 
     public void initTableView() {
         // tableView 초기화
-        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4"};
-        String[] rowTitles = {"기준량", "원수성분", "처방농도"};
+        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
 
-        String[] values = new String[7];
         data.clear();
+        tableView.getColumns().clear();
 
         for (int i = 0; i < columnTitles.length; i++) {
             final int columnIndex = i;
@@ -77,14 +76,42 @@ public class MacroTabController {
             tableView.getColumns().add(column);
         }
 
+        //표의 행 데이터 초기화
+        updateTableData();
+
+        tableView.setEditable(true);
+        tableView.setItems(data);
+    }
+
+    private void updateTableData() {
+        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
+        String[] rowTitles = {"기준량", "원수성분", "처방농도"};
+
+        data.clear();
+
+        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
+
+        Map<String, String> totalSetting = settingInfo.getTotalSetting();
+        boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
+
         for (int i = 0; i < rowTitles.length; i++) {
             ObservableList<String> row = FXCollections.observableArrayList();
             row.add(rowTitles[i]);
-            if (i == 0) { // 두 번째 행에 값 추가
+
+            if (i == 0) { // 기준량 행
                 for (String value : values) {
                     row.add(value);
                 }
-            } else {
+            } else if (i == 1) { // 원수성분 행
+                for (int j = 1; j < columnTitles.length; j++) {
+                    if (isConsiderFalse) {
+                        row.add("0");
+                    } else {
+                        String key = columnTitles[j];
+                        row.add(totalSetting.containsKey(key) ? totalSetting.get(key) : "0");
+                    }
+                }
+            } else { // 처방농도 행
                 for (int j = 1; j < columnTitles.length; j++) {
                     row.add("");
                 }
@@ -92,75 +119,46 @@ public class MacroTabController {
             data.add(row);
         }
 
-        tableView.setEditable(true);
         tableView.setItems(data);
 
-        System.out.println(data);
+        // 원수 고려 유무에 따라 컬럼 편집 가능 여부 설정
+        setCellEditability(isConsiderFalse);
+    }
+
+    private void setCellEditability(boolean isConsiderFalse) {
+        for (TableColumn<ObservableList<String>, ?> column : tableView.getColumns()) {
+            if (column.getText().equals("원수성분")) {
+                column.setEditable(!isConsiderFalse);
+            } else {
+                for (ObservableList<String> row : data) {
+                    if (!isConsiderFalse && "0".equals(row.get(tableView.getColumns().indexOf(column)))) {
+                        column.setEditable(false);
+                    }
+                }
+            }
+        }
     }
 
     @FXML
     public void refreshButton(ActionEvent actionEvent) {
-        // tableView 초기화
-        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4"};
-        String[] rowTitles = {"기준량", "원수성분", "처방농도"};
-
-        tableView = new TableView<>();
-        data.clear();
-
-
-        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
-
-        for (int i = 0; i < columnTitles.length; i++) {
-            final int columnIndex = i;
-            TableColumn<ObservableList<String>, String> column = new TableColumn<>(columnTitles[i]);
-
-            column.setCellValueFactory(cellData -> {
-                ObservableValue<String> cellValue = new SimpleStringProperty(cellData.getValue().get(columnIndex));
-                return cellValue;
-            });
-            column.setCellFactory(TextFieldTableCell.forTableColumn(new DefaultStringConverter()));
-            column.setOnEditCommit(event -> {
-                ObservableList<String> row = event.getRowValue();
-                row.set(columnIndex, event.getNewValue());
-            });
-
-            tableView.getColumns().add(column);
-        }
-
-        for (int i = 0; i < rowTitles.length; i++) {
-            ObservableList<String> row = FXCollections.observableArrayList();
-            row.add(rowTitles[i]);
-            if (i == 0) { // 두 번째 행에 값 추가
-                for (String value : values) {
-                    row.add(value);
-                }
-            } else {
-                for (int j = 1; j < columnTitles.length; j++) {
-                    row.add("");
-                }
-            }
-            data.add(row);
-        }
-
-        tableView.setEditable(true);
-        tableView.setItems(data);
-
+        updateTableData();
     }
+
 
     private String[] getStandardValues(int mediumCultureId, String crop) {
 
-        String[] values = new String[8];
+        String[] values = new String[11];
 
         // 선택한 배양액 아이디에 해당하는 NutrientSolution 객체 가져오기
-        Optional<CropNutrientStandard> cropData = mediumService.getCropData(mediumCultureId);
-        CropNutrientStandard selectedCropNutrient = cropData.get();
+        Optional<CropNutrientStandard> cropDataOP = mediumService.getCropData(mediumCultureId);
 
-
-        if (selectedCropNutrient == null) {
-            // 선택한 작물에 해당하는 정보가 없는 경우 처리
+        // 안전하게 Optional 처리
+        if (!cropDataOP.isPresent()) {
             System.out.println("Selected crop information not found.");
             return values;
         }
+
+        CropNutrientStandard selectedCropNutrient = cropDataOP.get();
 
         // CropNutrientStandard 객체에서 각 값을 배열에 저장
         values[0] = String.valueOf(selectedCropNutrient.getNO3());
@@ -171,13 +169,12 @@ public class MacroTabController {
         values[5] = String.valueOf(selectedCropNutrient.getMg());
         values[6] = String.valueOf(selectedCropNutrient.getSO4());
         values[7] = String.valueOf(selectedCropNutrient.getP());
+        values[8] = String.valueOf(selectedCropNutrient.getPH());
+        values[9] = String.valueOf(selectedCropNutrient.getEC());
+        values[10] = String.valueOf(selectedCropNutrient.getHCO3());
 
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
 
-        //원수 고려 안하는 경우 원수값 입력 row에 다 0으로 고정
-        if(totalSetting.get("원수 고려 유무").equals("0")){
-
-        }
 
         return values;
     }

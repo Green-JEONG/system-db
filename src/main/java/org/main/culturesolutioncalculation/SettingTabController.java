@@ -124,8 +124,6 @@ public class SettingTabController {
         if (anySelected) {
             considerFalse.setSelected(false); // 원수 고려 O 체크박스가 선택된 경우 -> 원수 고려 X 선택 해제
         }
-
-
         disableConsideredUnitRadios(!anySelected);
     }
 
@@ -152,10 +150,10 @@ public class SettingTabController {
 
         boolean isConsiderFalseSelected = considerFalse.isSelected();
 
-        selectedValues.put("원수 고려 유무", isConsiderFalseSelected ? "0" : "1");
+        selectedValues.put("원수 고려 유무", isConsiderFalseSelected ? "X" : "O");
 
         if (isConsiderFalseSelected) { // 원수 고려 안하는 경우
-            selectedValues.put("원수 고려", "0");
+            //selectedValues.put("원수 고려", "0");
         } else { // 원수 고려하는 경우
             addCheckBoxToMap(selectedValues, ph);
             addCheckBoxToMap(selectedValues, ec);
