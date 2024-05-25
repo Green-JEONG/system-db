@@ -46,7 +46,7 @@
                 <VBox spacing="10">
                     <HBox spacing="5" style="-fx-padding: 0 0 0 50;">
                         <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                            <VBox alignment="CENTER" spacing="500">
+                            <VBox alignment="CENTER" spacing="50">
                                 <VBox>
                                     <Label text="분석날짜" styleClass="label-bold" />
                                     <ListView fx:id="historyListView" prefWidth="150" prefHeight="150.0" />
