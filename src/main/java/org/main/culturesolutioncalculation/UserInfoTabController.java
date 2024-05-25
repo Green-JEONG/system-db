@@ -129,6 +129,9 @@ public class UserInfoTabController {
     }
 
     @FXML
+    private ListView<String> historyListView;
+
+    @FXML
     private void getRequestHistory() {
 
         int userId = userService.findByContact(contact.getText().toString());
@@ -138,8 +141,8 @@ public class UserInfoTabController {
         List<RequestHistoryInfo> findHistory = requestHistoryService.findByUser(userId);
 
         for (RequestHistoryInfo requestHistory : findHistory) {
-            System.out.println("requestHistory.getRequestDate() = " + requestHistory.getRequestDate());
-
+            // requestHistory.getRequestDate() 값을 ListView에 추가합니다.
+            historyListView.getItems().add(requestHistory.getRequestDate().toString());
         }
     }
 
