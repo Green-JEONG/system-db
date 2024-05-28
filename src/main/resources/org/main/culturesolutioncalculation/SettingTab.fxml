@@ -145,26 +145,26 @@
                                             <VBox spacing="5">
                                                 <HBox spacing="5">
                                                     <VBox>
-                                                        <CheckBox text="산도 (pH)" fx:id="ph" />
-                                                        <CheckBox text="농도 (EC)" fx:id="ec" />
-                                                        <CheckBox text="질산태질소 (NO3-N)" fx:id="no3n" />
-                                                        <CheckBox text="암모니아태질소 (NH4-N)" fx:id="nh4n" />
-                                                        <CheckBox text="인 (P)" fx:id="p" />
-                                                        <CheckBox text="칼륨 (K)" fx:id="k" />
-                                                        <CheckBox text="칼슘 (Ca)" fx:id="ca" />
-                                                        <CheckBox text="마그네슘 (Mg)" fx:id="mg" />
-                                                        <CheckBox text="황 (S)" fx:id="s" />
+                                                        <CheckBox text="산도(pH)" fx:id="ph" />
+                                                        <CheckBox text="농도(EC)" fx:id="ec" />
+                                                        <CheckBox text="질산태질소(NO3-N)" fx:id="no3n" />
+                                                        <CheckBox text="암모니아태질소(NH4-N)" fx:id="nh4n" />
+                                                        <CheckBox text="인(P)" fx:id="p" />
+                                                        <CheckBox text="칼륨(K)" fx:id="k" />
+                                                        <CheckBox text="칼슘(Ca)" fx:id="ca" />
+                                                        <CheckBox text="마그네슘(Mg)" fx:id="mg" />
+                                                        <CheckBox text="황(S)" fx:id="s" />
                                                     </VBox>
                                                     <VBox>
-                                                        <CheckBox text="염소 (Cl)" fx:id="cl" />
-                                                        <CheckBox text="나트륨 (Na)" fx:id="na" />
-                                                        <CheckBox text="철 (Fe)" fx:id="fe" />
-                                                        <CheckBox text="붕소 (B)" fx:id="b" />
-                                                        <CheckBox text="망간 (Mn)" fx:id="mn" />
-                                                        <CheckBox text="아연 (Zn)" fx:id="zn" />
-                                                        <CheckBox text="구리 (Cu)" fx:id="cu" />
-                                                        <CheckBox text="몰리브뎀 (Mo)" fx:id="mo" />
-                                                        <CheckBox text="중탄산 (HCO3)" fx:id="hco3" />
+                                                        <CheckBox text="염소(Cl)" fx:id="cl" />
+                                                        <CheckBox text="나트륨(Na)" fx:id="na" />
+                                                        <CheckBox text="철(Fe)" fx:id="fe" />
+                                                        <CheckBox text="붕소(B)" fx:id="b" />
+                                                        <CheckBox text="망간(Mn)" fx:id="mn" />
+                                                        <CheckBox text="아연(Zn)" fx:id="zn" />
+                                                        <CheckBox text="구리(Cu)" fx:id="cu" />
+                                                        <CheckBox text="몰리브뎀(Mo)" fx:id="mo" />
+                                                        <CheckBox text="중탄산(HCO3)" fx:id="hco3" />
                                                     </VBox>
                                                 </HBox>
                                             </VBox>

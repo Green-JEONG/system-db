@@ -9,6 +9,8 @@ public class SettingTabController {
 
     private SettingInfo settingInfo = MainController.getSettingInfo();
 
+    private static MainController mainController;
+
     @FXML
     private Tab settingTab;
     @FXML
@@ -33,6 +35,10 @@ public class SettingTabController {
     private ToggleGroup considerGroup = new ToggleGroup();
     private ToggleGroup molybdenumGroup = new ToggleGroup();
     private ToggleGroup consideredUnitGroup = new ToggleGroup();
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
 
     @FXML
@@ -211,11 +217,12 @@ public class SettingTabController {
 
     @FXML
     public void prevButton() {
-        TabPane tabPane = settingTab.getTabPane();
-        int currentIndex = tabPane.getTabs().indexOf(settingTab);
-        if (currentIndex > 0) {  // 첫 번째 탭이 아닌 경우에만
-            tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
-        }
+        mainController.moveToUserInfoTab();
+//        TabPane tabPane = settingTab.getTabPane();
+//        int currentIndex = tabPane.getTabs().indexOf(settingTab);
+//        if (currentIndex > 0) {  // 첫 번째 탭이 아닌 경우에만
+//            tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
+//        }
     }
 
     @FXML
@@ -223,10 +230,14 @@ public class SettingTabController {
         Map<String, String> selectedValues = getSelectedValues();
         settingInfo.setTotalSetting(selectedValues);
 
-        TabPane tabPane = settingTab.getTabPane();
-        int currentIndex = tabPane.getTabs().indexOf(settingTab);
-        tabPane.getSelectionModel().select(currentIndex + 1);
+        mainController.moveToMacroTab();
+
+//        TabPane tabPane = settingTab.getTabPane();
+//        int currentIndex = tabPane.getTabs().indexOf(settingTab);
+//        tabPane.getSelectionModel().select(currentIndex + 1);
 
     }
+
+
 
 }

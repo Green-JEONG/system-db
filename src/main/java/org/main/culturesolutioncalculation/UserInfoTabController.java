@@ -194,18 +194,17 @@ public class UserInfoTabController {
             return;
         }
 
-        if(userInfo != null) {
-            userInfo.setName(username.getText().toString());
-            userInfo.setAddress(address.getText().toString());
-            userInfo.setContact(contact.getText().toString());
-            userInfo.setEmail(email.getText().toString());
+        userInfo = new UserInfo();
+        userInfo.setName(username.getText().toString());
+        userInfo.setAddress(address.getText().toString());
+        userInfo.setContact(contact.getText().toString());
+        userInfo.setEmail(email.getText().toString());
 
-        } else {
-            System.err.println("UserInfo 객체가 초기화되지 않았습니다.");
-        }
 
         //유저 DB 저장
-        userService.save(userInfo);
+        int userId = userService.save(userInfo);
+        userInfo.setId(userId);
+
         //분석 기록 저장
         saveRequestHistoryInfo();
 

@@ -15,13 +15,17 @@ import javafx.util.converter.DefaultStringConverter;
 
 import java.util.Map;
 public class MicroResultController {
-    MainController mainController = new MainController();
+    private static MainController mainController;
     TableData tableData = mainController.getTableData();
 
     @FXML
     private TableView<ObservableList<String>> tableView;
 
     private ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     @FXML
     public void initialize() {
@@ -99,6 +103,8 @@ public class MicroResultController {
 
     @FXML
     public void prevButton(ActionEvent event) {
+
+
         TabPane tabPane = findTabPane(event);
         if (tabPane != null) {
             int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
@@ -127,5 +133,6 @@ public class MicroResultController {
         }
         return null;
     }
+
 
 }

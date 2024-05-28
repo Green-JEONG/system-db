@@ -18,19 +18,16 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DefaultStringConverter;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
-import org.main.culturesolutioncalculation.model.NutrientSolution;
-import org.main.culturesolutioncalculation.service.CSVDataReader;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MacroTabController {
+    private static MainController mainController;
 
     private MediumService mediumService;
-    UserInfo userInfo = MainController.getUserInfo();
 
     RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
 
@@ -52,10 +49,15 @@ public class MacroTabController {
         initTableView();
     }
 
+    private String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
+    String[] rowTitles = {"기준량", "원수성분", "처방농도"};
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
+
     public void initTableView() {
         // tableView 초기화
-        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
-
         data.clear();
         tableView.getColumns().clear();
 
@@ -83,16 +85,54 @@ public class MacroTabController {
         tableView.setItems(data);
     }
 
+    // 열 영향 맵핑을 생성하는 메소드 -> 왜냐면 나트륨이 고려되면 NO3랑 NH4가 편집 가능해야 함
+    private Map<String, List<String>> createImpactMapping() {
+        Map<String, List<String>> impactMap = new HashMap<>();
+        impactMap.put("질산태질소(NO3-N)", Arrays.asList("NO3"));
+        impactMap.put("암모니아태질소(NH4-N)", Arrays.asList("NH4"));
+        impactMap.put("인(P)",Arrays.asList("H2PO4"));
+        return impactMap;
+    }
+
+
     private void updateTableData() {
-        String[] columnTitles = {"다량원소", "NO3", "NH4", "H2PO4", "K", "Ca", "Mg", "SO4", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
-        String[] rowTitles = {"기준량", "원수성분", "처방농도"};
 
         data.clear();
 
         String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
-
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
         boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
+
+        Set<String> checkedConsideredOptionNames = new HashSet<>();
+        Map<String, List<String>> impactMap = createImpactMapping();
+
+        System.out.println("isConsiderFalse = " + isConsiderFalse);
+
+
+        //원수 고려한다면 -> 원수 고려 옵션들의 이름 필터링
+        if(!isConsiderFalse) {
+            // 원수 고려 옵션들의 이름 필터링
+            checkedConsideredOptionNames = totalSetting.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals("1"))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+
+            Set<String> impactedNames = new HashSet<>();
+            for (String name : checkedConsideredOptionNames) {
+                if (impactMap.containsKey(name)) {
+                    List<String> impactedColumns = impactMap.get(name);
+                    impactedNames.addAll(impactedColumns);
+                }
+            }
+            checkedConsideredOptionNames.addAll(impactedNames);
+        }
+
+
+        System.out.println("===============");
+        for (String name : checkedConsideredOptionNames) {
+            System.out.println("name = " + name);
+        }
+        System.out.println("================");
 
         for (int i = 0; i < rowTitles.length; i++) {
             ObservableList<String> row = FXCollections.observableArrayList();
@@ -103,14 +143,20 @@ public class MacroTabController {
                     row.add(value);
                 }
             } else if (i == 1) { // 원수성분 행
-                for (int j = 1; j < columnTitles.length; j++) {
-                    if (isConsiderFalse) {
-                        row.add("0");
-                    } else {
-                        String key = columnTitles[j];
-                        row.add(totalSetting.containsKey(key) ? totalSetting.get(key) : "0");
+                ObservableList<String> consideredRow = FXCollections.observableArrayList();
+                for (String title : columnTitles) {
+                    if(title.equals("다량원소")) continue;
+                    boolean isEditable = checkedConsideredOptionNames.stream().anyMatch(name -> name.contains(title));
+                    if(isEditable) {
+                        System.out.println(title + " = 고려 원수이므로 편집 가능");
+                        consideredRow.add("");
+                    }
+                    else {
+                        System.out.println(title + " = 0으로 세팅");
+                        consideredRow.add("0");
                     }
                 }
+                row.addAll(consideredRow);
             } else { // 처방농도 행
                 for (int j = 1; j < columnTitles.length; j++) {
                     row.add("");
@@ -122,26 +168,57 @@ public class MacroTabController {
         tableView.setItems(data);
 
         // 원수 고려 유무에 따라 컬럼 편집 가능 여부 설정
-        setCellEditability(isConsiderFalse);
+        setCellEditability(isConsiderFalse, checkedConsideredOptionNames);
     }
 
-    private void setCellEditability(boolean isConsiderFalse) {
-        for (TableColumn<ObservableList<String>, ?> column : tableView.getColumns()) {
-            if (column.getText().equals("원수성분")) {
-                column.setEditable(!isConsiderFalse);
-            } else {
-                for (ObservableList<String> row : data) {
-                    if (!isConsiderFalse && "0".equals(row.get(tableView.getColumns().indexOf(column)))) {
-                        column.setEditable(false);
-                    }
-                }
-            }
+    private void setCellEditability(boolean isConsiderFalse, Set<String> checkedConsideredOptionNames) {
+        if (!isConsiderFalse) {
+
+            tableView.getColumns().forEach(column -> {
+                boolean isEditable = checkedConsideredOptionNames.stream().anyMatch(name -> column.getText().contains(name));
+                column.setEditable(!isConsiderFalse && isEditable);
+            });
+
+        } else {
+            tableView.getColumns().forEach(column -> column.setEditable(false));  // 모든 컬럼 편집 불가능
         }
     }
 
     @FXML
     public void refreshButton(ActionEvent actionEvent) {
         updateTableData();
+        calculatePrescriptionDose();
+    }
+    @FXML
+    private void calculatePrescriptionDose() {
+        // "기준량" 행과 "원수성분" 행의 인덱스를 확인
+        int baselineIndex = rowTitles.length > 0 ? 0 : -1;
+        int rawWaterIndex = rowTitles.length > 1 ? 1 : -1;
+        int prescriptionIndex = rowTitles.length > 2 ? 2 : -1;
+
+        if (baselineIndex == -1 || rawWaterIndex == -1 || prescriptionIndex == -1) {
+            System.out.println("Row indices are not set correctly.");
+            return;
+        }
+
+        ObservableList<String> baselineRow = data.get(baselineIndex);
+        ObservableList<String> rawWaterRow = data.get(rawWaterIndex);
+        ObservableList<String> prescriptionRow = data.get(prescriptionIndex);
+
+        // 처방 농도 계산
+        for (int i = 1; i < columnTitles.length; i++) {  // 인덱스 0은 행 제목이므로 1부터 시작
+            try {
+                double baselineValue = Double.parseDouble(baselineRow.get(i));
+                double rawWaterValue = rawWaterRow.get(i).isEmpty() ? 0.0 : Double.parseDouble(rawWaterRow.get(i));
+                double prescriptionValue = baselineValue - rawWaterValue;
+                prescriptionRow.set(i, String.format("%.2f", prescriptionValue));
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing numbers: " + e.getMessage());
+                prescriptionRow.set(i, "Err");
+            }
+        }
+
+        tableView.refresh();  // TableView 갱신
     }
 
 
@@ -194,9 +271,11 @@ public class MacroTabController {
 
     @FXML
     public void prevButton(ActionEvent actionEvent) {
-        TabPane tabPane = macroTab.getTabPane();
-        int currentIndex = tabPane.getTabs().indexOf(macroTab);
-        tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
+
+        mainController.moveToSettingTab();
+//        TabPane tabPane = macroTab.getTabPane();
+//        int currentIndex = tabPane.getTabs().indexOf(macroTab);
+//        tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
     }
 
     public void saveInput(ActionEvent event) throws IOException {
@@ -230,4 +309,6 @@ public class MacroTabController {
         }
         return null;
     }
+
+
 }

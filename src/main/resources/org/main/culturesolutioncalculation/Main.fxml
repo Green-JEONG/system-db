@@ -13,11 +13,11 @@
     <fx:include source="Toolbar.fxml" />
     <TabPane fx:id = "mainTabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-            <fx:include source="UserInfoTab.fxml" />
+            <fx:include fx:id="userInfoTab" source="UserInfoTab.fxml" />
             <fx:include source="TypeTab.fxml" />
-            <fx:include source="SettingTab.fxml" />
-            <fx:include source="MacroTab.fxml" />
-            <fx:include source="MicroTab.fxml" />
+            <fx:include fx:id = "settingTab" source="SettingTab.fxml" />
+            <fx:include fx:id = "macroTab" source="MacroTab.fxml" />
+            <fx:include fx:id = "microTab" source="MicroTab.fxml" />
             <fx:include fx:id = "printTab" source="PrintTab.fxml" />
         </tabs>
     </TabPane>

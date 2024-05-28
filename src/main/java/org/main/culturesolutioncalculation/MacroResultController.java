@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -15,10 +16,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class MacroResultController {
-    MainController mainController = new MainController();
+    private static MainController mainController;
+
     TableData tableData = mainController.getTableData();
 
     @FXML
@@ -26,8 +29,14 @@ public class MacroResultController {
 
     private ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
 
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
+
+
     @FXML
     public void initialize() {
+
         Map<String, String> macroSettings = tableData.getMacroSettings();
         if (macroSettings == null) {
             initTableView();
@@ -99,11 +108,16 @@ public class MacroResultController {
 
     @FXML
     public void prevButton(ActionEvent event) {
-        TabPane tabPane = findTabPane(event);
-        if (tabPane != null) {
-            int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
-            tabPane.getSelectionModel().select(currentIndex - 1);
+        if (mainController != null) {
+            mainController.moveToMacroTab();
+        } else {
+            System.out.println("MainController is not set in MacroResultController");
         }
+//        TabPane tabPane = findTabPane(event);
+//        if (tabPane != null) {
+//            int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
+//            tabPane.getSelectionModel().select(currentIndex - 1);
+//        }
     }
 
     @FXML
@@ -114,6 +128,7 @@ public class MacroResultController {
             tabPane.getSelectionModel().select(currentIndex + 1);
         }
     }
+
 
     private TabPane findTabPane(ActionEvent event) {
         Node source = (Node) event.getSource();

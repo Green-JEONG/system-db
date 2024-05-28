@@ -52,11 +52,14 @@ public class UserService {
         }
         return userInfo;
     }
-    public void save(UserInfo users){
+    public int save(UserInfo users){
         //이미 유저가 존재하면 user는 세이브 안하고 분석 기록 튜플 하나 생성
-        if(findByContact(users.getContact()) != null){
+        UserInfo userInfoByContact = findByContact(users.getContact());
+        UserInfo userInfo = null;
+        int userId = 0;
+        if(userInfoByContact != null){
             System.out.println("해당 유저가 이미 존재합니다");
-            return;
+            return userInfoByContact.getId();
         }
         else {
             String query = "INSERT INTO users (name, address, contact, email) VALUES (?, ?, ?, ?)";
@@ -76,9 +79,8 @@ public class UserService {
 
                     try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
-                            int userId = generatedKeys.getInt(1);
+                            userId = generatedKeys.getInt(1);
                             users.setId(userId);
-                            System.out.println("userId = " + userId);
                         }
                     }
                 } else {
@@ -89,6 +91,7 @@ public class UserService {
                 e.printStackTrace();
             }
         }
+        return userId;
     }
 
 
