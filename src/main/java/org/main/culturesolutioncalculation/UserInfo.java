@@ -20,6 +20,14 @@ public class UserInfo {
     public UserInfo() {
     }
 
+    public UserInfo(int id, String name, String address, String contact, String email) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.contact = contact;
+        this.email = email;
+    }
+
     public int getId() {
         return id;
     }

@@ -1,11 +1,13 @@
 package org.main.culturesolutioncalculation;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.print.SangJuPrint;
@@ -13,29 +15,40 @@ import org.main.culturesolutioncalculation.service.print.SangJuPrint;
 import java.util.Map;
 
 public class PrintTabController {
-    MainController mainController = new MainController();
-    UserInfo userInfo = MainController.getUserInfo();
 
-    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
+    MainController mainController = new MainController();
+    private static UserInfo userInfo;// = MainController.getUserInfo();
+
+    private static RequestHistoryInfo requestHistoryInfo;//MainController.getRequestHistoryInfo();
     SettingInfo settingInfo = mainController.getSettingInfo();
 
     private MediumService mediumService;
 
-    @FXML
-    private Label customerNameLabel;
-    @FXML
-    private Label addressLabel;
-    @FXML
-    private Label contactLabel;
-    @FXML
-    private Label emailLabel;
+
+    //왼쪽 AnchorPane의 라벨
+    @FXML private Label name;
+    @FXML private Label address;
+    @FXML private Label contact;
+    @FXML private Label cropName;
+    @FXML private Label mediumType;
+
+    //오른쪽 AnchorPane의 라벨
+    @FXML private Label processNumber;
+    @FXML private Label customerName;
+    @FXML private Label customerAddress;
+    @FXML private Label customerContact;
+    @FXML private Label customerCropName;
+    @FXML private Label ph;
+    @FXML private Label ec;
+    @FXML private Label hco3;
+
+
 
     @FXML
     private Label processingDateLabel;
     @FXML
     private Label selectedCultureLabel;
-    @FXML
-    private Label selectedCropLabel;
+
 
     @FXML
     private Label settingsLabel;
@@ -54,6 +67,10 @@ public class PrintTabController {
     public void initialize() {
         initializeAnalysisTable();
         initializeCompositionTable();
+    }
+
+    private void initializeUserInfo() {
+
     }
 
     private void initializeAnalysisTable() {
@@ -100,6 +117,19 @@ public class PrintTabController {
 
     @FXML
     private void loadAnalysisData() {
+
+        if (requestHistoryInfo != null && userInfo != null) {
+            Platform.runLater(() -> {
+                name.setText("의뢰자 : " + userInfo.getName().toString());
+                contact.setText("전화번호 : " + userInfo.getContact());
+                address.setText("주소 : " + userInfo.getAddress());
+                cropName.setText("작물명 : "+requestHistoryInfo.getSelectedCropName());
+                mediumType.setText("시료 종류 : "+requestHistoryInfo.getMediumTypeName());
+            });
+        } else {
+            System.out.println("UserInfo is null");
+        }
+
         ObservableList<DataItem> analysisData = FXCollections.observableArrayList(
                 new DataItem("산도 (pH)", "", "", ""),
                 new DataItem("농도 (EC)", "", "dS/m", ""),
@@ -125,6 +155,23 @@ public class PrintTabController {
 
     @FXML
     private void loadCompositionData() {
+
+        if (requestHistoryInfo != null && userInfo != null) {
+            Platform.runLater(() -> {
+                processNumber.setText("시료번호 : "+requestHistoryInfo.getRequestDate().toString());
+                customerName.setText("의뢰인-이름 : " + userInfo.getName().toString());
+                customerContact.setText("의뢰인-전화번호 : " + userInfo.getContact());
+                customerAddress.setText("의뢰인-주소 : " + userInfo.getAddress());
+                customerCropName.setText("품종 : "+requestHistoryInfo.getSelectedCropName());
+                ph.setText("원수수질-pH : "+requestHistoryInfo.getPh());
+                ec.setText("원수수질-EC(dS/m) : "+requestHistoryInfo.getEc());
+                hco3.setText("원수수질-중탄산(mg/L) : "+requestHistoryInfo.getHco3());
+            });
+        } else {
+            System.out.println("UserInfo is null");
+        }
+
+
         ObservableList<DataItem> compositionData = FXCollections.observableArrayList(
                 new DataItem("A", "질산칼슘(4수염) | Ca(NO3)23H2O", "kg", ""),
                 new DataItem("A", "질산칼슘(10수염) | 5[Ca(NO3)2·2H2O]NH4NO3", "kg", ""),
@@ -143,6 +190,13 @@ public class PrintTabController {
         );
         compositionTable.setItems(compositionData);
     }
+
+    public void setHistoryInfo(RequestHistoryInfo selectedHistory) {
+        System.out.println("selectedHistory.getRequestDate() = " + selectedHistory.getRequestDate());
+        requestHistoryInfo = selectedHistory;
+        userInfo = selectedHistory.getUserInfo();
+    }
+
 
     public static class DataItem {
         private final String item;
@@ -176,26 +230,27 @@ public class PrintTabController {
 
     @FXML
     public void load() {
-        try {
-            customerNameLabel.setText(userInfo.getName());
-            addressLabel.setText(userInfo.getAddress());
-            contactLabel.setText(userInfo.getContact());
-            emailLabel.setText(userInfo.getEmail());
-            processingDateLabel.setText(requestHistoryInfo.getRequestDate().toString());
-            selectedCultureLabel.setText(mediumService.getMediumTypeName(requestHistoryInfo.getMediumTypeId()));
-            selectedCropLabel.setText(requestHistoryInfo.getSelectedCropName());
 
-            for (Map.Entry<String, String> entry : settingInfo.getTotalSetting().entrySet()) {
-                String settingText = entry.getKey() + ": " + entry.getValue();
-                settingsLabel.setText(settingsLabel.getText() + settingText + "\n");
-            }
-
-            // Call generatePDF method to create and open the PDF
-            SangJuPrint sangJuPrint = new SangJuPrint();
-            sangJuPrint.generatePDF();
-
-        } catch (NullPointerException e) {
-            System.out.println("값이 입력되지 않았습니다.");
-        }
+//        try {
+//            customerNameLabel.setText(userInfo.getName());
+//            addressLabel.setText(userInfo.getAddress());
+//            contactLabel.setText(userInfo.getContact());
+//            emailLabel.setText(userInfo.getEmail());
+//            processingDateLabel.setText(requestHistoryInfo.getRequestDate().toString());
+//            selectedCultureLabel.setText(mediumService.getMediumTypeName(requestHistoryInfo.getMediumTypeId()));
+//            selectedCropLabel.setText(requestHistoryInfo.getSelectedCropName());
+//
+//            for (Map.Entry<String, String> entry : settingInfo.getTotalSetting().entrySet()) {
+//                String settingText = entry.getKey() + ": " + entry.getValue();
+//                settingsLabel.setText(settingsLabel.getText() + settingText + "\n");
+//            }
+//
+//            // Call generatePDF method to create and open the PDF
+//            SangJuPrint sangJuPrint = new SangJuPrint();
+//            sangJuPrint.generatePDF();
+//
+//        } catch (NullPointerException e) {
+//            System.out.println("값이 입력되지 않았습니다.");
+//        }
     }
 }

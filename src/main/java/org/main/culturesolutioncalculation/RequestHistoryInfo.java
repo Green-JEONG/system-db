@@ -9,6 +9,8 @@ public class RequestHistoryInfo {
     private Timestamp requestDate;
     private UserInfo userInfo;
     private int mediumTypeId; //배양액 재배작물 아이디
+
+    private String mediumTypeName; //배양액 종류 이름
     private String sampleType;
     private String varietyName; //품종명
 
@@ -47,6 +49,14 @@ public class RequestHistoryInfo {
 
     public void setHco3(double hco3) {
         this.hco3 = hco3;
+    }
+
+    public String getMediumTypeName() {
+        return mediumTypeName;
+    }
+
+    public void setMediumTypeName(String mediumTypeName) {
+        this.mediumTypeName = mediumTypeName;
     }
 
     public RequestHistoryInfo() {

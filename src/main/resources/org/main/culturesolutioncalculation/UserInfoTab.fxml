@@ -49,7 +49,7 @@
                             <VBox alignment="CENTER" spacing="50">
                                 <VBox>
                                     <Label text="분석날짜" styleClass="label-bold" />
-                                    <ListView fx:id="historyListView" prefWidth="150" prefHeight="150.0" />
+                                    <ListView fx:id="historyListView" onMouseClicked="#handleListViewClick" prefWidth="150" prefHeight="150.0" />
                                 </VBox>
                             </VBox>
                         </AnchorPane>

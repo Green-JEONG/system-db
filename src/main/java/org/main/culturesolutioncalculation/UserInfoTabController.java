@@ -1,17 +1,21 @@
 package org.main.culturesolutioncalculation;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import org.main.culturesolutioncalculation.service.requestHistory.RequestHistory;
+import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.UserService;
 import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 public class UserInfoTabController {
     @FXML
@@ -84,21 +88,43 @@ public class UserInfoTabController {
     private ToggleGroup deliveryMethodGroup;
 
 
-    private UserInfo userInfo = MainController.getUserInfo();
+    private UserInfo userInfo;// = MainController.getUserInfo();
     private RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
 
     private RequestHistoryService requestHistoryService;
 
     private UserService userService;
+    private MediumService mediumService;
 
+    private static MainController mainController;
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 
     public UserInfoTabController() {
-
+        //this.mainController = new MainController();
         this.requestHistoryService = new RequestHistoryService();
         this.userService = new UserService();
+        this.mediumService = new MediumService();
     }
 
     public void initialize() {
+
+        // ListView에 CellFactory 설정
+        historyListView.setCellFactory(param -> new ListCell<RequestHistoryInfo>() {
+            @Override
+            protected void updateItem(RequestHistoryInfo item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    // Date formatting을 원하는 방식으로 설정
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    setText(dateFormat.format(item.getRequestDate()));
+                }
+            }
+        });
 
         // 현재 날짜로 설정
         date.setValue(LocalDate.now());
@@ -129,22 +155,31 @@ public class UserInfoTabController {
     }
 
     @FXML
-    private ListView<String> historyListView;
-
+    private ListView<RequestHistoryInfo> historyListView;
     @FXML
     private void getRequestHistory() {
 
-        int userId = userService.findByContact(contact.getText().toString());
+        userInfo = userService.findByContact(contact.getText());
+        List<RequestHistoryInfo> findHistory = requestHistoryService.findByUser(userInfo.getId());
+        ObservableList<RequestHistoryInfo> items = FXCollections.observableArrayList(findHistory);
+        historyListView.setItems(items);
+    }
 
-        if(userId==0) throw new NoSuchElementException("분석 기록이 존재하지 않습니다");
+    @FXML
+    private void handleListViewClick() { // 사용자가 ListView의 항목을 클릭했을 때 호출
+        RequestHistoryInfo selectedHistory = historyListView.getSelectionModel().getSelectedItem();
 
-        List<RequestHistoryInfo> findHistory = requestHistoryService.findByUser(userId);
+        //해당 분석 기록에서 사용된 배양액 종류 이름 갖고오기
+        selectedHistory.setMediumTypeName(mediumService.getMediumTypeName(selectedHistory.getMediumTypeId()));
 
-        for (RequestHistoryInfo requestHistory : findHistory) {
-            // requestHistory.getRequestDate() 값을 ListView에 추가합니다.
-            historyListView.getItems().add(requestHistory.getRequestDate().toString());
+        //requestHistoryInfo에 대한 유저 정보 채워넣기
+        selectedHistory.setUserInfo(userInfo);
+
+        if (selectedHistory != null) {
+            mainController.showPrintTabWithHistory(selectedHistory);
         }
     }
+
 
     @FXML
     private void saveUserInfo() {

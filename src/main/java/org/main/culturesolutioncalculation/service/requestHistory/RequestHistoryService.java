@@ -1,9 +1,8 @@
 package org.main.culturesolutioncalculation.service.requestHistory;
 
 import org.main.culturesolutioncalculation.RequestHistoryInfo;
+import org.main.culturesolutioncalculation.UserInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
-import org.main.culturesolutioncalculation.service.users.Users;
-
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,6 +79,41 @@ public class RequestHistoryService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    //requestHistory의 id를 통해 users의 id 찾기 -> 최종적으로 UserInfo 반환
+    public UserInfo getUserInfoById(RequestHistoryInfo requestHistoryInfo){
+        if (requestHistoryInfo == null) {
+            System.out.println("requestHistory id가 null일 수 없습니다");
+            return null;
+        }
+
+        String query = "SELECT * FROM users WHERE id = (SELECT user_id FROM requestHistory WHERE id = ?)";
+        UserInfo userInfo = null; // null로 초기화
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, requestHistoryInfo.getId());
+            System.out.println("requestHistoryInfo = " + requestHistoryInfo.getId());
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (resultSet.next()) { //
+                    userInfo = new UserInfo(); // 결과가 있을 때 객체 생성
+                    userInfo.setId(resultSet.getInt("id"));
+                    userInfo.setName(resultSet.getString("name"));
+                    userInfo.setAddress(resultSet.getString("address"));
+                    userInfo.setContact(resultSet.getString("contact"));
+                    userInfo.setEmail(resultSet.getString("email"));
+                    System.out.println("user = " + userInfo.getName());
+                }
+            } catch (SQLException e) {
+                System.out.println("Error retrieving user: " + e.getMessage()); // 예외 처리 개선
+                return null; // 예외 발생 시 null 반환
+            }
+        } catch (SQLException e) {
+            System.out.println("Database connection error: " + e.getMessage());
+            return null; // 예외 발생 시 null 반환
+        }
+        return userInfo;
     }
 
     //해당 유저의 분석 리스트 반환

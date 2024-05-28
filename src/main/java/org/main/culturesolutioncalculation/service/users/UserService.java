@@ -22,13 +22,14 @@ public class UserService {
         this.conn = DatabaseConnector.getInstance(url, user, password);
     }
 
+
     //유저 정보 저장 - 이름, 주소, 연락처
 
     //TODO 유저가 db에 있으면 유저 아이디 뱉고, db에 없으면 0반환
-    public int findByContact(String contact){ //유저가 db에 있으면 true, 없으면 false
+    public UserInfo findByContact(String contact){ //유저가 db에 있으면 true, 없으면 false
 
         String preQuery = "select * from users u where u.contact = ?";
-        int userId = 0;
+        UserInfo userInfo = null;
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(preQuery);
         ){
@@ -36,20 +37,24 @@ public class UserService {
             pstmt.setString(1, contact);
 
             try(ResultSet resultSet = pstmt.executeQuery()){
-                while(resultSet.next()){
-                    userId = resultSet.getInt("id");
-                    System.out.println("userId = " + userId);
+                if(resultSet.next()){
+                    userInfo = new UserInfo(
+                            resultSet.getInt("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("address"),
+                            resultSet.getString("contact"),
+                            resultSet.getString("email")
+                    );
                 }
             }
-            return userId;
         }catch (SQLException e){
             e.printStackTrace();
         }
-        return userId;
+        return userInfo;
     }
     public void save(UserInfo users){
         //이미 유저가 존재하면 user는 세이브 안하고 분석 기록 튜플 하나 생성
-        if(findByContact(users.getContact()) != 0){
+        if(findByContact(users.getContact()) != null){
             System.out.println("해당 유저가 이미 존재합니다");
             return;
         }

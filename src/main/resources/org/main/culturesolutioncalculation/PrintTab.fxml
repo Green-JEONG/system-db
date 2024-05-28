@@ -7,6 +7,7 @@
 <Tab xmlns="http://javafx.com/javafx"
      xmlns:fx="http://javafx.com/fxml"
      fx:controller="org.main.culturesolutioncalculation.PrintTabController"
+     fx:id = "printTab"
      text="프린트">
     <content>
         <SplitPane dividerPositions="0.5, 0.5">
@@ -27,19 +28,19 @@
                     </VBox>
                         <VBox spacing="10">
                             <HBox spacing="10">
-                                <Label text="의뢰자 : " />
+                                <Label fx:id = "name" text="의뢰자 : " />
                             </HBox>
                             <HBox spacing="5">
-                                <Label text="전화번호 : " />
+                                <Label fx:id = "contact" text="전화번호 : " />
                             </HBox>
                             <HBox spacing="5">
-                                <Label text="주소 : " />
+                                <Label fx:id = "address" text="주소 : " />
                             </HBox>
                             <HBox spacing="5">
-                                <Label text="작물명 : " />
+                                <Label fx:id = "cropName" text="작물명 : " />
                             </HBox>
                             <HBox spacing="5">
-                                <Label text="시료종류 : " />
+                                <Label fx:id = "mediumType" text="시료종류 : " />
                             </HBox>
                         </VBox>
                         <TableView fx:id="analysisTable">
@@ -67,29 +68,29 @@
                     </VBox>
                     <VBox spacing="10">
                         <HBox spacing="10">
-                            <Label text="시료번호 : " />
+                            <Label fx:id = "processNumber" text="시료번호 : " />
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="의뢰인-이름 : " />
+                            <Label fx:id = "customerName" text="의뢰인-이름 : " />
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="의뢰인-주소 : " />
+                            <Label fx:id = "customerAddress" text="의뢰인-주소 : " />
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="의뢰인-전화번호 : " />
+                            <Label fx:id="customerContact" text="의뢰인-전화번호 : " />
                         </HBox>
                         <HBox spacing="5">
                             <Label text="재배작물 : " />
-                            <Label text="품종 : " style="-fx-padding: 0 0 0 150;"/>
+                            <Label fx:id="customerCropName" text="품종 : " style="-fx-padding: 0 0 0 150;"/>
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="원수수질-pH : " />
+                            <Label fx:id="ph" text="원수수질-pH : " />
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="원수수질-EC(dS/m) : " />
+                            <Label fx:id="ec" text="원수수질-EC(dS/m) : " />
                         </HBox>
                         <HBox spacing="5">
-                            <Label text="원수수질-중탄산(mg/L) : " />
+                            <Label fx:id="hco3" text="원수수질-중탄산(mg/L) : " />
                         </HBox>
                     </VBox>
                         <TableView fx:id="compositionTable">
