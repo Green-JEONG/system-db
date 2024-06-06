@@ -1,28 +1,29 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
+import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
-import org.main.culturesolutioncalculation.service.users.Users;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
-import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MacroCalculationStrategy implements CalculationStrategy{
 
 
+    private static final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private static final String user = "root";
+    private static final String password = "root";
     private DatabaseConnector conn;
 
-    private Timestamp request_date;
-
-    private Users users;
-    private int requestHistory_id;
+    private RequestHistoryInfo requestHistoryInfo;
 
     private int users_macro_consideredValues_id;
 
     private boolean is4;
     private boolean isConsidered;
-    private String unit;
+    private String macroUnit; //다량원소 단위
 
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
 
@@ -49,15 +50,20 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //            put("SO4S",1.75);
 //        }
 //    };
-    public MacroCalculationStrategy(Users users, String unit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
-        this.users = users;
-        this.unit = unit;
+    public MacroCalculationStrategy(String macroUnit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization, RequestHistoryInfo requestHistoryInfo){
+
+        System.out.println("consideredValues = " + consideredValues);
+        //System.out.println("userFertilization = " + userFertilization);
+
+
+        this.conn = DatabaseConnector.getInstance(url, user, password);
+        this.macroUnit = macroUnit;
         this.is4 = is4;
         this.isConsidered = isConsidered;
         this.consideredValues = consideredValues;
         this.userFertilization = userFertilization;
         this.calFertilization = userFertilization;
-        request_date = Timestamp.from(Instant.now());
+        this.requestHistoryInfo = requestHistoryInfo;
         getMajorCompoundRatio(is4);
     }
 
@@ -85,6 +91,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
                         compoundRatio.put(major,resultSet.getDouble(major));
                     }
                 }
+                System.out.println("compoundRatio = " + compoundRatio);
                 compoundsRatio.put(macro,compoundRatio);
             }
         }catch (SQLException e){
@@ -129,9 +136,11 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         return minRatioValue;
     }
     //최소 비율 값을 사용해 원수 배당량 계산
+    //TODO - BigDecimal로 소숫점 두 자리수까지만 절삭하는 거 테스트하기
     private double calculateNutrientAllocation(String nutrient, String compound, double minRatioValue) {
         double ratio = compoundsRatio.get(compound).get(nutrient);
-        return ratio * minRatioValue;
+        BigDecimal allocation = BigDecimal.valueOf(ratio * minRatioValue);
+        return allocation.setScale(2, RoundingMode.DOWN).doubleValue();
     }
     //최종 계산된 최소 비율 값에 따라 화합물 질량 업데이트
     private void updateMolecularMass(String compound, double minRatioValue) {
@@ -147,51 +156,26 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         insertIntoUsersMacroCalculatedMass();
     }
 
-//    public void insertIntoRequestHistory() {
-//        String query = "insert into requestHistory (user_id, request_date) " +
-//                "values (" + users.getId() + ", '" + request_date + "')";
-//
-//        try (Connection connection = conn.getConnection();
-//             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-//            int result = pstmt.executeUpdate();
-//            if (result > 0) {
-//                System.out.println("insert success in requestHistory");
-//                // 생성된 pk get
-//                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-//                    if (generatedKeys.next()) {
-//                        requestHistory_id = generatedKeys.getInt(1); // 생성된 ID
-//                        System.out.println("Generated Request ID: " + requestHistory_id);
-//                    } else {
-//                        System.out.println("No ID was generated.");
-//                    }
-//                }
-//
-//            } else System.out.println("insert fail in requestHistory");
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     //TODO - insert 테스트
     private void insertIntoUsersMacroFertilization(){
-        String query = "insert into users_macro_fertilization (user_id";
+
+        String query = "insert into users_macro_fertilization (requestHistory_id";
         for (String macro : userFertilization.keySet()) {
             query += ", "+macro;
         }
-        query += ", requestHistory_id) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
-        query += "values (" + users.getId();
+        query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
+        query += "values (" + requestHistoryInfo.getId();
 
         for (String macro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(macro);
         }
-        query += ", "+requestHistory_id+")";
+        query += ")";
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
             int result = stmt.executeUpdate(query);
 
-            //if(result>0) System.out.println("success insert users_macro_fertilization");
-            //else System.out.println("insert failed users_macro_fertilization");
+            if(result>0) System.out.println("success insert users_macro_fertilization");
+            else System.out.println("insert failed users_macro_fertilization");
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -229,15 +213,15 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             double concentration_100fold = molecularMass.get(macro).getMass() / 10;
 
             String query = "insert into users_macro_calculatedMass (user_id, users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id) " +
-                    "values ("+ users.getId() +", "+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "
-                    +concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+", "+requestHistory_id+")";
+                    "values ("+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "
+                    +concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+", "+requestHistoryInfo.getId()+")";
 
             try(Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement();){
                 int result = stmt.executeUpdate(query);
 
-                //if(result>0) System.out.println("success");
-                //else System.out.println("insert failed");
+                if(result>0) System.out.println("success");
+                else System.out.println("insert failed");
             }catch (SQLException e){
                 e.printStackTrace();
             }
@@ -248,18 +232,17 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
-                "H2PO4, K, Ca, Mg, SO4S, unit, user_id, requestHistory_id) values (";
+                "H2PO4, K, Ca, Mg, SO4S, unit, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+unit+"', "+users.getId()+", "+requestHistory_id+")";
+            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+ macroUnit +"'," +requestHistoryInfo.getId()+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
-            values += ", '"+unit+"', ";
-            values += users.getId()+", ";
-            values += requestHistory_id+")";
+            values += ", '"+ macroUnit +"', ";
+            values += requestHistoryInfo.getId()+")";
             query += values;
         }
 

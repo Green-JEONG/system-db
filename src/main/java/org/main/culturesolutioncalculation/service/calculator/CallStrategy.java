@@ -1,5 +1,6 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
+import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.util.*;
@@ -52,7 +53,7 @@ public class CallStrategy {
 
     public void callMacroStrategy(){
         CalculationStrategy strategy = new MacroCalculationStrategy
-                (new Users(), "mM",true, false, consideredValues, fertilization);
+                ( "mM",true, false, consideredValues, fertilization, new RequestHistoryInfo());
         CalculatorClient client = new CalculatorClient(strategy);
         Map<String, Map<String, Double>> calculatedValues = client.calculate();
         client.save();

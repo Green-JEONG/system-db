@@ -69,11 +69,9 @@ public class PrintTabController {
         initializeCompositionTable();
     }
 
-    private void initializeUserInfo() {
-
-    }
 
     private void initializeAnalysisTable() {
+
         TableColumn<DataItem, String> itemColumn = new TableColumn<>("항목");
         itemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
 
@@ -95,6 +93,8 @@ public class PrintTabController {
     }
 
     private void initializeCompositionTable() {
+
+
         TableColumn<DataItem, String> tankColumn = new TableColumn<>("조제탱크");
         tankColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
 
@@ -191,6 +191,7 @@ public class PrintTabController {
         compositionTable.setItems(compositionData);
     }
 
+    // userInfoTab -> PrintTab으로 올 때 & microResult -> PrintTab으로 올 때
     public void setHistoryInfo(RequestHistoryInfo selectedHistory) {
         System.out.println("selectedHistory.getRequestDate() = " + selectedHistory.getRequestDate());
         requestHistoryInfo = selectedHistory;

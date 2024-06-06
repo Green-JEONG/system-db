@@ -3,16 +3,17 @@ package org.main.culturesolutioncalculation;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ToolBar;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class MainController {
 
 
+    @FXML public ToolBar toolBarTab;
     @FXML private TabPane mainTabPane;
     @FXML private static Tab printTab;
     @FXML private static Tab macroTab;
@@ -20,12 +21,17 @@ public class MainController {
     @FXML private static Tab settingTab;
     @FXML private static Tab userInfoTab;
     private static UserInfo userInfo = new UserInfo();
-    private static RequestHistoryInfo requestHistoryInfo = new RequestHistoryInfo();
+    private static RequestHistoryInfo requestHistoryInfo = new RequestHistoryInfo(); //이렇게 바로 생성자 주입 받아야 전역적으로 사용되는 거 같음
     private static SettingInfo settingInfo = new SettingInfo();
     private static TableData tableData = new TableData();
     private static PrintTabController printTabController;
+    //public static MacroResultController2 macroResultController;
+    public static MacroResultController macroResultController;
     public static UserInfo getUserInfo() {
         return userInfo;
+    }
+    public void setRequestHistoryInfo (RequestHistoryInfo requestHistoryInfo){
+        this.requestHistoryInfo = requestHistoryInfo;
     }
 
     public static SettingInfo getSettingInfo() {
@@ -36,7 +42,7 @@ public class MainController {
         return tableData;
     }
 
-    public static RequestHistoryInfo getRequestHistoryInfo() {
+    public static  RequestHistoryInfo getRequestHistoryInfo() {
         return requestHistoryInfo;
     }
     @FXML
@@ -48,8 +54,7 @@ public class MainController {
         setMacroTabController();
         setMicroResultController();
         setSettingTabController();
-
-
+        setToolbarController();
 
         if (mainTabPane != null) {
             for (Tab tab : mainTabPane.getTabs()) {
@@ -92,11 +97,22 @@ public class MainController {
         }
     }
 
+    public void setToolbarController(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Toolbar.fxml"));
+            loader.load();
+            ToolbarController toolbarController = loader.getController();
+            toolbarController.setMacroResultController(macroResultController);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setMacroResultController(){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MacroResult.fxml"));
             loader.load();
-            MacroResultController macroResultController = loader.getController();
+            macroResultController = loader.getController();
             macroResultController.setMainController(this);
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,6 +150,32 @@ public class MainController {
             return null;
         }
     }
+
+    public MacroResultController getMacroResultController(){
+        return macroResultController;
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("MacroResult.fxml"));
+//            loader.load();
+//            MacroResultController macroResultController = loader.getController();
+//            return macroResultController;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+    }
+
+    public ToolbarController getToolbarController(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Toolbar.fxml"));
+            loader.load();
+            ToolbarController toolbarController = loader.getController();
+            return toolbarController;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void moveToSettingTab(){
         if (mainTabPane != null && settingTab != null) {
             Platform.runLater(() -> {
@@ -187,8 +229,6 @@ public class MainController {
 
         printTabController = getPrintTabController();
 
-        System.out.println("selectedHistory = " + selectedHistory);
-
         // 선택된 history 정보를 설정
         if (printTabController != null) {
             printTabController.setHistoryInfo(selectedHistory);
@@ -197,4 +237,19 @@ public class MainController {
         // 탭 전환 로직
         mainTabPane.getSelectionModel().select(printTab);
     }
+
+    public void setMacroResultTabWithValues(Map<String, Double> userFertilization, Map<String, Double> consideredValues, Map<String, Double>standardValues, boolean is4, RequestHistoryInfo requestHistoryInfo, String macroUnit, boolean isConsidered) {
+        macroResultController = getMacroResultController();
+
+        if(macroResultController != null){
+            macroResultController.setUserFertilization(userFertilization);
+            macroResultController.setConsideredValues(consideredValues);
+            macroResultController.setStandardValues(standardValues);
+            macroResultController.setIs4(is4);
+            macroResultController.setRequestHistoryInfo(requestHistoryInfo);
+            macroResultController.setMacroUnit(macroUnit);
+            macroResultController.setConsidered(isConsidered);
+        }
+    }
+
 }

@@ -29,9 +29,20 @@ public class MacroTabController {
 
     private MediumService mediumService;
 
-    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
+    private static RequestHistoryInfo requestHistoryInfo;// = MainController.getRequestHistoryInfo();
 
     SettingInfo settingInfo = MainController.getSettingInfo();
+
+    private Map<String, Double> userFertilization = new LinkedHashMap<>(); // 처방 농도
+
+    private Map<String, Double> consideredValues = new LinkedHashMap<>(); //고려 원수 값
+
+    private Map<String, Double> standardValues = new LinkedHashMap<>();// 기준값
+
+    private boolean is4; //질산칼슘 4수염 선택하면 true, 10수염 선택하면 false
+
+    private String macroUnit; //다량원소 단위
+    private boolean isConsidered; //원수 고려 여부
 
 
     @FXML
@@ -46,6 +57,8 @@ public class MacroTabController {
     }
 
     public void initialize() {
+        requestHistoryInfo = MainController.getRequestHistoryInfo();
+        System.out.println("requestHistoryInfo = " + requestHistoryInfo);
         initTableView();
     }
 
@@ -101,16 +114,17 @@ public class MacroTabController {
 
         String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
+        is4 = "Ca(NO3)2·4H2O".equals(totalSetting.get("질산칼슘 비료")); //4수염이면 true
+        macroUnit = totalSetting.get("설정 다량원소 단위");
         boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
 
         Set<String> checkedConsideredOptionNames = new HashSet<>();
         Map<String, List<String>> impactMap = createImpactMapping();
 
-        System.out.println("isConsiderFalse = " + isConsiderFalse);
-
 
         //원수 고려한다면 -> 원수 고려 옵션들의 이름 필터링
         if(!isConsiderFalse) {
+            isConsidered = true;
             // 원수 고려 옵션들의 이름 필터링
             checkedConsideredOptionNames = totalSetting.entrySet().stream()
                     .filter(entry -> entry.getValue().equals("1"))
@@ -125,14 +139,9 @@ public class MacroTabController {
                 }
             }
             checkedConsideredOptionNames.addAll(impactedNames);
+        }else{
+            isConsidered = false;
         }
-
-
-        System.out.println("===============");
-        for (String name : checkedConsideredOptionNames) {
-            System.out.println("name = " + name);
-        }
-        System.out.println("================");
 
         for (int i = 0; i < rowTitles.length; i++) {
             ObservableList<String> row = FXCollections.observableArrayList();
@@ -205,6 +214,8 @@ public class MacroTabController {
         ObservableList<String> rawWaterRow = data.get(rawWaterIndex);
         ObservableList<String> prescriptionRow = data.get(prescriptionIndex);
 
+        userFertilization.clear(); // 처방농도 맵 초기화
+
         // 처방 농도 계산
         for (int i = 1; i < columnTitles.length; i++) {  // 인덱스 0은 행 제목이므로 1부터 시작
             try {
@@ -212,6 +223,42 @@ public class MacroTabController {
                 double rawWaterValue = rawWaterRow.get(i).isEmpty() ? 0.0 : Double.parseDouble(rawWaterRow.get(i));
                 double prescriptionValue = baselineValue - rawWaterValue;
                 prescriptionRow.set(i, String.format("%.2f", prescriptionValue));
+
+                if(columnTitles[i].equals("NO3")){
+                    standardValues.put("NO3N",baselineValue);
+                    consideredValues.put("NO3N", rawWaterValue);
+                    userFertilization.put("NO3N", prescriptionValue);
+                }
+                else if(columnTitles[i].equals("NH4")){
+                    standardValues.put("NH4N",baselineValue);
+                    consideredValues.put("NH4N", rawWaterValue);
+                    userFertilization.put("NH4N", prescriptionValue);
+                }
+                else if(columnTitles[i].equals("SO4")){
+                    standardValues.put("SO4S",baselineValue);
+                    consideredValues.put("SO4S", rawWaterValue);
+                    userFertilization.put("SO4S", prescriptionValue);
+                }
+                else if(columnTitles[i].equals("산도(pH)")){
+                    standardValues.put("pH",baselineValue);
+                    consideredValues.put("pH", rawWaterValue);
+                    userFertilization.put("pH", prescriptionValue);
+                }
+                else if(columnTitles[i].equals("농도(EC)")){
+                    standardValues.put("EC",baselineValue);
+                    consideredValues.put("EC", rawWaterValue);
+                    userFertilization.put("EC", prescriptionValue);
+                }
+                else if(columnTitles[i].equals("중탄산(HCO3)")){
+                    standardValues.put("HCO3",baselineValue);
+                    consideredValues.put("HCO3", rawWaterValue);
+                    userFertilization.put("HCO3", prescriptionValue);
+                }
+                else {
+                    standardValues.put(columnTitles[i], baselineValue);
+                    consideredValues.put(columnTitles[i], rawWaterValue);
+                    userFertilization.put(columnTitles[i], prescriptionValue);
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Error parsing numbers: " + e.getMessage());
                 prescriptionRow.set(i, "Err");
@@ -256,29 +303,16 @@ public class MacroTabController {
         return values;
     }
 
-    private CropNutrientStandard findCropNutrient(ArrayList<CropNutrientStandard> cropList, String crop) {
-        if (cropList == null) {
-            return null;
-        }
-
-        for (CropNutrientStandard cropNutrientStandard : cropList) {
-            if (cropNutrientStandard.getCropName().equals(crop)) {
-                return cropNutrientStandard;
-            }
-        }
-        return null; // 선택한 작물에 해당하는 정보를 찾을 수 없는 경우 null 반환
-    }
 
     @FXML
     public void prevButton(ActionEvent actionEvent) {
 
         mainController.moveToSettingTab();
-//        TabPane tabPane = macroTab.getTabPane();
-//        int currentIndex = tabPane.getTabs().indexOf(macroTab);
-//        tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
     }
 
+    @FXML
     public void saveInput(ActionEvent event) throws IOException {
+        mainController.setMacroResultTabWithValues(userFertilization, consideredValues, standardValues, is4, requestHistoryInfo, macroUnit, isConsidered);
         switchScene(event);
         // 테이블 저장
     }

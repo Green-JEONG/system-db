@@ -213,6 +213,7 @@ public class UserInfoTabController {
         tabPane.getSelectionModel().select(currentIndex + 1);
     }
 
+
     @FXML
     private void saveRequestHistoryInfo() {
 
@@ -245,6 +246,7 @@ public class UserInfoTabController {
 
         requestHistoryInfo.setRequestDate(Timestamp.valueOf(LocalDateTime.now()));
         requestHistoryInfo.setUserInfo(userInfo);
+        mainController.setRequestHistoryInfo(requestHistoryInfo);
 
         //분석 기록 DB 저장
         requestHistoryService.save(requestHistoryInfo);

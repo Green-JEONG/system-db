@@ -5,21 +5,22 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class ToolbarController {
-    @FXML
-    private Button exitButton;
-    @FXML
-    private Button initButton;
+    @FXML public Button calcButton;
+    @FXML private Button exitButton;
+    @FXML private Button initButton;
 
     private SettingInfo settingInfo = new SettingInfo();
 
     MainController mainController = new MainController();
+    private static MacroResultController macroResultController;
     TableData tableData = mainController.getTableData();
 
+    public void setMacroResultController(MacroResultController macroResultController) {
+        this.macroResultController = macroResultController;
+    }
 
     @FXML
     public void onEditButtonClick(ActionEvent event) {
@@ -116,32 +117,36 @@ public class ToolbarController {
 
     }
 
-    @FXML
-    public void onCalcButtonClick(ActionEvent actionEvent) {
-        // 설정 정보 가져오기
-        Map<String, String> totalSetting = settingInfo.getTotalSetting();
+        @FXML
+        public void onCalcButtonClick(ActionEvent actionEvent) {
 
-        // 다량원소 탭 설정 정보
-        Map<String, String> macroSettings = new HashMap<>();
-        macroSettings.put("설정 다량원소 단위", totalSetting.get("설정 다량원소 단위"));
-        macroSettings.put("질산칼슘 비료", totalSetting.get("질산칼슘 비료"));
-        macroSettings.put("원수 고려 유무", totalSetting.get("원수 고려 유무"));
-        macroSettings.put("원수 입력 단위", totalSetting.get("원수 입력 단위"));
+            mainController.getMacroResultController().calculateAndDisplayResults();
 
-        // 미량원소 탭 설정 정보
-        Map<String, String> microSettings = new HashMap<>();
-        microSettings.put("설정 미량원소 단위", totalSetting.get("설정 미량원소 단위"));
-        microSettings.put("철 비료", totalSetting.get("철 비료"));
-        microSettings.put("붕소 비료", totalSetting.get("붕소 비료"));
-        microSettings.put("망간 비료", totalSetting.get("망간 비료"));
-        microSettings.put("몰리브뎀 비료", totalSetting.get("몰리브뎀 비료"));
-        microSettings.put("원수 고려 유무", totalSetting.get("원수 고려 유무"));
-        microSettings.put("원수 입력 단위", totalSetting.get("원수 입력 단위"));
 
-        // 계산식 설정
-
-        tableData.setMacroSettings(macroSettings);
-        tableData.setMicroSettings(microSettings);
+//        // 설정 정보 가져오기
+//        Map<String, String> totalSetting = settingInfo.getTotalSetting();
+//
+//        // 다량원소 탭 설정 정보
+//        Map<String, String> macroSettings = new HashMap<>();
+//        macroSettings.put("설정 다량원소 단위", totalSetting.get("설정 다량원소 단위"));
+//        macroSettings.put("질산칼슘 비료", totalSetting.get("질산칼슘 비료"));
+//        macroSettings.put("원수 고려 유무", totalSetting.get("원수 고려 유무"));
+//        macroSettings.put("원수 입력 단위", totalSetting.get("원수 입력 단위"));
+//
+//        // 미량원소 탭 설정 정보
+//        Map<String, String> microSettings = new HashMap<>();
+//        microSettings.put("설정 미량원소 단위", totalSetting.get("설정 미량원소 단위"));
+//        microSettings.put("철 비료", totalSetting.get("철 비료"));
+//        microSettings.put("붕소 비료", totalSetting.get("붕소 비료"));
+//        microSettings.put("망간 비료", totalSetting.get("망간 비료"));
+//        microSettings.put("몰리브뎀 비료", totalSetting.get("몰리브뎀 비료"));
+//        microSettings.put("원수 고려 유무", totalSetting.get("원수 고려 유무"));
+//        microSettings.put("원수 입력 단위", totalSetting.get("원수 입력 단위"));
+//
+//        // 계산식 설정
+//
+//        tableData.setMacroSettings(macroSettings);
+//        tableData.setMicroSettings(microSettings);
     }
 
 }

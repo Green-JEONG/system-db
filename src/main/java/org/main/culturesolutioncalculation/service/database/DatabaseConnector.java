@@ -9,6 +9,10 @@ import java.sql.SQLException;
 
 public class DatabaseConnector {
 
+    private static final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private static final String user = "root";
+    private static final String password = "root";
+
     private static DatabaseConnector instance;
     private static HikariDataSource dataSource;
 
