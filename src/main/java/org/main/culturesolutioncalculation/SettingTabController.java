@@ -217,11 +217,6 @@ public class SettingTabController {
     @FXML
     public void prevButton() {
         mainController.moveToUserInfoTab();
-//        TabPane tabPane = settingTab.getTabPane();
-//        int currentIndex = tabPane.getTabs().indexOf(settingTab);
-//        if (currentIndex > 0) {  // 첫 번째 탭이 아닌 경우에만
-//            tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
-//        }
     }
 
     @FXML

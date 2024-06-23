@@ -1,6 +1,8 @@
 package org.main.culturesolutioncalculation.model;
 
 
+import com.sun.scenario.effect.Crop;
+
 // 작물 배양액과 기준값
 public class CropNutrientStandard {
     private final int id;
@@ -46,6 +48,7 @@ public class CropNutrientStandard {
         this.Mo = Mo;
         this.P = P;
     }
+
 
     public CropNutrientStandard(int id, String cropName, String nutrientSolutionName, double EC, double PH, double HCO3, double NO3, double NH4, double h2PO4, double k, double ca, double mg, double SO4, double fe, double cu, double b, double mn, double zn, double mo, double p) {
         this.id = id;

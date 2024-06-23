@@ -18,12 +18,9 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DefaultStringConverter;
 import org.main.culturesolutioncalculation.model.CropNutrientStandard;
-import org.main.culturesolutioncalculation.model.NutrientSolution;
-import org.main.culturesolutioncalculation.service.CSVDataReader;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,7 +67,6 @@ public class MicroTabController {
     @FXML
     private void initialize() {
         requestHistoryInfo = MainController.getRequestHistoryInfo();
-        System.out.println("requestHistoryInfo = " + requestHistoryInfo);
         initTableView();
     }
     public void initTableView() {
@@ -107,16 +103,12 @@ public class MicroTabController {
     private void updateTableData() {
         data.clear();
 
-        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
+        String[] values = getStandardValues(requestHistoryInfo.getCultureMediumId(), requestHistoryInfo.getSelectedCropName());
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
-        boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
-        microUnit = totalSetting.get("설정 미량원소 단위");
         userMicroNutrients.add(totalSetting.get("몰리브뎀 비료"));
-
-        System.out.println("===microTab===");
-        for (String s : totalSetting.keySet()) {
-            System.out.println("totalSetting = " + totalSetting.get(s));
-        }
+        microUnit = totalSetting.get("설정 미량원소 단위");
+        System.out.println("microTab : microUnit = " + microUnit);
+        boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
 
         Set<String> checkedConsideredOptionNames = new HashSet<>();
 
@@ -144,11 +136,9 @@ public class MicroTabController {
                     if(title.equals("미량원소")) continue;
                     boolean isEditable = checkedConsideredOptionNames.stream().anyMatch(name -> name.contains(title));
                     if(isEditable) {
-                        System.out.println(title + " = 고려 원수이므로 편집 가능");
                         consideredRow.add("");
                     }
                     else {
-                        System.out.println(title + " = 0으로 세팅");
                         consideredRow.add("0");
                     }
                 }

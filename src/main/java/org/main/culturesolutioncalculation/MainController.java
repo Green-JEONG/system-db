@@ -162,15 +162,16 @@ public class MainController {
         }
     }
     public PrintTabController getPrintTabController(){
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("PrintTab.fxml"));
-            loader.load();
-            PrintTabController printTabController = loader.getController();
-            return printTabController;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        if (printTabController == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("PrintTab.fxml"));
+                loader.load();
+                printTabController = loader.getController();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        return printTabController;
     }
     public MicroResultController getMicroResultController(){
         return microResultController;
@@ -302,16 +303,20 @@ public class MainController {
         }
     }
 
-    public void setMacroDataToPrintTab(Map<String, Double> userFertilization, Map<String, FinalCal> molecularMass, Map<String, Double> consideredValues, RequestHistoryInfo requestHistoryInfo, CalculationStrategy strategy) {
+    public void setMacroDataToPrintTab(CalculationStrategy strategy) {
        printTabController = getPrintTabController();
 
        if(printTabController!= null){
-           printTabController.setMacroConsideredValues(consideredValues);
-           printTabController.setMacroMolecularMass(molecularMass);
-           printTabController.setMacroUserFertilization(userFertilization);
-           //printTabController.setRequestHistoryInfo(requestHistoryInfo);
-           printTabController.setStrategy(strategy);
+           printTabController.setMacroStrategy(strategy);
        }
+    }
+
+    public void setMicroDataToPrintTab(CalculationStrategy strategy) {
+        printTabController = getPrintTabController();
+
+        if(printTabController != null){
+            printTabController.setMicroStrategy(strategy);
+        }
     }
 }
 

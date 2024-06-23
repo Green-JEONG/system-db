@@ -153,12 +153,13 @@ public class MediumService {
         }
     }
 
-    public String getMediumTypeName(int mediumTypeId) {
-        String query = "select name from medium_types where id = ?";
+    public String getMediumTypeName(int cultureMediumId) {
+        String query= "select m.name from medium_types m join culture_medium c on m.id = c.medium_type_id where c.id = ?";
+
         String mediumTypeName = "";
         try (Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setInt(1, mediumTypeId);
+            pstmt.setInt(1, cultureMediumId);
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
                     mediumTypeName = resultSet.getString("name");

@@ -3,16 +3,19 @@ package org.main.culturesolutioncalculation;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.apache.commons.lang3.ObjectUtils;
 import org.main.culturesolutioncalculation.service.calculator.CalculationStrategy;
 import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.print.SangJuPrint;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,12 +24,16 @@ import java.util.Objects;
 public class PrintTabController {
 
     MainController mainController = new MainController();
-    private static UserInfo userInfo;// = MainController.getUserInfo();
+    private static UserInfo userInfo = MainController.getUserInfo();
+    private static ObservableList<DataItem> analysisData = FXCollections.observableArrayList();
+    private static ObservableList<DataItem> compositionData = FXCollections.observableArrayList();
+    private SangJuPrint sangJuPrint;
 
     private static RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
     SettingInfo settingInfo = mainController.getSettingInfo();
 
     private MediumService mediumService;
+    private RequestHistoryService requestHistoryService;
 
 
     //왼쪽 AnchorPane의 라벨
@@ -42,36 +49,24 @@ public class PrintTabController {
     @FXML private Label customerAddress;
     @FXML private Label customerContact;
     @FXML private Label customerCropName;
+    @FXML private Label customerCropMedium;
     @FXML private Label ph;
     @FXML private Label ec;
     @FXML private Label hco3;
 
     private static CalculationStrategy macroStrategy;
+    private static CalculationStrategy microStrategy;
 
-    private Map<String, FinalCal> macroMolecularMass =  new LinkedHashMap<>();
 
-    private Map<String, Double> macroConsideredValues = new LinkedHashMap<>();
+    public void setMicroStrategy(CalculationStrategy microStrategy) {
+        PrintTabController.microStrategy = microStrategy;
+    }
 
-    private Map<String, Double> macroUserFertilization = new LinkedHashMap<>();
-
-    public void setStrategy(CalculationStrategy strategy) {
+    public void setMacroStrategy(CalculationStrategy strategy) {
         this.macroStrategy = strategy;
     }
 
-    public void setMacroMolecularMass(Map<String, FinalCal> macroMolecularMass) {
-        this.macroMolecularMass = macroMolecularMass;
-    }
 
-    public void setMacroConsideredValues(Map<String, Double> macroConsideredValues) {
-        this.macroConsideredValues = macroConsideredValues;
-    }
-
-    public void setMacroUserFertilization(Map<String, Double> macroUserFertilization) {
-        this.macroUserFertilization = macroUserFertilization;
-    }
-//    public void setRequestHistoryInfo(RequestHistoryInfo requestHistoryInfo){
-//        this.requestHistoryInfo = requestHistoryInfo;
-//    }
 
     @FXML
     private Label processingDateLabel;
@@ -90,6 +85,9 @@ public class PrintTabController {
 
     public PrintTabController() {
         this.mediumService = new MediumService();
+        this.sangJuPrint = new SangJuPrint();
+        System.out.println("PrintTabController 인스턴스 생성됨");
+
     }
 
     @FXML
@@ -98,6 +96,10 @@ public class PrintTabController {
         initializeCompositionTable();
         if(macroStrategy!= null)
             macroStrategy.save(); //다량 원소 계산 결과 저장
+        if(microStrategy!= null)
+            microStrategy.save();
+        requestHistoryService = new RequestHistoryService();
+        mediumService = new MediumService();
     }
 
 
@@ -131,6 +133,9 @@ public class PrintTabController {
         TableColumn<DataItem, String> fertilizerColumn = new TableColumn<>("비료의 종류");
         fertilizerColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
+        TableColumn<DataItem, String> fertilizerKorColumn = new TableColumn<>("비료명");
+        fertilizerKorColumn.setCellValueFactory(new PropertyValueFactory<>("kor"));
+
         TableColumn<DataItem, String> unitColumn = new TableColumn<>("단위");
         unitColumn.setCellValueFactory(new PropertyValueFactory<>("unit"));
 
@@ -142,23 +147,13 @@ public class PrintTabController {
         unitColumn.setMinWidth(50);
         amountColumn.setMinWidth(200);
 
-        compositionTable.getColumns().addAll(tankColumn, fertilizerColumn, unitColumn, amountColumn);
+        compositionTable.getColumns().addAll(tankColumn, fertilizerColumn,fertilizerKorColumn, unitColumn, amountColumn);
     }
 
     @FXML
     private void loadAnalysisData() {
 
-
-        if (requestHistoryInfo != null && userInfo != null) {
-
-            if (requestHistoryInfo.getSelectedCropName() == null || requestHistoryInfo.getSelectedCropName().isEmpty()) {
-                //getCropNameFromDatabase();
-            }
-
-            if (requestHistoryInfo.getMediumTypeName()== null || requestHistoryInfo.getMediumTypeName().isEmpty()) {
-                //getMeditumTypeFromDatabase();
-            }
-
+        if (requestHistoryInfo != null) {
             Platform.runLater(() -> {
                 name.setText("의뢰자 : " + requestHistoryInfo.getUserInfo().getName());
                 contact.setText("전화번호 : " + requestHistoryInfo.getUserInfo().getContact());
@@ -168,81 +163,62 @@ public class PrintTabController {
                 System.out.println(requestHistoryInfo.getId());
             });
         } else {
-            System.out.println("UserInfo is null");
+            System.out.println("RequestHistoryInfo is null");
         }
 
+        ObservableList<DataItem> macroAnalysisData = requestHistoryService.getMacroAnalysisData(requestHistoryInfo);
+        ObservableList<DataItem> microAnalysisData = requestHistoryService.getMicroAnalysisData(requestHistoryInfo);
 
 
-        if (requestHistoryInfo != null && userInfo != null) {
-            Platform.runLater(() -> {
-                name.setText("의뢰자 : " + userInfo.getName().toString());
-                contact.setText("전화번호 : " + userInfo.getContact());
-                address.setText("주소 : " + userInfo.getAddress());
-                cropName.setText("작물명 : "+requestHistoryInfo.getSelectedCropName());
-                mediumType.setText("시료 종류 : "+requestHistoryInfo.getMediumTypeName());
-            });
-        } else {
-            System.out.println("UserInfo is null");
-        }
-
-        ObservableList<DataItem> analysisData = FXCollections.observableArrayList(
-                new DataItem("산도 (pH)", "", "", ""),
-                new DataItem("농도 (EC)", "", "dS/m", ""),
-                new DataItem("질산태질소 (NO3-N)", "", "ppm", ""),
-                new DataItem("암모니아태질소 (NH4-N)", "", "ppm", ""),
-                new DataItem("인 (P)", "", "ppm", ""),
-                new DataItem("칼륨 (K)", "", "ppm", ""),
-                new DataItem("칼슘 (Ca)", "", "ppm", ""),
-                new DataItem("마그네슘 (Mg)", "", "ppm", ""),
-                new DataItem("황 (S)", "", "ppm", ""),
+        analysisData.addAll(macroAnalysisData);
+        analysisData.addAll(microAnalysisData);
+        /*
                 new DataItem("염소 (Cl)", "", "ppm", ""),
-                new DataItem("나트륨 (Na)", "", "ppm", ""),
-                new DataItem("철 (Fe)", "", "ppm", ""),
-                new DataItem("붕소 (B)", "", "ppm", ""),
-                new DataItem("망간 (Mn)", "", "ppm", ""),
-                new DataItem("아연 (Zn)", "", "ppm", ""),
-                new DataItem("구리 (Cu)", "", "ppm", ""),
-                new DataItem("몰리브뎀 (Mo)", "", "ppm", ""),
-                new DataItem("중탄산 (HCO3-)", "", "ppm", "")
-        );
+                new DataItem("나트륨 (Na)", "", "ppm", "") 은 요구 사항 부족으로 넣지 못함
+         */
         analysisTable.setItems(analysisData);
     }
 
     @FXML
     private void loadCompositionData() {
 
-        if (requestHistoryInfo != null && userInfo != null) {
+        if (requestHistoryInfo != null) {
             Platform.runLater(() -> {
                 processNumber.setText("시료번호 : "+requestHistoryInfo.getRequestDate().toString());
-                customerName.setText("의뢰인-이름 : " + userInfo.getName().toString());
-                customerContact.setText("의뢰인-전화번호 : " + userInfo.getContact());
-                customerAddress.setText("의뢰인-주소 : " + userInfo.getAddress());
-                customerCropName.setText("품종 : "+requestHistoryInfo.getSelectedCropName());
+                customerName.setText("의뢰인-이름 : " + requestHistoryInfo.getUserInfo().getName().toString());
+                customerContact.setText("의뢰인-전화번호 : " + requestHistoryInfo.getUserInfo().getContact());
+                customerAddress.setText("의뢰인-주소 : " + requestHistoryInfo.getUserInfo().getAddress());
+                customerCropName.setText("재배작물 : "+requestHistoryInfo.getSelectedCropName());
+                customerCropMedium.setText("품종 : "+requestHistoryInfo.getMediumTypeName());
                 ph.setText("원수수질-pH : "+requestHistoryInfo.getPh());
                 ec.setText("원수수질-EC(dS/m) : "+requestHistoryInfo.getEc());
                 hco3.setText("원수수질-중탄산(mg/L) : "+requestHistoryInfo.getHco3());
             });
         } else {
-            System.out.println("UserInfo is null");
+            System.out.println("RequestHistoryInfo is null");
         }
+        ObservableList<DataItem> macroCompositionData = requestHistoryService.getMacroCompositionData(requestHistoryInfo);
+        ObservableList<DataItem> microCompositionData = requestHistoryService.getMicroCompositionData(requestHistoryInfo);
 
+        compositionData.addAll(macroCompositionData);
+        compositionData.addAll(microCompositionData);
 
-        ObservableList<DataItem> compositionData = FXCollections.observableArrayList(
-                new DataItem("A", "질산칼슘(4수염) | Ca(NO3)23H2O", "kg", ""),
-                new DataItem("A", "질산칼슘(10수염) | 5[Ca(NO3)2·2H2O]NH4NO3", "kg", ""),
-                new DataItem("A", "질산암모늄(초안) | NH4NO3", "kg", ""),
-                new DataItem("A", "황산암모늄(유안) | (NH4)2SO4", "kg", ""),
-                new DataItem("A", "질산칼륨 | KNO3", "kg", ""),
-                new DataItem("A", "킬레이트철 | EDTAFeNa·3H2O", "kg", ""),
-                new DataItem("B", "질산칼륨 | KNO3", "kg", ""),
-                new DataItem("B", "황산칼륨 | K2SO4", "kg", ""),
-                new DataItem("B", "황산마그네슘 | MgSO4·7H2O", "kg", ""),
-                new DataItem("B", "붕산 | H3BO3", "g", ""),
-                new DataItem("B", "황산망간 | MnSO4·H2O", "g", ""),
-                new DataItem("B", "황산아연 | ZnSO4·7H2O", "g", ""),
-                new DataItem("B", "황산구리 | CuSo4·5H2O", "g", ""),
-                new DataItem("B", "몰리브덴산나트륨 | Na2MoO4·2H2O", "g", "")
-        );
+//        ObservableList<DataItem> compositionData = FXCollections.observableArrayList(
+//                new DataItem("A", "질산칼슘(4수염) | Ca(NO3)23H2O", "kg", ""),
+//                new DataItem("A", "질산칼슘(10수염) | 5[Ca(NO3)2·2H2O]NH4NO3", "kg", ""),
+//                new DataItem("A", "질산암모늄(초안) | NH4NO3", "kg", ""),
+//                new DataItem("A", "황산암모늄(유안) | (NH4)2SO4", "kg", ""),
+//                new DataItem("A", "질산칼륨 | KNO3", "kg", ""),
+//                new DataItem("A", "킬레이트철 | EDTAFeNa·3H2O", "kg", ""),
+//                new DataItem("B", "질산칼륨 | KNO3", "kg", ""),
+//                new DataItem("B", "황산칼륨 | K2SO4", "kg", ""),
+//                new DataItem("B", "황산마그네슘 | MgSO4·7H2O", "kg", ""),
+//                new DataItem("B", "붕산 | H3BO3", "g", ""),
+//                new DataItem("B", "황산망간 | MnSO4·H2O", "g", ""),
+//                new DataItem("B", "황산아연 | ZnSO4·7H2O", "g", ""),
+//                new DataItem("B", "황산구리 | CuSo4·5H2O", "g", ""),
+//                new DataItem("B", "몰리브덴산나트륨 | Na2MoO4·2H2O", "g", "")
+//        );
         compositionTable.setItems(compositionData);
     }
 
@@ -253,6 +229,25 @@ public class PrintTabController {
         userInfo = selectedHistory.getUserInfo();
     }
 
+    @FXML
+    public void printAnalysisData(ActionEvent actionEvent) {
+        try {
+            sangJuPrint.generatePDF(requestHistoryInfo, analysisData, "analysis");
+        }catch (NullPointerException e){
+            System.err.print(e);
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void printCompositionData(ActionEvent actionEvent) {
+        try{
+            sangJuPrint.generatePDF(requestHistoryInfo, compositionData, "composition");
+        }catch (NullPointerException e){
+            System.err.print(e);
+            e.printStackTrace();
+        }
+    }
 
 
     public static class DataItem {
@@ -260,12 +255,21 @@ public class PrintTabController {
         private final String value;
         private final String unit;
         private final String method;
+        private String kor;
 
         public DataItem(String item, String value, String unit, String method) {
             this.item = item;
             this.value = value;
             this.unit = unit;
             this.method = method;
+        }
+
+        public DataItem(String item, String value, String unit, String method, String kor) {
+            this.item = item;
+            this.value = value;
+            this.unit = unit;
+            this.method = method;
+            this.kor = kor;
         }
 
         public String getItem() {
@@ -282,6 +286,10 @@ public class PrintTabController {
 
         public String getMethod() {
             return method;
+        }
+
+        public String getKor() {
+            return kor;
         }
     }
 

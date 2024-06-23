@@ -39,6 +39,8 @@ public class MicroResultController {
     private TableData tableData;
 
     private static RequestHistoryInfo requestHistoryInfo;
+    private static CalculationStrategy strategy;
+
 
     public void setMainController(MainController mainController) {
 
@@ -46,7 +48,7 @@ public class MicroResultController {
         this.tableData = mainController.getToolbarController().tableData;
     }
 
-    public void setMicroUnit(String macroUnit) {
+    public void setMicroUnit(String microUnit) {
         this.microUnit = microUnit;
     }
 
@@ -59,14 +61,10 @@ public class MicroResultController {
     }
     public void setUserFertilization(Map<String, Double> userFertilization) {
         this.userFertilization = userFertilization;
-        System.out.println("userFertilization = " + userFertilization);
     }
 
     public void setUserMicroNutrients(List<String> userMicroNutrients) {
         this.userMicroNutrients = userMicroNutrients;
-        for (String userMicroNutrient : userMicroNutrients) {
-            System.out.println("userMicroNutrient = " + userMicroNutrient);
-        }
     }
 
     public void setConsideredValues(Map<String, Double> consideredValues) {
@@ -82,7 +80,7 @@ public class MicroResultController {
     String[] rowTitles =  {"설정농도(mM)", "시비농도(mM)", "킬레이트 철", "붕산", "황산망간", "황산아연", "황산구리", "몰리브덴산나트륨", "몰리브덴산암모늄", "합계"};
 
     // 분자식에 들어갈 값
-    String[] formula = {"", "", "Fe-EDTA", "H3BO3", "MnSO4·5H2O", "ZnSO4·7H2O", "CuSO4·5H2O", "Na2MoO4·2H2O", "(NH4)6Mo7O24·4H2O", ""};
+    String[] formula = {"", "", "Fe-EDTA", "H3BO3", "MnSO4·H2O", "ZnSO4·7H2O", "CuSO4·5H2O", "Na2MoO4·2H2O", "(NH4)6Mo7O24·4H2O", ""};
 
 
     @FXML
@@ -125,7 +123,7 @@ public class MicroResultController {
 
         System.out.println("Calculating and displaying results");
 
-        CalculationStrategy strategy = new MicroCalculationStrategy(requestHistoryInfo ,microUnit, isConsidered, userMicroNutrients, consideredValues, userFertilization );
+        strategy = new MicroCalculationStrategy(requestHistoryInfo ,microUnit, isConsidered, userMicroNutrients, consideredValues, userFertilization );
         CalculatorClient client = new CalculatorClient(strategy);
         Map<String, Map<String, Double>> calculatedValues = client.calculate();
 
@@ -224,7 +222,6 @@ public class MicroResultController {
 
             if (row.containsKey(component)) {
                 row.get(component).set(formattedValue);
-                System.out.println("component = " + component + " & formattedValue : "+formattedValue);
             }
         }
     }
@@ -240,6 +237,7 @@ public class MicroResultController {
 
     @FXML
     public void nextButton(ActionEvent event) {
+        mainController.setMicroDataToPrintTab(strategy);
         mainController.movePrintTab();
 
     }

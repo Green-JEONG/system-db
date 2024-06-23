@@ -9,7 +9,6 @@ import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -129,7 +128,11 @@ public class TypeTabController {
 
         if(requestHistoryInfo != null) {
             // 배양액 타입 아이디 세팅
-            requestHistoryInfo.setMediumTypeId(selectedMediumTypeId);
+            requestHistoryInfo.setCultureMediumId(selectedMediumTypeId);
+            // 배양액 타입 이름 세팅
+            requestHistoryInfo.setMediumTypeName(listView.getSelectionModel().getSelectedItem());
+
+
             String selectedComboBoxValue = comboBox.getValue();
             String[] selectedItem = tableView.getSelectionModel().getSelectedItem();
 
@@ -144,7 +147,7 @@ public class TypeTabController {
             //선택한 재배 작물 id requestHistoryInfo에 주입
             if (selectedItem != null) {
                 int selectedItemId = Integer.parseInt(selectedItem[0]);
-                requestHistoryInfo.setMediumTypeId(selectedItemId); //(culture_medium에 있는 튜플 id와 동일)
+                requestHistoryInfo.setCultureMediumId(selectedItemId); //(culture_medium에 있는 튜플 id와 동일)
             } else {
                 System.err.println("TableView에서 선택된 항목이 없습니다.");
             }

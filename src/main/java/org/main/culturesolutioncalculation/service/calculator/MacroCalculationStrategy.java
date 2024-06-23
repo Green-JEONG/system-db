@@ -67,9 +67,6 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     public MacroCalculationStrategy(String macroUnit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization, RequestHistoryInfo requestHistoryInfo){
 
-        System.out.println("requestHistoryInfo = " + requestHistoryInfo.getId());
-        System.out.println("requestHistoryInfo = " + requestHistoryInfo.getUserInfo().getName());
-
 
         this.conn = DatabaseConnector.getInstance(url, user, password);
         this.macroUnit = macroUnit;
@@ -77,7 +74,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         this.isConsidered = isConsidered;
         this.consideredValues = consideredValues;
         this.userFertilization = userFertilization;
-        this.calFertilization = userFertilization;
+        this.calFertilization = new LinkedHashMap<>(userFertilization);
         this.requestHistoryInfo = requestHistoryInfo;
         getMajorCompoundRatio(is4);
     }
@@ -95,10 +92,11 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
             while(resultSet.next()){
                 String macro = resultSet.getString("macro"); //질산칼슘4수염, 질산칼륨, 질산암모늄 등등
+                String kor = resultSet.getString("macro_kr"); //화합물 한글 명
                 String solution = resultSet.getString("solution"); //양액 타입 (A,B, C)
                 double mass = resultSet.getDouble("mass");//화합물 질량
 
-                molecularMass.put(macro, new FinalCal(solution, mass)); //100배액 계산을 위해 화합물과 그 질량 저장
+                molecularMass.put(macro, new FinalCal(solution, mass, kor)); //100배액 계산을 위해 화합물과 그 질량 저장
 
                 Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. 질산칼슘4수염이 갖는 원수의 이름과 질량비를 갖는 map
                 for (String major : userFertilization.keySet()) {
@@ -141,7 +139,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         double minRatioValue = Double.MAX_VALUE;
 
         for (String nutrient : compoundsRatio.get(compound).keySet()) { //해당 화합물의 원수
-            double availableAmount = userFertilization.get(nutrient); //해당 원수의 처방 농도
+            double availableAmount = calFertilization.get(nutrient); //해당 원수의 처방 농도
             double ratio = compoundsRatio.get(compound).get(nutrient); //해당 원수의 화합물 첨가 비율
             double amountBasedOnRatio = availableAmount / ratio;
             minRatioValue = Math.min(minRatioValue, amountBasedOnRatio);
@@ -177,13 +175,13 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         for (String macro : userFertilization.keySet()) {
             query += ", "+macro;
         }
-        query += ") "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
+        query += ", unit ) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id, unit)
         query += "values (" + requestHistoryInfo.getId();
 
         for (String macro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(macro);
         }
-        query += ")";
+        query += ", '"+macroUnit+"')";
 
         System.out.println("query = " + query);
 
@@ -226,43 +224,42 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     //TODO - insert 제대로 되는 지 확인 & 100배액(kg) 계산식 저거 맞나 확인받기
     private void insertIntoUsersMacroCalculatedMass() { //계산된 질량 값 DB 저장
         String unit = "'kg'";
+        int result = 0;
 
         for (String macro : molecularMass.keySet()) {
             double concentration_100fold = molecularMass.get(macro).getMass() / 10;
 
-            String query = "insert into users_macro_calculatedMass (users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id) " +
+            String query = "insert into users_macro_calculatedMass (users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id, macro_kr) " +
                     "values ("+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "
-                    +concentration_100fold+", "+unit+", "+"'"+molecularMass.get(macro).getSolution()+"'"+", "+requestHistoryInfo.getId()+")";
-
-            System.out.println("query = " + query);
+                    +concentration_100fold+", "+unit+", "+"'"+molecularMass.get(macro).getSolution()+"'"+", "+requestHistoryInfo.getId()+", '"+molecularMass.get(macro).getKor()+"')";
 
             try(Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement();){
-                int result = stmt.executeUpdate(query);
+                result = stmt.executeUpdate(query);
 
-                if(result>0) System.out.println("success");
-                else System.out.println("insert failed");
             }catch (SQLException e){
                 e.printStackTrace();
             }
         }
+        if(result>0) System.out.println("success: users_macro_calculatedMass");
+        else System.out.println("insert failed");
     }
 
 
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
-                "H2PO4, K, Ca, Mg, SO4S, pH, HCO3, EC, unit, requestHistory_id) values (";
+                "H2PO4, K, Ca, Mg, SO4S, pH, HCO3, EC, unit, requestHistory_id, is4) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, requestHistory_id) values (false, '"+ macroUnit +"'," +requestHistoryInfo.getId()+")";
+            query += "(is_considered, unit, requestHistory_id, is4) values (false, '"+ macroUnit +"', " +requestHistoryInfo.getId()+", "+is4+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
             values += ", '"+ macroUnit +"', ";
-            values += requestHistoryInfo.getId()+")";
+            values += requestHistoryInfo.getId()+", "+is4+")";
             query += values;
         }
         System.out.println("query = " + query);

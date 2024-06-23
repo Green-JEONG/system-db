@@ -17,13 +17,9 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private static final String user = "root";
     private static final String password = "root";
     private DatabaseConnector conn;
-    private Users users;
-
-    private RequestHistoryInfo requestHistoryInfo;
+    private static RequestHistoryInfo requestHistoryInfo;
 
     private boolean isConsidered;
-    private int requestHistory_id;
-    private Timestamp request_date;
     private String unit;
     private int users_micro_consideredValues_id;
     private Map<String, Map<String, Double>> compoundsRatio = new LinkedHashMap<>(); // ex; {NH4NO3 , {NH4N=1.0, NO3N=1.0}}
@@ -70,22 +66,21 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //    };
 
     public MicroCalculationStrategy(RequestHistoryInfo requestHistoryInfo, String unit, boolean isConsidered,  List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+        this.conn = DatabaseConnector.getInstance(url, user, password);
         this.requestHistoryInfo = requestHistoryInfo;
         this.unit = unit;
         this.isConsidered = isConsidered;
         this.userMicroNutrients = userMicroNutrients;
         this.consideredValues = consideredValues;
         this.userFertilization = userFertilization;
-        this.calFertilization = userFertilization;
-        request_date = Timestamp.from(Instant.now());
-        this.conn = DatabaseConnector.getInstance(url, user, password);
+        this.calFertilization = new LinkedHashMap<>(userFertilization);
         getMajorCompoundRatio(userMicroNutrients);
     }
 
     //분자 별 갖고 있는 미량 원소 비율을 가져옴. userMicroNutrients : 사용자가 선택한 미량원소 리스트
     private void getMajorCompoundRatio(List<String> userMicroNutrients){ // 몰리브뎀 화합물 종류만 들어옴
 
-        String query = "select * from micronutrients where micro in ('CuSO4·5H2O', 'ZnSO4·7H2O', 'Fe-EDTA', 'H3BO3', 'MnSO4·5H2O'"; //황산 구리, 황산 아연, Fe-EDTA, H3BO3, MnSO4·5H2O 화합물은 무조건 선택
+        String query = "select * from micronutrients where micro in ('CuSO4·5H2O', 'ZnSO4·7H2O', 'Fe-EDTA', 'H3BO3', 'MnSO4·H2O'"; //황산 구리, 황산 아연, Fe-EDTA, H3BO3, MnSO4·5H2O 화합물은 무조건 선택
         //Na2MoO4·2H2O
         for (String micro : userMicroNutrients) {
             query += ", '"+micro+"'";
@@ -101,8 +96,9 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                 String solution = resultSet.getString("solution");
                 double mass = resultSet.getDouble("mass");
                 int contentCount = resultSet.getInt("content_count");
+                String micro_kr = resultSet.getString("micro_kr");
 
-                molecularMass.put(micro, new FinalCal(solution, mass)); //100배액 계산을 위해 화합물과 그 질량, 양액 저장
+                molecularMass.put(micro, new FinalCal(solution, mass, micro_kr)); //100배액 계산을 위해 화합물과 그 질량, 양액 저장
 
                 Map<String, Double> compoundRatio = new LinkedHashMap<>(); //ex. 질산칼슘4수염이 갖는 원수의 이름과 질량비를 갖는 map
                 for (String major : userFertilization.keySet()) {
@@ -209,14 +205,14 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         for (String micro : molecularMass.keySet()) {
             double concentration_100fold = molecularMass.get(micro).getMass()*100/1000;
 
-            String query = "insert into users_micro_calculatedMass (user_id, users_micro_consideredValues_id, micro, mass, unit, solution, requestHistory_id) " +
-                    "values ("+ users.getId() +", "+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "
-                    +concentration_100fold+", "+unit+", "+molecularMass.get(micro).getSolution()+", "+requestHistory_id+")";
+            String query = "insert into users_micro_calculatedMass (users_micro_consideredValues_id, micro, mass, unit, solution, requestHistory_id, micro_kr) " +
+                    "values ("+users_micro_consideredValues_id+", "+"'"+micro+"'"+", "
+                    +concentration_100fold+", "+unit+", '"+molecularMass.get(micro).getSolution()+"', "+requestHistoryInfo.getId()+", '"+molecularMass.get(micro).getKor()+"')";
 
             try(Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement();){
                 int result = stmt.executeUpdate(query);
-                if(result>0) System.out.println("success");
+                if(result>0) System.out.println("success: users_micro_calculatedMass");
                 else System.out.println("insert failed");
             }catch (SQLException e){
                 e.printStackTrace();
@@ -225,22 +221,25 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     }
     private void insertIntoUsersMicroFertilization(){
-        String query = "insert into users_micro_fertilization (user_id";
+        String query = "insert into users_micro_fertilization (unit";
         for (String micro : userFertilization.keySet()) {
             query += ", "+micro;
         }
-        query += ", requestHistory_id) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id)
-        query += "values (" + users.getId();
+        query += ", requestHistory_id) "; //여기까지 query = insert into user_macro_fertilization (macro, NO3N, Ca, requestHistory_id, unit)
+        query += "values ('"+unit+"'";
 
         for (String micro : userFertilization.keySet()) {
             query += ", "+userFertilization.get(micro);
         }
-        query += requestHistory_id + ")";
+        query += ", "+requestHistoryInfo.getId() + ")";
+
+        System.out.println("query = " + query);
+
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
-            //int result = stmt.executeUpdate(query);
-            //if(result>0) System.out.println("success insert users_macro_fertilization");
-            //else System.out.println("insert failed users_macro_fertilization");
+            int result = stmt.executeUpdate(query);
+            if(result>0) System.out.println("success insert users_macro_fertilization");
+            else System.out.println("insert failed users_macro_fertilization");
         }catch (SQLException e){
             e.printStackTrace();
         }
@@ -274,23 +273,23 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private void insertIntoUsersMicroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_micro_consideredValues ";
         String values = "(is_considered, Fe, Cu, " +
-                "B, Mn, Zn, Mo, unit, user_id, requestHistory_id) values (";
+                "B, Mn, Zn, Mo, pH, HCO3, EC, unit, requestHistory_id) values (";
+        int result = 0;
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+unit+"', "+users.getId()+", "+requestHistory_id+")";
+            query += "(is_considered, unit, requestHistory_id) values (false, '"+unit+"', "+requestHistoryInfo.getId()+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
                 values += ", "+consideredValues.get(value);
             }
             values += ", '"+unit+"', ";
-            values += users.getId()+", ";
-            values += requestHistory_id+")";
+            values += requestHistoryInfo.getId()+")";
             query += values;
         }
         try (Connection connection = conn.getConnection();
              Statement stmt = connection.createStatement()) {
-            int result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+            result = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
             if (result > 0) {
                 System.out.println("success insert users_micro_consideredValues");
                 ResultSet generatedKeys = stmt.getGeneratedKeys();

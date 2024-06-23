@@ -7,15 +7,12 @@ import javafx.scene.control.*;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 import org.main.culturesolutioncalculation.service.users.UserService;
-import org.main.culturesolutioncalculation.service.users.Users;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
 public class UserInfoTabController {
     @FXML
@@ -170,7 +167,10 @@ public class UserInfoTabController {
         RequestHistoryInfo selectedHistory = historyListView.getSelectionModel().getSelectedItem();
 
         //해당 분석 기록에서 사용된 배양액 종류 이름 갖고오기
-        selectedHistory.setMediumTypeName(mediumService.getMediumTypeName(selectedHistory.getMediumTypeId()));
+        selectedHistory.setMediumTypeName(mediumService.getMediumTypeName(selectedHistory.getCultureMediumId()));
+        //해당 분석 기록에서 선택된 작물 이름 갖고오기
+        selectedHistory.setSelectedCropName(requestHistoryService.getCropName(selectedHistory.getCultureMediumId()));
+
 
         //requestHistoryInfo에 대한 유저 정보 채워넣기
         selectedHistory.setUserInfo(userInfo);

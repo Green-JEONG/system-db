@@ -8,7 +8,7 @@ public class RequestHistoryInfo {
 
     private Timestamp requestDate;
     private UserInfo userInfo;
-    private int mediumTypeId; //배양액 재배작물 아이디
+    private int cultureMediumId; //배양액 재배작물 아이디
 
     private String mediumTypeName; //배양액 종류 이름
     private String sampleType;
@@ -63,11 +63,11 @@ public class RequestHistoryInfo {
 
     }
 
-    public RequestHistoryInfo(int id, Timestamp requestDate, UserInfo userInfo, int mediumTypeId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName, double ph, double ec, double hco3) {
+    public RequestHistoryInfo(int id, Timestamp requestDate, UserInfo userInfo, int cultureMediumId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName, double ph, double ec, double hco3) {
         this.id = id;
         this.requestDate = requestDate;
         this.userInfo = userInfo;
-        this.mediumTypeId = mediumTypeId;
+        this.cultureMediumId = cultureMediumId;
         this.sampleType = sampleType;
         this.varietyName = varietyName;
         this.cropType = cropType;
@@ -80,10 +80,10 @@ public class RequestHistoryInfo {
     }
 
     // 유저 정보를 통해 조회할 때는 ph, ec, hco3
-    public RequestHistoryInfo(int id, Timestamp requestDate, int mediumTypeId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName) {
+    public RequestHistoryInfo(int id, Timestamp requestDate, int cultureMediumId, String sampleType, String varietyName, String cropType, String substrateType, String deliveryMethod, String selectedCropName) {
         this.id = id;
         this.requestDate = requestDate;
-        this.mediumTypeId = mediumTypeId;
+        this.cultureMediumId = cultureMediumId;
         this.sampleType = sampleType;
         this.varietyName = varietyName;
         this.cropType = cropType;
@@ -151,12 +151,12 @@ public class RequestHistoryInfo {
         return userInfo;
     }
 
-    public int getMediumTypeId() {
-        return mediumTypeId;
+    public int getCultureMediumId() {
+        return cultureMediumId;
     }
 
-    public void setMediumTypeId(int mediumTypeId) {
-        this.mediumTypeId = mediumTypeId;
+    public void setCultureMediumId(int cultureMediumId) {
+        this.cultureMediumId = cultureMediumId;
     }
 
     public String getSampleType() {

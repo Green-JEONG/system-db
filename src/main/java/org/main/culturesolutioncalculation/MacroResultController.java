@@ -218,7 +218,6 @@ public class MacroResultController {
 
             if (row.containsKey(component)) {
                 row.get(component).set(formattedValue);
-                System.out.println("component = " + component + " & formattedValue : "+formattedValue);
             }
         }
     }
@@ -234,7 +233,7 @@ public class MacroResultController {
 
     @FXML
     public void nextButton(ActionEvent event) {
-        mainController.setMacroDataToPrintTab(strategy.getUserFertilization(), strategy.getMolecularMass(), strategy.getConsideredValues(), requestHistoryInfo, strategy);
+        mainController.setMacroDataToPrintTab(strategy);
         mainController.moveToMicroTab();
 //        TabPane tabPane = findTabPane(event);
 //        if (tabPane != null) {

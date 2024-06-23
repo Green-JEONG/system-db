@@ -58,7 +58,6 @@ public class MacroTabController {
 
     public void initialize() {
         requestHistoryInfo = MainController.getRequestHistoryInfo();
-        System.out.println("requestHistoryInfo = " + requestHistoryInfo);
         initTableView();
     }
 
@@ -112,7 +111,7 @@ public class MacroTabController {
 
         data.clear();
 
-        String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
+        String[] values = getStandardValues(requestHistoryInfo.getCultureMediumId(), requestHistoryInfo.getSelectedCropName());
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
         is4 = "Ca(NO3)2·4H2O".equals(totalSetting.get("질산칼슘 비료")); //4수염이면 true
         macroUnit = totalSetting.get("설정 다량원소 단위");
@@ -157,11 +156,9 @@ public class MacroTabController {
                     if(title.equals("다량원소")) continue;
                     boolean isEditable = checkedConsideredOptionNames.stream().anyMatch(name -> name.contains(title));
                     if(isEditable) {
-                        System.out.println(title + " = 고려 원수이므로 편집 가능");
                         consideredRow.add("");
                     }
                     else {
-                        System.out.println(title + " = 0으로 세팅");
                         consideredRow.add("0");
                     }
                 }
@@ -306,7 +303,6 @@ public class MacroTabController {
 
     @FXML
     public void prevButton(ActionEvent actionEvent) {
-
         mainController.moveToSettingTab();
     }
 

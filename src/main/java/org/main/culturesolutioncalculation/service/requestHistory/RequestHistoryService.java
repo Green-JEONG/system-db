@@ -1,5 +1,8 @@
 package org.main.culturesolutioncalculation.service.requestHistory;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.main.culturesolutioncalculation.PrintTabController.DataItem;
 import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.UserInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
@@ -90,40 +93,6 @@ public class RequestHistoryService {
         return generatedId;
     }
 
-    //requestHistory의 id를 통해 users의 id 찾기 -> 최종적으로 UserInfo 반환
-    public UserInfo getUserInfoById(RequestHistoryInfo requestHistoryInfo){
-        if (requestHistoryInfo == null) {
-            System.out.println("requestHistory id가 null일 수 없습니다");
-            return null;
-        }
-
-        String query = "SELECT * FROM users WHERE id = (SELECT user_id FROM requestHistory WHERE id = ?)";
-        UserInfo userInfo = null; // null로 초기화
-
-        try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setInt(1, requestHistoryInfo.getId());
-            System.out.println("requestHistoryInfo = " + requestHistoryInfo.getId());
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                if (resultSet.next()) { //
-                    userInfo = new UserInfo(); // 결과가 있을 때 객체 생성
-                    userInfo.setId(resultSet.getInt("id"));
-                    userInfo.setName(resultSet.getString("name"));
-                    userInfo.setAddress(resultSet.getString("address"));
-                    userInfo.setContact(resultSet.getString("contact"));
-                    userInfo.setEmail(resultSet.getString("email"));
-                    System.out.println("user = " + userInfo.getName());
-                }
-            } catch (SQLException e) {
-                System.out.println("Error retrieving user: " + e.getMessage()); // 예외 처리 개선
-                return null; // 예외 발생 시 null 반환
-            }
-        } catch (SQLException e) {
-            System.out.println("Database connection error: " + e.getMessage());
-            return null; // 예외 발생 시 null 반환
-        }
-        return userInfo;
-    }
 
     //해당 유저의 분석 리스트 반환
     public List<RequestHistoryInfo> findByUser(int userId){
@@ -170,13 +139,13 @@ public class RequestHistoryService {
                         "<hr>";
     } 재배작물이랑, 배양액 종류 찾아야 함
      */
-    public String getCropName(RequestHistory requestHistory){
+    public String getCropName(int cultureMediumId){
         String query = "select fertilizer_salts from culture_medium where id = ?";
         String cropName=  "";
         try(Connection connection = conn.getConnection();
             PreparedStatement pstmt = connection.prepareStatement(query)
         ){
-            pstmt.setInt(1, requestHistory.getCultureMediumId());
+            pstmt.setInt(1, cultureMediumId);
             try(ResultSet resultSet = pstmt.executeQuery()){
                 while(resultSet.next()){
                     cropName = resultSet.getString("fertilizer_salts");
@@ -216,7 +185,7 @@ public class RequestHistoryService {
             PreparedStatement pstmt = connection.prepareStatement(query)
         ){
             pstmt.setString(1, requestHistoryInfo.getSelectedCropName());
-            pstmt.setInt(2, requestHistoryInfo.getMediumTypeId());
+            pstmt.setInt(2, requestHistoryInfo.getCultureMediumId());
             pstmt.setInt(3, requestHistoryInfo.getId());
 
             int rowsAffected = pstmt.executeUpdate();
@@ -230,5 +199,156 @@ public class RequestHistoryService {
             System.err.println("Failed to update requestHistory");
             e.printStackTrace();
         }
+    }
+
+    public ObservableList<DataItem> getMacroAnalysisData(RequestHistoryInfo requestHistoryInfo) {
+        ObservableList<DataItem> response = FXCollections.observableArrayList();
+        String query = "select * from users_macro_fertilization where requestHistory_id = ?";
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setInt(1, requestHistoryInfo.getId());
+            System.out.println("PreparedStatement created with id: " + requestHistoryInfo.getId());
+
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("No data found for requestHistory_id: " + requestHistoryInfo.getId());
+                }
+
+                while (resultSet.next()) {
+                    String unit = resultSet.getString("unit");
+                    String method = requestHistoryInfo.getMediumTypeName();
+                    System.out.println("method = " + method);
+
+                    response.add(new DataItem("산도 (pH)", String.valueOf(resultSet.getDouble("pH")), unit, method));
+                    response.add(new DataItem("농도 (EC)", String.valueOf(resultSet.getDouble("EC")), "dS/m", method));
+                    response.add(new DataItem("질산태질소 (NO3-N)", String.valueOf(resultSet.getDouble("NO3N")), unit, method));
+                    response.add(new DataItem("암모니아태질소 (NH4-N)", String.valueOf(resultSet.getDouble("NH4N")), unit, method));
+                    response.add(new DataItem("인 (P)", String.valueOf(resultSet.getDouble("H2PO4")), "ppm", method));
+                    response.add(new DataItem("칼륨 (K)", String.valueOf(resultSet.getDouble("K")), unit, method));
+                    response.add(new DataItem("칼슘 (Ca)", String.valueOf(resultSet.getDouble("Ca")), unit, method));
+                    response.add(new DataItem("마그네슘 (Mg)", String.valueOf(resultSet.getDouble("Mg")), unit, method));
+                    response.add(new DataItem("황 (S)", String.valueOf(resultSet.getDouble("SO4S")), unit, method));
+                    response.add(new DataItem("중탄산 (HCO3-)", String.valueOf(resultSet.getDouble("HCO3")), unit, method));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to select users_macro_fertilization");
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+    public ObservableList<DataItem> getMicroAnalysisData(RequestHistoryInfo requestHistoryInfo) {
+        ObservableList<DataItem> response = FXCollections.observableArrayList();
+        String query = "select * from users_micro_fertilization where requestHistory_id = ?";
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setInt(1, requestHistoryInfo.getId());
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("No data found for requestHistory_id: " + requestHistoryInfo.getId());
+                }
+
+                while (resultSet.next()) {
+                    String unit = resultSet.getString("unit");
+                    String method = requestHistoryInfo.getMediumTypeName();
+
+                    response.add(new DataItem("철 (Fe)", String.valueOf(resultSet.getDouble("Fe")), unit, method));
+                    response.add(new DataItem("붕소 (B)", String.valueOf(resultSet.getDouble("B")), unit, method));
+                    response.add(new DataItem("망간 (Mn)", String.valueOf(resultSet.getDouble("Mn")), unit, method));
+                    response.add(new DataItem("아연 (Zn)", String.valueOf(resultSet.getDouble("Zn")), unit, method));
+                    response.add(new DataItem("구리 (Cu)", String.valueOf(resultSet.getDouble("Cu")), unit, method));
+                    response.add(new DataItem("몰리브뎀 (Mo)", String.valueOf(resultSet.getDouble("Mo")), unit, method));
+                    response.add(new DataItem("중탄산 (HCO3-)", String.valueOf(resultSet.getDouble("HCO3")), unit, method));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to select users_macro_fertilization");
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+
+    public ObservableList<DataItem> getMacroCompositionData(RequestHistoryInfo requestHistoryInfo) {
+        ObservableList<DataItem> response = FXCollections.observableArrayList();
+        boolean is4 = true, set = true;
+        String query = "SELECT cm.*, cv.is4 " +
+                "FROM users_macro_calculatedMass cm " +
+                "JOIN users_macro_consideredValues cv ON cm.requestHistory_id = cv.requestHistory_id " +
+                "WHERE cm.requestHistory_id = ?";
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setInt(1, requestHistoryInfo.getId());
+            System.out.println("PreparedStatement created with id: " + requestHistoryInfo.getId());
+
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("No data found for requestHistory_id: " + requestHistoryInfo.getId());
+                }
+
+                while (resultSet.next()) {
+                    if(set) {
+                        is4 = resultSet.getBoolean("is4");
+                        set = false;
+                    }
+
+                    response.add(new DataItem(resultSet.getString("solution"), resultSet.getString("macro"), resultSet.getString("unit"), resultSet.getString("mass"), resultSet.getString("macro_kr")));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to select users_macro_calculatedMass");
+            e.printStackTrace();
+        }
+
+        if(is4) response.add(new DataItem("A", "5[Ca(NO3)2·2H2O]NH4NO3", "kg", "0.00", "질산칼슘(10수염)"));
+        else response.add(new DataItem("A", "Ca(NO3)2·3H2O", "kg", "0.00" , "질산칼슘(4수염)"));
+
+        return response;
+    }
+
+    public ObservableList<DataItem> getMicroCompositionData(RequestHistoryInfo requestHistoryInfo) {
+        ObservableList<DataItem> response = FXCollections.observableArrayList();
+        String query = "SELECT cm.*" +
+                "FROM users_micro_calculatedMass cm " +
+                "WHERE cm.requestHistory_id = ?";
+
+        try (Connection connection = conn.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setInt(1, requestHistoryInfo.getId());
+            System.out.println("PreparedStatement created with id: " + requestHistoryInfo.getId());
+
+
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (!resultSet.isBeforeFirst()) {
+                    System.out.println("No data found for requestHistory_id: " + requestHistoryInfo.getId());
+                }
+
+                while (resultSet.next()) {
+                    response.add(new DataItem(resultSet.getString("solution"), resultSet.getString("micro"), resultSet.getString("unit"), resultSet.getString("mass"), resultSet.getString("micro_kr")));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to select users_micro_calculatedMass");
+            e.printStackTrace();
+        }
+
+        return response;
     }
 }
