@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.main.culturesolutioncalculation.service.database.MediumService;
+import org.main.culturesolutioncalculation.service.requestHistory.RequestHistoryService;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,6 +36,8 @@ public class TypeTabController {
 
     private RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
 
+    private RequestHistoryService requestHistoryService;
+
     private MediumService mediumService;
 
     private String selectedCropName = "";
@@ -44,6 +47,7 @@ public class TypeTabController {
     public TypeTabController() throws IOException {
         data = new TypeData();
         mediumService = new MediumService();
+        requestHistoryService = new RequestHistoryService();
     }
 
     public void initialize() {
@@ -144,7 +148,10 @@ public class TypeTabController {
             } else {
                 System.err.println("TableView에서 선택된 항목이 없습니다.");
             }
+            //분석 기록에 selectedCropName(선택 작물 명), Culture_medium_id(배양액 재배 작물 아이디) 넣기
+            requestHistoryService.setSelectedCropNameAndCultureMediumId(requestHistoryInfo);
 
+            // 다음 탭으로 이동
             tabPane.getSelectionModel().select(currentIndex + 1);
         } else {
             System.err.println("RequestHistoryInfo 객체가 초기화되지 않았습니다.");

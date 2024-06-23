@@ -21,7 +21,8 @@ public class RequestHistoryService {
 
     //분석 기록 저장
     //TODO 테스트 해야 함
-    public void save(RequestHistoryInfo requestHistory){
+    public int save(RequestHistoryInfo requestHistory){
+        int generatedId = 0;
         String query = "INSERT INTO requestHistory " +
                 "(request_date, user_id";
         String values = "VALUES (?, ?";
@@ -48,7 +49,7 @@ public class RequestHistoryService {
         System.out.println("query = " + query);
 
         try (Connection connection = conn.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+             PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setTimestamp(1, requestHistory.getRequestDate());
             pstmt.setLong(2, requestHistory.getUserInfo().getId());
@@ -72,6 +73,13 @@ public class RequestHistoryService {
 
             if (result > 0) {
                 System.out.println("Success insert requestHistory");
+
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        generatedId = generatedKeys.getInt(1);
+                        System.out.println("Generated ID: " + generatedId);
+                    }
+                }
             } else {
                 System.out.println("Insert failed requestHistory");
             }
@@ -79,6 +87,7 @@ public class RequestHistoryService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return generatedId;
     }
 
     //requestHistory의 id를 통해 users의 id 찾기 -> 최종적으로 UserInfo 반환
@@ -199,5 +208,27 @@ public class RequestHistoryService {
 
         }
         return mediumType;
+    }
+
+    public void setSelectedCropNameAndCultureMediumId(RequestHistoryInfo requestHistoryInfo) {
+        String query = "update requestHistory set selected_crop_name = ?, culture_medium_id = ? where id = ?";
+        try(Connection connection = conn.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query)
+        ){
+            pstmt.setString(1, requestHistoryInfo.getSelectedCropName());
+            pstmt.setInt(2, requestHistoryInfo.getMediumTypeId());
+            pstmt.setInt(3, requestHistoryInfo.getId());
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Update requestHistory successful");
+            } else {
+                System.out.println("Fail: requestHistory -> No rows affected");
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to update requestHistory");
+            e.printStackTrace();
+        }
     }
 }

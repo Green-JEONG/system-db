@@ -41,7 +41,7 @@ public class CallStrategy {
 
     public void callMicroStrategy(){
         CalculationStrategy strategy = new MicroCalculationStrategy(
-                new Users(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
+                new RequestHistoryInfo(),  unit, isConsidered,userMicroNutrients, consideredValues, fertilization
         );
 
         CalculatorClient client = new CalculatorClient(strategy);

@@ -1,5 +1,6 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
+import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 import org.main.culturesolutioncalculation.service.users.Users;
 
@@ -11,8 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 public class MicroCalculationStrategy implements CalculationStrategy{
+
+    private static final String url = "jdbc:mysql://localhost:3306/CultureSolutionCalculation?useSSL=false";
+    private static final String user = "root";
+    private static final String password = "root";
     private DatabaseConnector conn;
     private Users users;
+
+    private RequestHistoryInfo requestHistoryInfo;
 
     private boolean isConsidered;
     private int requestHistory_id;
@@ -25,6 +32,11 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     private Map<String, FinalCal> molecularMass =  new LinkedHashMap<>();
 
+    @Override
+    public Map<String, FinalCal> getMolecularMass() {
+        return molecularMass;
+    }
+
     List<String> userMicroNutrients = new LinkedList<>(); //유저가 선택했던 미량원소 비료 리스트
 
     //1. 기준값 - 프론트에서 넘어옴
@@ -34,6 +46,17 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 
     //넘어와야 할 처방 농도 양식 - 순서 그대로 유지되어야 함. front에서 넘어와야함
     private Map<String, Double> userFertilization = new LinkedHashMap<>(); //db에 저장되어야 할 처방 농도 (계산 수행 X)
+
+    @Override
+    public Map<String, Double> getUserFertilization() {
+        return userFertilization;
+    }
+
+    @Override
+    public Map<String, Double> getConsideredValues() {
+        return consideredValues;
+    }
+
     private Map<String, Double> calFertilization = new LinkedHashMap<>(); //계산 수행할 처방 농도
 //    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
 //        {
@@ -46,8 +69,8 @@ public class MicroCalculationStrategy implements CalculationStrategy{
 //        }
 //    };
 
-    public MicroCalculationStrategy(Users users, String unit, boolean isConsidered,  List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
-        this.users = users;
+    public MicroCalculationStrategy(RequestHistoryInfo requestHistoryInfo, String unit, boolean isConsidered,  List<String> userMicroNutrients, Map<String, Double> consideredValues, Map<String, Double> userFertilization){
+        this.requestHistoryInfo = requestHistoryInfo;
         this.unit = unit;
         this.isConsidered = isConsidered;
         this.userMicroNutrients = userMicroNutrients;
@@ -55,6 +78,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
         this.userFertilization = userFertilization;
         this.calFertilization = userFertilization;
         request_date = Timestamp.from(Instant.now());
+        this.conn = DatabaseConnector.getInstance(url, user, password);
         getMajorCompoundRatio(userMicroNutrients);
     }
 
@@ -62,7 +86,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
     private void getMajorCompoundRatio(List<String> userMicroNutrients){ // 몰리브뎀 화합물 종류만 들어옴
 
         String query = "select * from micronutrients where micro in ('CuSO4·5H2O', 'ZnSO4·7H2O', 'Fe-EDTA', 'H3BO3', 'MnSO4·5H2O'"; //황산 구리, 황산 아연, Fe-EDTA, H3BO3, MnSO4·5H2O 화합물은 무조건 선택
-
+        //Na2MoO4·2H2O
         for (String micro : userMicroNutrients) {
             query += ", '"+micro+"'";
         }
@@ -76,6 +100,7 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                 String micro = resultSet.getString("micro"); //질산칼슘4수염, 질산칼륨, 질산암모늄 등등
                 String solution = resultSet.getString("solution");
                 double mass = resultSet.getDouble("mass");
+                int contentCount = resultSet.getInt("content_count");
 
                 molecularMass.put(micro, new FinalCal(solution, mass)); //100배액 계산을 위해 화합물과 그 질량, 양액 저장
 
@@ -87,9 +112,9 @@ public class MicroCalculationStrategy implements CalculationStrategy{
                              ResultSet set = innerStmt.executeQuery("select mass from micronutrients_mass where micro = '" + major + "'")) {
                             if (set.next()) {
                                 double micro_mass = set.getDouble("mass");
-                                int content_count = set.getInt("content_count");
+                                //int content_count = set.getInt("content_count");
                                 compoundRatio.put("mass", micro_mass); // 원자량도 같이 저장해야 함
-                                compoundRatio.put("content_count", content_count*1.0);
+                                compoundRatio.put("content_count", contentCount*1.0);
                             }
                         }
 

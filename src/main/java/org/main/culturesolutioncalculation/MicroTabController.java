@@ -29,12 +29,24 @@ import java.util.stream.Collectors;
 
 public class MicroTabController {
 
+    private static MainController mainController;
+
     private MediumService mediumService;
 
-    RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
+    private static RequestHistoryInfo requestHistoryInfo;// = MainController.getRequestHistoryInfo();
 
     SettingInfo settingInfo = MainController.getSettingInfo();
-    private static MainController mainController;
+
+    private Map<String, Double> userFertilization = new LinkedHashMap<>(); // 처방 농도
+
+    private Map<String, Double> consideredValues = new LinkedHashMap<>(); //고려 원수 값
+
+    private Map<String, Double> standardValues = new LinkedHashMap<>();// 기준값
+
+    List<String> userMicroNutrients = new LinkedList<>(); //유저가 선택했던 미량원소 비료 리스트
+
+    private String microUnit; //다량원소 단위
+    private boolean isConsidered; //원수 고려 여부
 
 
     @FXML
@@ -47,19 +59,20 @@ public class MicroTabController {
     public MicroTabController(){
         mediumService = new MediumService();
     }
-
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
-    @FXML
-    private void initialize() {
-        initTableView();
-    }
 
     String[] columnTitles = {"미량원소", "Fe", "Cu", "B", "Mn", "Zn", "Mo", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
     String[] rowTitles =  {"기준량", "원수성분", "처방농도"};
 
+    @FXML
+    private void initialize() {
+        requestHistoryInfo = MainController.getRequestHistoryInfo();
+        System.out.println("requestHistoryInfo = " + requestHistoryInfo);
+        initTableView();
+    }
     public void initTableView() {
         // tableView 초기화
         data.clear();
@@ -97,6 +110,13 @@ public class MicroTabController {
         String[] values = getStandardValues(requestHistoryInfo.getMediumTypeId(), requestHistoryInfo.getSelectedCropName());
         Map<String, String> totalSetting = settingInfo.getTotalSetting();
         boolean isConsiderFalse = "X".equals(totalSetting.get("원수 고려 유무"));
+        microUnit = totalSetting.get("설정 미량원소 단위");
+        userMicroNutrients.add(totalSetting.get("몰리브뎀 비료"));
+
+        System.out.println("===microTab===");
+        for (String s : totalSetting.keySet()) {
+            System.out.println("totalSetting = " + totalSetting.get(s));
+        }
 
         Set<String> checkedConsideredOptionNames = new HashSet<>();
 
@@ -109,11 +129,6 @@ public class MicroTabController {
                     .collect(Collectors.toSet());
         }
 
-        System.out.println("===============");
-        for (String name : checkedConsideredOptionNames) {
-            System.out.println("name = " + name);
-        }
-        System.out.println("================");
 
         for (int i = 0; i < rowTitles.length; i++) {
             ObservableList<String> row = FXCollections.observableArrayList();
@@ -187,6 +202,9 @@ public class MicroTabController {
         ObservableList<String> rawWaterRow = data.get(rawWaterIndex);
         ObservableList<String> prescriptionRow = data.get(prescriptionIndex);
 
+        userFertilization.clear(); // 처방농도 맵 초기화
+
+
         // 처방 농도 계산
         for (int i = 1; i < columnTitles.length; i++) {  // 인덱스 0은 행 제목이므로 1부터 시작
             try {
@@ -194,6 +212,32 @@ public class MicroTabController {
                 double rawWaterValue = rawWaterRow.get(i).isEmpty() ? 0.0 : Double.parseDouble(rawWaterRow.get(i));
                 double prescriptionValue = baselineValue - rawWaterValue;
                 prescriptionRow.set(i, String.format("%.2f", prescriptionValue));
+
+                if(columnTitles[i].equals("산도(pH)")){
+                    standardValues.put("pH",baselineValue);
+                    consideredValues.put("pH", rawWaterValue);
+                    userFertilization.put("pH", prescriptionValue);
+                    userMicroNutrients.add("pH");
+                }
+                else if(columnTitles[i].equals("농도(EC)")){
+                    standardValues.put("EC",baselineValue);
+                    consideredValues.put("EC", rawWaterValue);
+                    userFertilization.put("EC", prescriptionValue);
+                    userMicroNutrients.add("EC");
+                }
+                else if(columnTitles[i].equals("중탄산(HCO3)")){
+                    standardValues.put("HCO3",baselineValue);
+                    consideredValues.put("HCO3", rawWaterValue);
+                    userFertilization.put("HCO3", prescriptionValue);
+                    userMicroNutrients.add("HCO3");
+                }
+                else {
+                    standardValues.put(columnTitles[i], baselineValue);
+                    consideredValues.put(columnTitles[i], rawWaterValue);
+                    userFertilization.put(columnTitles[i], prescriptionValue);
+                }
+
+
             } catch (NumberFormatException e) {
                 System.out.println("Error parsing numbers: " + e.getMessage());
                 prescriptionRow.set(i, "Err");
@@ -233,14 +277,12 @@ public class MicroTabController {
 
     @FXML
     public void prevButton(ActionEvent actionEvent) {
-        mainController.moveToMicroTab();
-
-//        TabPane tabPane = microTab.getTabPane();
-//        int currentIndex = tabPane.getTabs().indexOf(microTab);
-//        tabPane.getSelectionModel().select(currentIndex - 1);  // 이전 탭으로 이동
+        switchScene(actionEvent);
     }
 
-    public void saveInput(ActionEvent event) {
+    @FXML
+    public void saveInput(ActionEvent event) throws IOException {
+        mainController.setMicroResultTabWithValues(userFertilization, consideredValues, standardValues, requestHistoryInfo, microUnit, isConsidered, userMicroNutrients);
         switchScene(event);
         // 테이블 저장
     }

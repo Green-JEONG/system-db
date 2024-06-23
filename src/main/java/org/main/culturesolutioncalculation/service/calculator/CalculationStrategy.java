@@ -7,4 +7,10 @@ import java.util.Map;
 public interface CalculationStrategy {
     Map<String, Map<String, Double>> calculateDistributedValues();
     void save();
+
+    Map<String, FinalCal> getMolecularMass();
+
+    Map<String, Double> getUserFertilization();
+
+    Map<String, Double> getConsideredValues();
 }

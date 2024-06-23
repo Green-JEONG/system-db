@@ -1,5 +1,6 @@
 package org.main.culturesolutioncalculation.service.calculator;
 
+import org.main.culturesolutioncalculation.MainController;
 import org.main.culturesolutioncalculation.RequestHistoryInfo;
 import org.main.culturesolutioncalculation.service.database.DatabaseConnector;
 
@@ -17,7 +18,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     private static final String password = "root";
     private DatabaseConnector conn;
 
-    private RequestHistoryInfo requestHistoryInfo;
+    private static RequestHistoryInfo requestHistoryInfo;
 
     private int users_macro_consideredValues_id;
 
@@ -38,7 +39,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 
     //3. 처방 값. 넘어와야 할 처방 농도 양식 예시 - 순서 그대로 유지되어야 함 (기준값 - 원수고려값)
     private Map<String, Double> userFertilization = new LinkedHashMap<>(); //db에 저장되어야 할 처방 농도 (계산 수행 X)
-    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //계산 수행할 처방 농도
+    private Map<String, Double> calFertilization = new LinkedHashMap<>(); //계산 수행하는 처방 농도
     //    private Map<String, Double> fertilization = new LinkedHashMap<String, Double>(){
 //        {
 //            put("NO3N", 15.5);
@@ -50,10 +51,24 @@ public class MacroCalculationStrategy implements CalculationStrategy{
 //            put("SO4S",1.75);
 //        }
 //    };
+
+
+    public Map<String, FinalCal> getMolecularMass() {
+        return molecularMass;
+    }
+
+    public Map<String, Double> getConsideredValues() {
+        return consideredValues;
+    }
+
+    public Map<String, Double> getUserFertilization() {
+        return userFertilization;
+    }
+
     public MacroCalculationStrategy(String macroUnit, boolean is4, boolean isConsidered, Map<String, Double> consideredValues, Map<String, Double> userFertilization, RequestHistoryInfo requestHistoryInfo){
 
-        System.out.println("consideredValues = " + consideredValues);
-        //System.out.println("userFertilization = " + userFertilization);
+        System.out.println("requestHistoryInfo = " + requestHistoryInfo.getId());
+        System.out.println("requestHistoryInfo = " + requestHistoryInfo.getUserInfo().getName());
 
 
         this.conn = DatabaseConnector.getInstance(url, user, password);
@@ -91,7 +106,6 @@ public class MacroCalculationStrategy implements CalculationStrategy{
                         compoundRatio.put(major,resultSet.getDouble(major));
                     }
                 }
-                System.out.println("compoundRatio = " + compoundRatio);
                 compoundsRatio.put(macro,compoundRatio);
             }
         }catch (SQLException e){
@@ -170,6 +184,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             query += ", "+userFertilization.get(macro);
         }
         query += ")";
+
+        System.out.println("query = " + query);
+
+
         try(Connection connection = conn.getConnection();
             Statement stmt = connection.createStatement();){
             int result = stmt.executeUpdate(query);
@@ -212,9 +230,11 @@ public class MacroCalculationStrategy implements CalculationStrategy{
         for (String macro : molecularMass.keySet()) {
             double concentration_100fold = molecularMass.get(macro).getMass() / 10;
 
-            String query = "insert into users_macro_calculatedMass (user_id, users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id) " +
+            String query = "insert into users_macro_calculatedMass (users_macro_consideredValues_id, macro, mass, unit, solution, requestHistory_id) " +
                     "values ("+users_macro_consideredValues_id+", "+"'"+macro+"'"+", "
-                    +concentration_100fold+", "+unit+", "+molecularMass.get(macro).getSolution()+", "+requestHistoryInfo.getId()+")";
+                    +concentration_100fold+", "+unit+", "+"'"+molecularMass.get(macro).getSolution()+"'"+", "+requestHistoryInfo.getId()+")";
+
+            System.out.println("query = " + query);
 
             try(Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement();){
@@ -232,10 +252,10 @@ public class MacroCalculationStrategy implements CalculationStrategy{
     private void insertIntoUsersMacroConsideredValues() { //고려 원수 값 DB 저장
         String query = "insert into users_macro_consideredValues ";
         String values = "(is_considered, NO3N, NH4N, " +
-                "H2PO4, K, Ca, Mg, SO4S, unit, requestHistory_id) values (";
+                "H2PO4, K, Ca, Mg, SO4S, pH, HCO3, EC, unit, requestHistory_id) values (";
 
         if(!isConsidered){
-            query += "(is_considered, unit, user_id, requestHistory_id) values (false, '"+ macroUnit +"'," +requestHistoryInfo.getId()+")";
+            query += "(is_considered, unit, requestHistory_id) values (false, '"+ macroUnit +"'," +requestHistoryInfo.getId()+")";
         } else{
             values += "true";
             for (String value : consideredValues.keySet()) {
@@ -245,6 +265,7 @@ public class MacroCalculationStrategy implements CalculationStrategy{
             values += requestHistoryInfo.getId()+")";
             query += values;
         }
+        System.out.println("query = " + query);
 
         try (Connection connection = conn.getConnection();
                 Statement stmt = connection.createStatement()) {

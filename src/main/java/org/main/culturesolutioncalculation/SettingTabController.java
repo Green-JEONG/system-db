@@ -76,7 +76,6 @@ public class SettingTabController {
         hco3.selectedProperty().addListener((observable, oldValue, newValue) -> checkAndEnableConsideredUnitRadios());
 
 
-
         // 다량 원수 단위 선택
         macroPpm.setToggleGroup(macroUnitGroup);
         macroMe.setToggleGroup(macroUnitGroup);
@@ -230,11 +229,8 @@ public class SettingTabController {
         Map<String, String> selectedValues = getSelectedValues();
         settingInfo.setTotalSetting(selectedValues);
 
-        mainController.moveToMacroTab();
 
-//        TabPane tabPane = settingTab.getTabPane();
-//        int currentIndex = tabPane.getTabs().indexOf(settingTab);
-//        tabPane.getSelectionModel().select(currentIndex + 1);
+        mainController.moveToMacroTab();
 
     }
 

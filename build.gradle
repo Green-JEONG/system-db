@@ -30,7 +30,7 @@ application {
 }
 
 javafx {
-    version = '17.0.6'
+    version = '17.0.11'
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -47,12 +47,15 @@ dependencies {
 
     implementation 'com.zaxxer:HikariCP:5.0.1'
 
-    implementation 'com.itextpdf:html2pdf:4.0.5'
+    //implementation 'com.itextpdf:html2pdf:4.0.5'
 
     // SLF4J API
     implementation 'org.slf4j:slf4j-api:1.7.30'
     // Logback Classic (SLF4J의 구현체)
     implementation 'ch.qos.logback:logback-classic:1.2.3'
+
+    //html2pdf 경로 추가
+    implementation( fileTree(dir: 'libs', includes: ['*jar']))
 }
 
 test {

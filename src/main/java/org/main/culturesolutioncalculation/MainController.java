@@ -6,8 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import org.main.culturesolutioncalculation.service.calculator.CalculationStrategy;
+import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 
+import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class MainController {
@@ -20,6 +26,7 @@ public class MainController {
     @FXML private static Tab microTab;
     @FXML private static Tab settingTab;
     @FXML private static Tab userInfoTab;
+
     private static UserInfo userInfo = new UserInfo();
     private static RequestHistoryInfo requestHistoryInfo = new RequestHistoryInfo(); //이렇게 바로 생성자 주입 받아야 전역적으로 사용되는 거 같음
     private static SettingInfo settingInfo = new SettingInfo();
@@ -27,9 +34,12 @@ public class MainController {
     private static PrintTabController printTabController;
     //public static MacroResultController2 macroResultController;
     public static MacroResultController macroResultController;
+    private static MicroResultController microResultController;
+
     public static UserInfo getUserInfo() {
         return userInfo;
     }
+
     public void setRequestHistoryInfo (RequestHistoryInfo requestHistoryInfo){
         this.requestHistoryInfo = requestHistoryInfo;
     }
@@ -52,6 +62,7 @@ public class MainController {
         setUserInfoTabController();
         setMacroResultController();
         setMacroTabController();
+        setMicroTabController();
         setMicroResultController();
         setSettingTabController();
         setToolbarController();
@@ -122,7 +133,7 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MicroResult.fxml"));
             loader.load();
-            MicroResultController microResultController = loader.getController();
+            microResultController = loader.getController();
             microResultController.setMainController(this);
         } catch (IOException e) {
             e.printStackTrace();
@@ -139,6 +150,17 @@ public class MainController {
             e.printStackTrace();
         }
     }
+
+    public void setMicroTabController() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MicroTab.fxml"));
+            loader.load();
+            MicroTabController microTabController = loader.getController();
+            microTabController.setMainController(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public PrintTabController getPrintTabController(){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("PrintTab.fxml"));
@@ -150,6 +172,10 @@ public class MainController {
             return null;
         }
     }
+    public MicroResultController getMicroResultController(){
+        return microResultController;
+    }
+
 
     public MacroResultController getMacroResultController(){
         return macroResultController;
@@ -252,4 +278,40 @@ public class MainController {
         }
     }
 
+    public void setMicroResultTabWithValues(Map<String, Double> userFertilization, Map<String, Double> consideredValues, Map<String, Double> standardValues, RequestHistoryInfo requestHistoryInfo, String microUnit, boolean isConsidered, List<String>userMicroNutrients) {
+        microResultController = getMicroResultController();
+
+        if(microResultController != null){
+            microResultController.setUserFertilization(userFertilization);
+            microResultController.setConsideredValues(consideredValues);
+            microResultController.setStandardValues(standardValues);
+            microResultController.setRequestHistoryInfo(requestHistoryInfo);
+            microResultController.setMicroUnit(microUnit);
+            microResultController.setConsidered(isConsidered);
+            microResultController.setUserMicroNutrients(userMicroNutrients);
+        }
+    }
+
+    public void movePrintTab() {
+        if (mainTabPane != null && printTab != null) {
+            Platform.runLater(() -> {
+                loadTabContent(printTab, "PrintTab.fxml");  //PrintTab으로 이동
+                mainTabPane.getSelectionModel().select(printTab);
+                System.out.println("PrintTab content reloaded.");
+            });
+        }
+    }
+
+    public void setMacroDataToPrintTab(Map<String, Double> userFertilization, Map<String, FinalCal> molecularMass, Map<String, Double> consideredValues, RequestHistoryInfo requestHistoryInfo, CalculationStrategy strategy) {
+       printTabController = getPrintTabController();
+
+       if(printTabController!= null){
+           printTabController.setMacroConsideredValues(consideredValues);
+           printTabController.setMacroMolecularMass(molecularMass);
+           printTabController.setMacroUserFertilization(userFertilization);
+           //printTabController.setRequestHistoryInfo(requestHistoryInfo);
+           printTabController.setStrategy(strategy);
+       }
+    }
 }
+

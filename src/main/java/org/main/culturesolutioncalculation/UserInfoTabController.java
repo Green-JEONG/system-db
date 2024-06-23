@@ -249,6 +249,8 @@ public class UserInfoTabController {
         mainController.setRequestHistoryInfo(requestHistoryInfo);
 
         //분석 기록 DB 저장
-        requestHistoryService.save(requestHistoryInfo);
+        int savedId = requestHistoryService.save(requestHistoryInfo);
+        requestHistoryInfo.setId(savedId);
+        mainController.setRequestHistoryInfo(requestHistoryInfo);
     }
 }

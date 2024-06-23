@@ -9,17 +9,21 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.main.culturesolutioncalculation.service.calculator.CalculationStrategy;
+import org.main.culturesolutioncalculation.service.calculator.FinalCal;
 import org.main.culturesolutioncalculation.service.database.MediumService;
 import org.main.culturesolutioncalculation.service.print.SangJuPrint;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class PrintTabController {
 
     MainController mainController = new MainController();
     private static UserInfo userInfo;// = MainController.getUserInfo();
 
-    private static RequestHistoryInfo requestHistoryInfo;//MainController.getRequestHistoryInfo();
+    private static RequestHistoryInfo requestHistoryInfo = MainController.getRequestHistoryInfo();
     SettingInfo settingInfo = mainController.getSettingInfo();
 
     private MediumService mediumService;
@@ -42,7 +46,32 @@ public class PrintTabController {
     @FXML private Label ec;
     @FXML private Label hco3;
 
+    private static CalculationStrategy macroStrategy;
 
+    private Map<String, FinalCal> macroMolecularMass =  new LinkedHashMap<>();
+
+    private Map<String, Double> macroConsideredValues = new LinkedHashMap<>();
+
+    private Map<String, Double> macroUserFertilization = new LinkedHashMap<>();
+
+    public void setStrategy(CalculationStrategy strategy) {
+        this.macroStrategy = strategy;
+    }
+
+    public void setMacroMolecularMass(Map<String, FinalCal> macroMolecularMass) {
+        this.macroMolecularMass = macroMolecularMass;
+    }
+
+    public void setMacroConsideredValues(Map<String, Double> macroConsideredValues) {
+        this.macroConsideredValues = macroConsideredValues;
+    }
+
+    public void setMacroUserFertilization(Map<String, Double> macroUserFertilization) {
+        this.macroUserFertilization = macroUserFertilization;
+    }
+//    public void setRequestHistoryInfo(RequestHistoryInfo requestHistoryInfo){
+//        this.requestHistoryInfo = requestHistoryInfo;
+//    }
 
     @FXML
     private Label processingDateLabel;
@@ -67,6 +96,8 @@ public class PrintTabController {
     public void initialize() {
         initializeAnalysisTable();
         initializeCompositionTable();
+        if(macroStrategy!= null)
+            macroStrategy.save(); //다량 원소 계산 결과 저장
     }
 
 
@@ -94,7 +125,6 @@ public class PrintTabController {
 
     private void initializeCompositionTable() {
 
-
         TableColumn<DataItem, String> tankColumn = new TableColumn<>("조제탱크");
         tankColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
 
@@ -117,6 +147,31 @@ public class PrintTabController {
 
     @FXML
     private void loadAnalysisData() {
+
+
+        if (requestHistoryInfo != null && userInfo != null) {
+
+            if (requestHistoryInfo.getSelectedCropName() == null || requestHistoryInfo.getSelectedCropName().isEmpty()) {
+                //getCropNameFromDatabase();
+            }
+
+            if (requestHistoryInfo.getMediumTypeName()== null || requestHistoryInfo.getMediumTypeName().isEmpty()) {
+                //getMeditumTypeFromDatabase();
+            }
+
+            Platform.runLater(() -> {
+                name.setText("의뢰자 : " + requestHistoryInfo.getUserInfo().getName());
+                contact.setText("전화번호 : " + requestHistoryInfo.getUserInfo().getContact());
+                address.setText("주소 : " + requestHistoryInfo.getUserInfo().getAddress());
+                cropName.setText("작물명 : "+  requestHistoryInfo.getSelectedCropName());
+                mediumType.setText("시료 종류 : "+ requestHistoryInfo.getMediumTypeName());
+                System.out.println(requestHistoryInfo.getId());
+            });
+        } else {
+            System.out.println("UserInfo is null");
+        }
+
+
 
         if (requestHistoryInfo != null && userInfo != null) {
             Platform.runLater(() -> {
@@ -197,6 +252,7 @@ public class PrintTabController {
         requestHistoryInfo = selectedHistory;
         userInfo = selectedHistory.getUserInfo();
     }
+
 
 
     public static class DataItem {

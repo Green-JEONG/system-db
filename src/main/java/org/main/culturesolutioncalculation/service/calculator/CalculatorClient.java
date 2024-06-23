@@ -16,6 +16,16 @@ public class CalculatorClient {
     public Map<String, Map<String, Double>> calculate(){
         return strategy.calculateDistributedValues();
     }
+    public Map<String, FinalCal> getMolecularMass(){
+        return strategy.getMolecularMass();
+    }
+    public Map<String, Double> getUserFertilization(){
+        return strategy.getUserFertilization();
+    }
+
+    public Map<String, Double> getConsideredValue(){
+        return strategy.getConsideredValues();
+    }
 
     public void save(){
         strategy.save();

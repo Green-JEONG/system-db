@@ -38,6 +38,8 @@ public class MacroResultController {
 
     private static RequestHistoryInfo requestHistoryInfo;
 
+    private static CalculationStrategy strategy;
+
     public void setMainController(MainController mainController) {
 
         this.mainController = mainController;
@@ -61,7 +63,6 @@ public class MacroResultController {
     }
     public void setUserFertilization(Map<String, Double> userFertilization) {
         this.userFertilization = userFertilization;
-        System.out.println("userFertilization = " + userFertilization);
     }
 
     public void setConsideredValues(Map<String, Double> consideredValues) {
@@ -89,6 +90,15 @@ public class MacroResultController {
         for (String title : columnTitles) {
             TableColumn<Map<String, SimpleStringProperty>, String> column = new TableColumn<>(title);
             column.setCellValueFactory(cellData -> cellData.getValue().get(title));
+
+            // 열 너비 설정
+            if (title.equals("K")) {
+                column.setMinWidth(30);  // 최소 너비 설정
+                column.setPrefWidth(50); // 선호 너비 설정
+                column.setMaxWidth(100);  // 최대 너비 설정
+            }
+
+
             tableView.getColumns().add(column);
         }
         tableView.setItems(data);
@@ -111,20 +121,14 @@ public class MacroResultController {
 
         System.out.println("Calculating and displaying results");
 
-//        int rowIndex = 3;
-//        Map<String, SimpleStringProperty> row = data.get(rowIndex);
-//        row.get("NO3N").set("5.50");
-//        tableView.refresh();
-
-
-        CalculationStrategy strategy = new MacroCalculationStrategy(macroUnit, is4, isConsidered, consideredValues, userFertilization, new RequestHistoryInfo());
+        strategy = new MacroCalculationStrategy(macroUnit, is4, isConsidered, consideredValues, userFertilization, requestHistoryInfo);
         CalculatorClient client = new CalculatorClient(strategy);
         Map<String, Map<String, Double>> calculatedValues = client.calculate();
 
         // UI 업데이트만 Platform.runLater 내에서 실행
         Platform.runLater(() -> {
 
-            // 기준 농도 설정
+            // 기준 농도 설정 (설정 농도)
             Map<String, SimpleStringProperty> standardProperty = data.get(Arrays.asList(rowTitles).indexOf("설정농도(mM)"));
             for (Map.Entry<String, Double> valueEntry : standardValues.entrySet()) {
                 Double value = valueEntry.getValue();
@@ -145,9 +149,9 @@ public class MacroResultController {
                 }
             }
 
-            //시비 농도 설정 (fertilization)
+            //시비 농도 설정 (원소 고려 농도)
             Map<String, SimpleStringProperty> fertilizationProperty = data.get(Arrays.asList(rowTitles).indexOf("시비농도(mM)"));
-            for (Map.Entry<String, Double> valueEntry : userFertilization.entrySet()) {
+            for (Map.Entry<String, Double> valueEntry : consideredValues.entrySet()) {
                 Double value = valueEntry.getValue();
                 String component = valueEntry.getKey();
                 String formattedValue = String.format("%.2f", value);
@@ -166,13 +170,25 @@ public class MacroResultController {
                 }
             }
 
-
-
-
-
-
             System.out.println("Displaying results: " + calculatedValues);
             displayResults(calculatedValues);
+
+            //합계 설정
+            Map<String, SimpleStringProperty> totalValueProperty = data.get(Arrays.asList(rowTitles).indexOf("합계"));
+            String[] components = {"NO3N", "NH4N", "H2PO4", "K", "Ca", "Mg", "SO4S", "산도(pH)", "농도(EC)", "중탄산(HCO3)"};
+            for (String component : components) {
+                double sum = 0.0;
+                for(int i = 2; i < data.size()-1; i++){ //"설정농도(mM)"와 "시비농도(mM)" 제외하고 합계 계산
+                    Map<String, SimpleStringProperty> row = data.get(i);
+                    String value = row.get(component).get();
+                    if(!value.isEmpty()) sum += Double.parseDouble(value);
+                }
+                String formattedValue = String.format("%.2f", sum);
+                if(totalValueProperty.containsKey(component)) totalValueProperty.get(component).set(formattedValue);
+            }
+
+
+
             tableView.refresh();
         });
     }
@@ -218,11 +234,13 @@ public class MacroResultController {
 
     @FXML
     public void nextButton(ActionEvent event) {
-        TabPane tabPane = findTabPane(event);
-        if (tabPane != null) {
-            int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
-            tabPane.getSelectionModel().select(currentIndex + 1);
-        }
+        mainController.setMacroDataToPrintTab(strategy.getUserFertilization(), strategy.getMolecularMass(), strategy.getConsideredValues(), requestHistoryInfo, strategy);
+        mainController.moveToMicroTab();
+//        TabPane tabPane = findTabPane(event);
+//        if (tabPane != null) {
+//            int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
+//            tabPane.getSelectionModel().select(currentIndex + 1);
+//        }
     }
 
     private TabPane findTabPane(ActionEvent event) {
