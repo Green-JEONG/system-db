@@ -137,6 +137,20 @@
   <img src="https://github.com/user-attachments/assets/51384928-029d-4f56-902e-e50a0b279b11" style="width:49%;"/>
 </div>
 
+# 13) 시연 영상
+https://github.com/user-attachments/assets/e10d6f2d-3a6d-475e-9d2c-468308e5e277
 
-# 13) 개발 구현 환경
+# 14) 개발 구현 환경
 <img src="https://github.com/user-attachments/assets/0ee69076-9d6b-41ef-8585-817e71db4dfb" width="600"/>
+
+# 15) 보고서
+<div>
+  <img src="https://github.com/user-attachments/assets/9ec30415-7708-4ec7-bd39-d93841847f1b" style="width:49%;"/>
+  <img src="https://github.com/user-attachments/assets/1f001933-45c7-4fce-be65-00075939bffa" style="width:49%;"/>
+</div>
+
+# 16) 참가 프로그램
+<div>
+  <img src="https://github.com/user-attachments/assets/86fd81ac-ae38-4f48-8a16-9754ee80a84c" style="width:45%;"/>
+  <img src="https://github.com/user-attachments/assets/1423b66b-1550-432e-a15f-1e48d5ee0cb5" style="width:53%;"/>
+</div>
